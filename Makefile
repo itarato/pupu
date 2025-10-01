@@ -11,22 +11,15 @@ endif
 MAINSRC=$(wildcard src/main.cpp lib/imgui/*.cpp lib/rlImGui/*.cpp)
 OBJ=$(addsuffix .o,$(basename $(MAINSRC)))
 
-TESTSRC=$(wildcard src/tests.cpp)
-TESTOBJ=$(addsuffix .o,$(basename $(TESTSRC)))
-
 .PHONY: all debug clean test
 
 all: CXXFLAGS += -O3
-all: plogo
+all: main
 
 debug: CXXFLAGS += -g -O0 -fno-omit-frame-pointer
-debug: plogo
+debug: main
 
-plogo: $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
-
-test: CXXFLAGS += -g -O0
-test: $(TESTOBJ)
+main: $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 %.o:%.cpp
@@ -34,11 +27,4 @@ test: $(TESTOBJ)
 
 clean:
 	rm -f ./src/*.o
-	rm -f ./plogo
-
-cleandeep:
-	rm -f ./test
-	rm -f ./plogo
-	rm -f ./src/*.o
-	rm -f ./lib/imgui/*.o
-	rm -f ./lib/rlImGui/*.o
+	rm -f ./main
