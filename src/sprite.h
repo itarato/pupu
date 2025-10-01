@@ -10,12 +10,10 @@ struct Sprite {
  public:
   ~Sprite() {
   }
-  Sprite(Vector2 pos, float pixel_size = 1.f) : pos(pos), pixel_size(pixel_size) {
+  Sprite(float pixel_size = 1.f) : pixel_size(pixel_size) {
   }
-  Sprite(Vector2 pos, float pixel_size, std::shared_ptr<Texture2D> texture, Vector2 size, int frame_count,
-         unsigned int frame_length)
-      : pos(pos),
-        pixel_size(pixel_size),
+  Sprite(float pixel_size, std::shared_ptr<Texture2D> texture, Vector2 size, int frame_count, unsigned int frame_length)
+      : pixel_size(pixel_size),
         texture(std::move(texture)),
         size(size),
         frame_count(frame_count),
@@ -30,7 +28,7 @@ struct Sprite {
     frame_stepper.set_threshold(frame_length);
   }
 
-  void draw() const {
+  void draw(Vector2 const &pos) const {
     DrawTexturePro(*texture, {size.x * current_frame, 0.f, size.x * horizontal_reverse, size.y},
                    {pos.x - origin.x, pos.y - origin.y, size.x * pixel_size, size.y * pixel_size}, origin, 0.f, WHITE);
   }
@@ -54,7 +52,6 @@ struct Sprite {
   }
 
  private:
-  Vector2 pos;
   float pixel_size{1.f};
   std::shared_ptr<Texture2D> texture;
   Vector2 size{};

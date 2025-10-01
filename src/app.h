@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "asset_manager.h"
+#include "character.h"
 #include "raylib.h"
 #include "sprite.h"
 #include "sprite_group.h"
@@ -22,7 +23,7 @@ struct App {
 
     asset_manager.preload();
 
-    sprite.init_texture(asset_manager.textures[TextureNames::Character1__Run], {32.f, 32.f}, 12, 6);
+    character.init({static_cast<float>(GetScreenWidth() / 2), static_cast<float>(GetScreenHeight() / 2)});
   }
 
   void run() {
@@ -42,14 +43,14 @@ struct App {
   }
 
  private:
+  Character character{};
+
   void draw() const {
-    sprite.draw();
+    character.draw();
     DrawFPS(0, 0);
   }
 
   void update() {
-    sprite.update();
+    character.update();
   }
-
-  Sprite sprite{{100.f, 100.f}, 3.f};
 };

@@ -27,8 +27,12 @@ struct SpriteGroup {
     current_sprite_mut().update();
   }
 
-  void draw() const {
-    current_sprite().draw();
+  void draw(Vector2 const &pos) const {
+    current_sprite().draw(pos);
+  }
+
+  void push_sprite(Sprite &&sprite) {
+    sprites.push_back(std::move(sprite));
   }
 
  private:
