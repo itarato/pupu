@@ -2,9 +2,21 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build",
+      "label": "build_main",
       "type": "shell",
       "command": "make clean && make",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "build_editor",
+      "type": "shell",
+      "command": "make clean && make editor",
       "group": {
         "kind": "build",
         "isDefault": true

@@ -8,7 +8,7 @@ ifeq ($(UNAME_S),Darwin)
 	LIBS = -lm -lpthread -ldl -framework IOKit -framework Cocoa -framework OpenGL `pkg-config --libs --cflags raylib`
 endif
 
-MAINSRC=$(wildcard src/main.cpp lib/imgui/*.cpp lib/rlImGui/*.cpp)
+MAINSRC=$(wildcard src/main.cpp)
 OBJ=$(addsuffix .o,$(basename $(MAINSRC)))
 
 .PHONY: all debug clean test
@@ -25,6 +25,13 @@ main: $(OBJ)
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+EDITOR_SRC=$(wildcard src/level_editor.cpp)
+EDITOR_OBJ=$(addsuffix .o,$(basename $(EDITOR_SRC)))
+
+editor: $(EDITOR_OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
+
 clean:
 	rm -f ./src/*.o
 	rm -f ./main
+	rm -f ./editor

@@ -5,10 +5,18 @@
 
 #include "raylib.h"
 
+constexpr int BACKGROUND_COUNT{6};
+
 enum TextureNames {
   Character1__Run,
   Character1__Idle,
   Character1__Hit,
+  Background__0,
+  Background__1,
+  Background__2,
+  Background__3,
+  Background__4,
+  Background__5,
 };
 
 struct AssetManager {
@@ -19,9 +27,7 @@ struct AssetManager {
   void unload_assets() {
     TraceLog(LOG_INFO, "Unload all textures");
 
-    for (auto [k, v] : textures) {
-      UnloadTexture(*v);
-    }
+    for (auto [k, v] : textures) UnloadTexture(*v);
   }
 
   void preload() {
@@ -31,6 +37,19 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/1/Idle.png"));
     textures[TextureNames::Character1__Hit] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/1/Hit.png"));
+
+    textures[TextureNames::Background__0] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Backgrounds/1.png"));
+    textures[TextureNames::Background__1] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Backgrounds/2.png"));
+    textures[TextureNames::Background__2] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Backgrounds/3.png"));
+    textures[TextureNames::Background__3] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Backgrounds/4.png"));
+    textures[TextureNames::Background__4] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Backgrounds/5.png"));
+    textures[TextureNames::Background__5] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Backgrounds/6.png"));
   }
 
  private:
