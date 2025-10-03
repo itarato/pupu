@@ -35,3 +35,7 @@ struct Stepper {
   unsigned int counter{0};
   unsigned int threshold{};
 };
+
+inline int mod_reduced(const int v, const int mod) {
+  return v - (v % mod);
+}
