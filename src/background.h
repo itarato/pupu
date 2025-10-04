@@ -48,6 +48,10 @@ struct Background {
     if (background_index != -1) UnloadRenderTexture(render_texture);
   }
 
+  int get_current_index() const {
+    return background_index;
+  }
+
  private:
   int background_index{-1};
   RenderTexture2D render_texture;

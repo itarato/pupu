@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <ctime>
 #include <memory>
 #include <unordered_map>
 
@@ -25,32 +27,6 @@ constexpr Rectangle tileset_tile_frame{gui_tile_frame.width, background_frame.he
 constexpr Rectangle gui_tile_frame_px = upscale(gui_tile_frame, pixel_size);
 constexpr Rectangle tileset_tile_frame_px = upscale(tileset_tile_frame, pixel_size);
 
-enum TileSource {
-  Gui,
-  Tileset,
-};
-
-struct TileSelection {
-  TileSource source;
-  IntVec2 tile_pos;
-
-  void draw(Vector2 const pos, int const pixel_size) const {
-    std::shared_ptr<Texture2D> texture;
-    if (source == TileSource::Gui) {
-      texture = asset_manager.textures[TextureNames::GuiTiles];
-    } else if (source == TileSource::Tileset) {
-      texture = asset_manager.textures[TextureNames::TilesetTiles];
-    } else {
-      TraceLog(LOG_ERROR, "Invalid tile source");
-      return;
-    }
-
-    DrawTexturePro(*texture, {static_cast<float>(tile_pos.x), static_cast<float>(tile_pos.y), tile_size, tile_size},
-                   {pos.x, pos.y, static_cast<float>(tile_size_px), static_cast<float>(tile_size_px)}, Vector2Zero(),
-                   0.f, WHITE);
-  }
-};
-
 struct Editor {
  public:
   Editor() {
@@ -67,23 +43,31 @@ struct Editor {
       Vector2 mouse_pos = GetMousePosition();
 
       if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
+        // Draw tile.
         IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px)};
         tiles[int_coord] = tile_selection;
       } else if (CheckCollisionPointRec(mouse_pos, gui_tile_frame_px)) {
+        // Pick gui tile.
         tile_selection = TileSelection{TileSource::Gui, relative_frame_pos(gui_tile_frame_px, tile_size, pixel_size)};
       } else if (CheckCollisionPointRec(mouse_pos, tileset_tile_frame_px)) {
+        // Pick tileset tile.
         tile_selection =
             TileSelection{TileSource::Tileset, relative_frame_pos(tileset_tile_frame_px, tile_size, pixel_size)};
       }
     }
+
     if (IsMouseButtonDown(1)) {
       Vector2 mouse_pos = GetMousePosition();
 
+      // Erase tile.
       if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
         IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px)};
         tiles.erase(int_coord);
       }
     }
+
+    // Save map.
+    if (IsKeyPressed(KEY_S)) export_to_file();
   }
 
   void draw() const {
@@ -91,7 +75,7 @@ struct Editor {
     background.draw({0.f, 0.f});
 
     // Tiles.
-    for (auto const& [k, v] : tiles) v.draw(k.to_vector2(), pixel_size);
+    for (auto const& [k, v] : tiles) v.draw(k.to_vector2(), tile_size, pixel_size);
 
     // Tilesets.
     DrawTexturePro(*asset_manager.textures[TextureNames::GuiTiles],
@@ -106,7 +90,7 @@ struct Editor {
     if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
       tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_size_px)),
                            static_cast<float>(mod_reduced(mouse_pos.y, tile_size_px))},
-                          pixel_size);
+                          tile_size, pixel_size);
 
     } else {
       // Tile highlight.
@@ -126,6 +110,27 @@ struct Editor {
   Background background{};
   TileSelection tile_selection{TileSource::Gui, {0, 0}};
   std::unordered_map<IntVec2, TileSelection> tiles{};
+
+  void export_to_file() {
+    std::time_t now = std::time(nullptr);
+    char filename[64];
+    std::strftime(filename, sizeof(filename), "map_%Y%m%d%H%M%S.mp", std::localtime(&now));
+
+    FILE* file = std::fopen(filename, "w");
+    if (!file) {
+      TraceLog(LOG_ERROR, "Cannot create map file");
+      return;
+    }
+
+    std::fprintf(file, "%d", background.get_current_index());
+
+    for (auto const& [k, v] : tiles) {
+      k.write(file);
+      v.write(file);
+    }
+
+    std::fclose(file);
+  }
 };
 
 int main() {
