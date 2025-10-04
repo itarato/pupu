@@ -4,6 +4,7 @@
 
 #include "asset_manager.h"
 #include "character.h"
+#include "map.h"
 #include "raylib.h"
 #include "sprite.h"
 #include "sprite_group.h"
@@ -22,8 +23,8 @@ struct App {
     SetTargetFPS(GetMonitorRefreshRate(0));
 
     asset_manager.preload();
-
     character.init({static_cast<float>(GetScreenWidth() / 2), static_cast<float>(GetScreenHeight() / 2)});
+    map.reload_from_file();
   }
 
   void run() {
@@ -40,17 +41,21 @@ struct App {
     }
 
     asset_manager.unload_assets();
+    map.unload();
   }
 
  private:
+  Map map{};
   Character character{};
 
   void draw() const {
+    map.draw();
     character.draw();
     DrawFPS(0, 0);
   }
 
   void update() {
+    map.update();
     character.update();
   }
 };

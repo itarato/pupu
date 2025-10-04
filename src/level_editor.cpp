@@ -109,7 +109,7 @@ struct Editor {
   std::unordered_map<IntVec2, TileSelection> tiles{};
 
   void export_to_file() {
-    const char* filename{"map.mp"};
+    const char* filename{"assets/maps/map.mp"};
 
     FILE* file = std::fopen(filename, "w");
     if (!file) {
@@ -117,7 +117,8 @@ struct Editor {
       return;
     }
 
-    std::fprintf(file, "%d%d%d", tile_width, tile_height, background.get_current_index());
+    int values[4] = {tile_width, tile_height, background.get_current_index(), static_cast<int>(tiles.size())};
+    fwrite(values, sizeof(int), 4, file);
 
     for (auto const& [k, v] : tiles) {
       k.write(file);

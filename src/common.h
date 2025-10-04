@@ -10,6 +10,12 @@ constexpr int PIXEL_SIZE{3};
 constexpr int TILE_SIZE{16};
 constexpr int TILE_SIZE_PX{TILE_SIZE * PIXEL_SIZE};
 
+#define PANIC(...)                \
+  {                               \
+    fprintf(stderr, __VA_ARGS__); \
+    exit(EXIT_FAILURE);           \
+  }
+
 struct IntVec2 {
   int x{0};
   int y{0};
@@ -23,19 +29,20 @@ struct IntVec2 {
   }
 
   void write(FILE* file) const {
-    std::fprintf(file, "%d%d", x, y);
+    int pack[2]{x, y};
+    fwrite(pack, sizeof(int), 2, file);
   }
 };
 
 IntVec2 intvec2_from_file(FILE* file) {
-  int x{};
-  int y{};
-  if (std::fscanf(file, "%d%d", &x, &y) != 2) {
-    TraceLog(LOG_FATAL, "Cannot read intvec2");
-    exit(EXIT_FAILURE);
-  }
+  IntVec2 out{};
 
-  return IntVec2{x, y};
+  if (std::fread(&out.x, sizeof(int), 1, file) != 1) PANIC("Failed reading x");
+  if (std::fread(&out.y, sizeof(int), 1, file) != 1) PANIC("Failed reading y");
+
+  TraceLog(LOG_INFO, "IntVec2 read: %d:%d", out.x, out.y);
+
+  return out;
 }
 
 namespace std {
@@ -86,8 +93,8 @@ enum TileSource {
 };
 
 struct TileSelection {
-  TileSource source;
-  IntVec2 tile_pos;
+  TileSource source{};
+  IntVec2 tile_pos{};
 
   void draw(Vector2 const pos, int const tile_size, int const pixel_size) const {
     std::shared_ptr<Texture2D> texture;
@@ -109,17 +116,14 @@ struct TileSelection {
   }
 
   void write(FILE* file) const {
-    std::fprintf(file, "%d", source);
+    fwrite(&source, sizeof(int), 1, file);
     tile_pos.write(file);
   }
 };
 
 TileSelection tile_selection_from_file(FILE* file) {
   int tile_source_raw{};
-  if (std::fscanf(file, "%d", &tile_source_raw) != 1) {
-    TraceLog(LOG_FATAL, "Cannot read tile source");
-    exit(EXIT_FAILURE);
-  }
+  if (fread(&tile_source_raw, sizeof(int), 1, file) != 1) PANIC("Cannot read tile source");
   IntVec2 pos = intvec2_from_file(file);
 
   TileSource source{};
@@ -131,7 +135,7 @@ TileSelection tile_selection_from_file(FILE* file) {
       source = TileSource::Tileset;
       break;
     default:
-      TraceLog(LOG_ERROR, "Invalid tile source at reading");
+      TraceLog(LOG_ERROR, "Invalid tile source at reading: %d", tile_source_raw);
       break;
   }
 
