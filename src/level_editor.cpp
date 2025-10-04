@@ -32,7 +32,7 @@ enum TileSource {
 
 struct TileSelection {
   TileSource source;
-  Vector2 tile_pos;
+  IntVec2 tile_pos;
 
   void draw(Vector2 const pos, int const pixel_size) const {
     std::shared_ptr<Texture2D> texture;
@@ -45,7 +45,7 @@ struct TileSelection {
       return;
     }
 
-    DrawTexturePro(*texture, {0.f, 0.f, tile_size, tile_size},
+    DrawTexturePro(*texture, {static_cast<float>(tile_pos.x), static_cast<float>(tile_pos.y), tile_size, tile_size},
                    {pos.x, pos.y, static_cast<float>(tile_size_px), static_cast<float>(tile_size_px)}, Vector2Zero(),
                    0.f, WHITE);
   }
@@ -63,12 +63,25 @@ struct Editor {
       background.preload(key - KEY_ZERO, background_tile_width, background_tile_height, pixel_size);
     }
 
-    if (IsMouseButtonPressed(0)) {
+    if (IsMouseButtonDown(0)) {
       Vector2 mouse_pos = GetMousePosition();
 
       if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
         IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px)};
         tiles[int_coord] = tile_selection;
+      } else if (CheckCollisionPointRec(mouse_pos, gui_tile_frame_px)) {
+        tile_selection = TileSelection{TileSource::Gui, relative_frame_pos(gui_tile_frame_px, tile_size, pixel_size)};
+      } else if (CheckCollisionPointRec(mouse_pos, tileset_tile_frame_px)) {
+        tile_selection =
+            TileSelection{TileSource::Tileset, relative_frame_pos(tileset_tile_frame_px, tile_size, pixel_size)};
+      }
+    }
+    if (IsMouseButtonDown(1)) {
+      Vector2 mouse_pos = GetMousePosition();
+
+      if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
+        IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px)};
+        tiles.erase(int_coord);
       }
     }
   }
@@ -111,12 +124,14 @@ struct Editor {
 
  private:
   Background background{};
-  TileSelection tile_selection{TileSource::Gui, Vector2Zero()};
+  TileSelection tile_selection{TileSource::Gui, {0, 0}};
   std::unordered_map<IntVec2, TileSelection> tiles{};
 };
 
 int main() {
   InitWindow(background_frame_px.width, background_frame_px.height + tileset_tile_frame_px.height, "Pupu Level Editor");
+  SetTargetFPS(30);
+
   asset_manager.preload();
 
   Editor editor{};

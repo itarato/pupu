@@ -66,3 +66,9 @@ inline int mod_reduced(const int v, const int mod) {
 constexpr Rectangle upscale(Rectangle const rect, float const scale) {
   return Rectangle{rect.x * scale, rect.y * scale, rect.width * scale, rect.height * scale};
 }
+
+IntVec2 relative_frame_pos(Rectangle frame, int tile_size, int pixel_size) {
+  Vector2 mouse_pos = GetMousePosition();
+  return IntVec2{mod_reduced(mouse_pos.x - frame.x, tile_size * pixel_size) / pixel_size,
+                 mod_reduced(mouse_pos.y - frame.y, tile_size * pixel_size) / pixel_size};
+}
