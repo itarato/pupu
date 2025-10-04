@@ -1,4 +1,5 @@
 #include <memory>
+#include <unordered_map>
 
 #include "asset_manager.h"
 #include "background.h"
@@ -7,32 +8,22 @@
 
 constexpr int pixel_size{3};
 constexpr int tile_size{16};
-constexpr int background_size{64};
+constexpr int tile_size_px{tile_size * pixel_size};
+constexpr int background_tile_size{64};
 constexpr int tile_width{32};
 constexpr int tile_height{20};
 
 constexpr int background_tile_width{tile_width / 4};
 constexpr int background_tile_height{tile_height / 4};
 
-constexpr Rectangle background_frame{
-    0.f,
-    0.f,
-    background_size* background_tile_width,
-    background_size* background_tile_height,
-};
+constexpr Rectangle background_frame{0.f, 0.f, tile_size* tile_width, tile_size* tile_height};
+constexpr Rectangle background_frame_px = upscale(background_frame, pixel_size);
 
-constexpr Rectangle gui_tile_frame{
-    0.f,
-    background_frame.height* pixel_size,
-    240.f,
-    112.f,
-};
-constexpr Rectangle tileset_tile_frame{
-    gui_tile_frame.width * pixel_size,
-    background_frame.height* pixel_size,
-    256.f,
-    176.f,
-};
+constexpr Rectangle gui_tile_frame{0.f, background_frame.height, 240.f, 112.f};
+constexpr Rectangle tileset_tile_frame{gui_tile_frame.width, background_frame.height, 256.f, 176.f};
+
+constexpr Rectangle gui_tile_frame_px = upscale(gui_tile_frame, pixel_size);
+constexpr Rectangle tileset_tile_frame_px = upscale(tileset_tile_frame, pixel_size);
 
 enum TileSource {
   Gui,
@@ -54,10 +45,9 @@ struct TileSelection {
       return;
     }
 
-    DrawTexturePro(
-        *texture, {0.f, 0.f, tile_size, tile_size},
-        {pos.x, pos.y, static_cast<float>(tile_size * pixel_size), static_cast<float>(tile_size * pixel_size)},
-        Vector2Zero(), 0.f, WHITE);
+    DrawTexturePro(*texture, {0.f, 0.f, tile_size, tile_size},
+                   {pos.x, pos.y, static_cast<float>(tile_size_px), static_cast<float>(tile_size_px)}, Vector2Zero(),
+                   0.f, WHITE);
   }
 };
 
@@ -74,6 +64,12 @@ struct Editor {
     }
 
     if (IsMouseButtonPressed(0)) {
+      Vector2 mouse_pos = GetMousePosition();
+
+      if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
+        IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px)};
+        tiles[int_coord] = tile_selection;
+      }
     }
   }
 
@@ -81,23 +77,32 @@ struct Editor {
     // Background.
     background.draw({0.f, 0.f});
 
+    // Tiles.
+    for (auto const& [k, v] : tiles) v.draw(k.to_vector2(), pixel_size);
+
     // Tilesets.
-    DrawTexturePro(
-        *asset_manager.textures[TextureNames::GuiTiles], {0.f, 0.f, gui_tile_frame.width, gui_tile_frame.height},
-        {gui_tile_frame.x, gui_tile_frame.y, gui_tile_frame.width * pixel_size, gui_tile_frame.height * pixel_size},
-        Vector2Zero(), 0.f, WHITE);
+    DrawTexturePro(*asset_manager.textures[TextureNames::GuiTiles],
+                   {0.f, 0.f, gui_tile_frame.width, gui_tile_frame.height}, gui_tile_frame_px, Vector2Zero(), 0.f,
+                   WHITE);
     DrawTexturePro(*asset_manager.textures[TextureNames::TilesetTiles],
-                   {0.f, 0.f, tileset_tile_frame.width, tileset_tile_frame.height},
-                   {tileset_tile_frame.x, tileset_tile_frame.y, tileset_tile_frame.width * pixel_size,
-                    tileset_tile_frame.height * pixel_size},
+                   {0.f, 0.f, tileset_tile_frame.width, tileset_tile_frame.height}, tileset_tile_frame_px,
                    Vector2Zero(), 0.f, WHITE);
 
-    // Tile highlight.
     Vector2 mouse_pos = GetMousePosition();
-    DrawRectangle(mod_reduced(mouse_pos.x, tile_size * pixel_size), mod_reduced(mouse_pos.y, tile_size * pixel_size),
-                  tile_size * pixel_size, tile_size * pixel_size, ColorAlpha(WHITE, 0.3f));
 
-    tile_selection.draw(Vector2Zero(), pixel_size);
+    if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
+      tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_size_px)),
+                           static_cast<float>(mod_reduced(mouse_pos.y, tile_size_px))},
+                          pixel_size);
+
+    } else {
+      // Tile highlight.
+      DrawRectangle(mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px), tile_size_px,
+                    tile_size_px, ColorAlpha(WHITE, 0.5f));
+      DrawRectangleLinesEx({static_cast<float>(mod_reduced(mouse_pos.x, tile_size_px)),
+                            static_cast<float>(mod_reduced(mouse_pos.y, tile_size_px)), tile_size_px, tile_size_px},
+                           pixel_size, BLACK);
+    }
   }
 
   void unload() {
@@ -107,11 +112,11 @@ struct Editor {
  private:
   Background background{};
   TileSelection tile_selection{TileSource::Gui, Vector2Zero()};
+  std::unordered_map<IntVec2, TileSelection> tiles{};
 };
 
 int main() {
-  InitWindow(background_frame.width * pixel_size, (background_frame.height + tileset_tile_frame.height) * pixel_size,
-             "Pupu Level Editor");
+  InitWindow(background_frame_px.width, background_frame_px.height + tileset_tile_frame_px.height, "Pupu Level Editor");
   asset_manager.preload();
 
   Editor editor{};
