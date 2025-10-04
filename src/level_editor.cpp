@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <ctime>
 #include <memory>
 #include <unordered_map>
 
@@ -8,9 +7,6 @@
 #include "common.h"
 #include "raylib.h"
 
-constexpr int pixel_size{3};
-constexpr int tile_size{16};
-constexpr int tile_size_px{tile_size * pixel_size};
 constexpr int background_tile_size{64};
 constexpr int tile_width{32};
 constexpr int tile_height{20};
@@ -18,25 +14,25 @@ constexpr int tile_height{20};
 constexpr int background_tile_width{tile_width / 4};
 constexpr int background_tile_height{tile_height / 4};
 
-constexpr Rectangle background_frame{0.f, 0.f, tile_size* tile_width, tile_size* tile_height};
-constexpr Rectangle background_frame_px = upscale(background_frame, pixel_size);
+constexpr Rectangle background_frame{0.f, 0.f, TILE_SIZE* tile_width, TILE_SIZE* tile_height};
+constexpr Rectangle background_frame_px = upscale(background_frame, PIXEL_SIZE);
 
 constexpr Rectangle gui_tile_frame{0.f, background_frame.height, 240.f, 112.f};
 constexpr Rectangle tileset_tile_frame{gui_tile_frame.width, background_frame.height, 256.f, 176.f};
 
-constexpr Rectangle gui_tile_frame_px = upscale(gui_tile_frame, pixel_size);
-constexpr Rectangle tileset_tile_frame_px = upscale(tileset_tile_frame, pixel_size);
+constexpr Rectangle gui_tile_frame_px = upscale(gui_tile_frame, PIXEL_SIZE);
+constexpr Rectangle tileset_tile_frame_px = upscale(tileset_tile_frame, PIXEL_SIZE);
 
 struct Editor {
  public:
   Editor() {
-    background.preload(0, background_tile_width, background_tile_height, pixel_size);
+    background.preload(0, background_tile_width, background_tile_height, PIXEL_SIZE);
   }
 
   void update() {
     int key = GetKeyPressed();
     if (key >= KEY_ZERO && key <= KEY_FIVE) {
-      background.preload(key - KEY_ZERO, background_tile_width, background_tile_height, pixel_size);
+      background.preload(key - KEY_ZERO, background_tile_width, background_tile_height, PIXEL_SIZE);
     }
 
     if (IsMouseButtonDown(0)) {
@@ -44,15 +40,15 @@ struct Editor {
 
       if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
         // Draw tile.
-        IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px)};
+        IntVec2 int_coord{mod_reduced(mouse_pos.x, TILE_SIZE_PX), mod_reduced(mouse_pos.y, TILE_SIZE_PX)};
         tiles[int_coord] = tile_selection;
       } else if (CheckCollisionPointRec(mouse_pos, gui_tile_frame_px)) {
         // Pick gui tile.
-        tile_selection = TileSelection{TileSource::Gui, relative_frame_pos(gui_tile_frame_px, tile_size, pixel_size)};
+        tile_selection = TileSelection{TileSource::Gui, relative_frame_pos(gui_tile_frame_px, TILE_SIZE, PIXEL_SIZE)};
       } else if (CheckCollisionPointRec(mouse_pos, tileset_tile_frame_px)) {
         // Pick tileset tile.
         tile_selection =
-            TileSelection{TileSource::Tileset, relative_frame_pos(tileset_tile_frame_px, tile_size, pixel_size)};
+            TileSelection{TileSource::Tileset, relative_frame_pos(tileset_tile_frame_px, TILE_SIZE, PIXEL_SIZE)};
       }
     }
 
@@ -61,7 +57,7 @@ struct Editor {
 
       // Erase tile.
       if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
-        IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px)};
+        IntVec2 int_coord{mod_reduced(mouse_pos.x, TILE_SIZE_PX), mod_reduced(mouse_pos.y, TILE_SIZE_PX)};
         tiles.erase(int_coord);
       }
     }
@@ -75,7 +71,7 @@ struct Editor {
     background.draw({0.f, 0.f});
 
     // Tiles.
-    for (auto const& [k, v] : tiles) v.draw(k.to_vector2(), tile_size, pixel_size);
+    for (auto const& [k, v] : tiles) v.draw(k.to_vector2(), TILE_SIZE, PIXEL_SIZE);
 
     // Tilesets.
     DrawTexturePro(*asset_manager.textures[TextureNames::GuiTiles],
@@ -88,17 +84,18 @@ struct Editor {
     Vector2 mouse_pos = GetMousePosition();
 
     if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
-      tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_size_px)),
-                           static_cast<float>(mod_reduced(mouse_pos.y, tile_size_px))},
-                          tile_size, pixel_size);
+      tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, TILE_SIZE_PX)),
+                           static_cast<float>(mod_reduced(mouse_pos.y, TILE_SIZE_PX))},
+                          TILE_SIZE, PIXEL_SIZE);
 
     } else {
       // Tile highlight.
-      DrawRectangle(mod_reduced(mouse_pos.x, tile_size_px), mod_reduced(mouse_pos.y, tile_size_px), tile_size_px,
-                    tile_size_px, ColorAlpha(WHITE, 0.5f));
-      DrawRectangleLinesEx({static_cast<float>(mod_reduced(mouse_pos.x, tile_size_px)),
-                            static_cast<float>(mod_reduced(mouse_pos.y, tile_size_px)), tile_size_px, tile_size_px},
-                           pixel_size, BLACK);
+      DrawRectangle(mod_reduced(mouse_pos.x, TILE_SIZE_PX), mod_reduced(mouse_pos.y, TILE_SIZE_PX), TILE_SIZE_PX,
+                    TILE_SIZE_PX, ColorAlpha(WHITE, 0.5f));
+      DrawRectangleLinesEx({static_cast<float>(mod_reduced(mouse_pos.x, TILE_SIZE_PX)),
+                            static_cast<float>(mod_reduced(mouse_pos.y, TILE_SIZE_PX)),
+                            static_cast<float>(TILE_SIZE_PX), static_cast<float>(TILE_SIZE_PX)},
+                           PIXEL_SIZE, BLACK);
     }
   }
 
@@ -112,9 +109,7 @@ struct Editor {
   std::unordered_map<IntVec2, TileSelection> tiles{};
 
   void export_to_file() {
-    std::time_t now = std::time(nullptr);
-    char filename[64];
-    std::strftime(filename, sizeof(filename), "map_%Y%m%d%H%M%S.mp", std::localtime(&now));
+    const char* filename{"map.mp"};
 
     FILE* file = std::fopen(filename, "w");
     if (!file) {
@@ -122,7 +117,7 @@ struct Editor {
       return;
     }
 
-    std::fprintf(file, "%d", background.get_current_index());
+    std::fprintf(file, "%d%d%d", tile_width, tile_height, background.get_current_index());
 
     for (auto const& [k, v] : tiles) {
       k.write(file);

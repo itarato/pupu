@@ -4,6 +4,11 @@
 #include <functional>
 
 #include "raylib.h"
+#include "raymath.h"
+
+constexpr int PIXEL_SIZE{3};
+constexpr int TILE_SIZE{16};
+constexpr int TILE_SIZE_PX{TILE_SIZE * PIXEL_SIZE};
 
 struct IntVec2 {
   int x{0};
@@ -18,13 +23,17 @@ struct IntVec2 {
   }
 
   void write(FILE* file) const {
-    std::fprintf(file, "%d%d", &x, &y);
+    std::fprintf(file, "%d%d", x, y);
   }
 };
 
 IntVec2 intvec2_from_file(FILE* file) {
-  int x, y;
-  std::fscanf(file, "%d%d", x, y);
+  int x{};
+  int y{};
+  if (std::fscanf(file, "%d%d", &x, &y) != 2) {
+    TraceLog(LOG_FATAL, "Cannot read intvec2");
+    exit(EXIT_FAILURE);
+  }
 
   return IntVec2{x, y};
 }
@@ -106,11 +115,14 @@ struct TileSelection {
 };
 
 TileSelection tile_selection_from_file(FILE* file) {
-  int tile_source_raw;
-  std::fscanf(file, "%d", &tile_source_raw);
+  int tile_source_raw{};
+  if (std::fscanf(file, "%d", &tile_source_raw) != 1) {
+    TraceLog(LOG_FATAL, "Cannot read tile source");
+    exit(EXIT_FAILURE);
+  }
   IntVec2 pos = intvec2_from_file(file);
 
-  TileSource source;
+  TileSource source{};
   switch (tile_source_raw) {
     case 0:
       source = TileSource::Gui;
