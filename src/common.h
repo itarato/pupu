@@ -44,8 +44,6 @@ IntVec2 intvec2_from_file(FILE* file) {
   if (std::fread(&out.x, sizeof(int), 1, file) != 1) PANIC("Failed reading x");
   if (std::fread(&out.y, sizeof(int), 1, file) != 1) PANIC("Failed reading y");
 
-  TraceLog(LOG_INFO, "IntVec2 read: %d:%d", out.x, out.y);
-
   return out;
 }
 

@@ -9,16 +9,13 @@
 #include "raylib.h"
 
 struct HitMap {
-  int north{};
-  int south{};
-  int east{};
-  int west{};
-
-  HitMap() {
-  }
-  ~HitMap() {
-  }
+  int north{-1};
+  int south{-1};
+  int east{-1};
+  int west{-1};
 };
+
+constexpr HitMap NULL_HIT_MAP{};
 
 struct Map {
  public:
@@ -66,6 +63,15 @@ struct Map {
     background.unload();
   }
 
+  HitMap const& get_hit_map(Vector2 const& pos) const {
+    int x = static_cast<int>(pos.x / TILE_SIZE_PX);
+    int y = static_cast<int>(pos.y / TILE_SIZE_PX);
+
+    if (x < 0 || y < 0 || x >= tile_width || y >= tile_height) return NULL_HIT_MAP;
+
+    return hit_map[y * tile_width + x];
+  }
+
  private:
   Background background{};
   int tile_width{};
@@ -75,7 +81,7 @@ struct Map {
 
   void recalculate() {
     hit_map.clear();
-    hit_map.resize(tile_width * tile_height, HitMap());
+    hit_map.resize(tile_width * tile_height, NULL_HIT_MAP);
 
     for (int y = 0; y < tile_height; y++) {
       int west_wall = -1;
@@ -83,7 +89,7 @@ struct Map {
 
       for (int x = 0; x < tile_width; x++) {
         hit_map[y * tile_width + x].west = west_wall;
-        if (tiles.contains(IntVec2{x, y})) west_wall = x;
+        if (tiles.contains(IntVec2{x, y})) west_wall = x + 1;
 
         hit_map[y * tile_width + (tile_width - 1 - x)].east = east_wall;
         if (tiles.contains(IntVec2{(tile_width - 1 - x), y})) east_wall = (tile_width - 1 - x);
@@ -96,7 +102,7 @@ struct Map {
 
       for (int y = 0; y < tile_height; y++) {
         hit_map[y * tile_width + x].north = north_wall;
-        if (tiles.contains(IntVec2{x, y})) north_wall = y;
+        if (tiles.contains(IntVec2{x, y})) north_wall = y + 1;
 
         hit_map[(tile_height - 1 - y) * tile_width + x].south = south_wall;
         if (tiles.contains(IntVec2{x, (tile_height - 1 - y)})) south_wall = (tile_height - 1 - y);
