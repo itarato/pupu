@@ -32,6 +32,10 @@ struct IntVec2 {
     int pack[2]{x, y};
     fwrite(pack, sizeof(int), 2, file);
   }
+
+  IntVec2 scale(int const scale) const {
+    return IntVec2{x * scale, y * scale};
+  }
 };
 
 IntVec2 intvec2_from_file(FILE* file) {

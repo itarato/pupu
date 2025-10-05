@@ -40,7 +40,7 @@ struct Editor {
 
       if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
         // Draw tile.
-        IntVec2 int_coord{mod_reduced(mouse_pos.x, TILE_SIZE_PX), mod_reduced(mouse_pos.y, TILE_SIZE_PX)};
+        IntVec2 int_coord{static_cast<int>(mouse_pos.x) / TILE_SIZE_PX, static_cast<int>(mouse_pos.y) / TILE_SIZE_PX};
         tiles[int_coord] = tile_selection;
       } else if (CheckCollisionPointRec(mouse_pos, gui_tile_frame_px)) {
         // Pick gui tile.
@@ -57,7 +57,7 @@ struct Editor {
 
       // Erase tile.
       if (CheckCollisionPointRec(mouse_pos, background_frame_px)) {
-        IntVec2 int_coord{mod_reduced(mouse_pos.x, TILE_SIZE_PX), mod_reduced(mouse_pos.y, TILE_SIZE_PX)};
+        IntVec2 int_coord{static_cast<int>(mouse_pos.x) / TILE_SIZE_PX, static_cast<int>(mouse_pos.y) / TILE_SIZE_PX};
         tiles.erase(int_coord);
       }
     }
@@ -71,7 +71,7 @@ struct Editor {
     background.draw({0.f, 0.f});
 
     // Tiles.
-    for (auto const& [k, v] : tiles) v.draw(k.to_vector2(), TILE_SIZE, PIXEL_SIZE);
+    for (auto const& [k, v] : tiles) v.draw(k.scale(TILE_SIZE_PX).to_vector2(), TILE_SIZE, PIXEL_SIZE);
 
     // Tilesets.
     DrawTexturePro(*asset_manager.textures[TextureNames::GuiTiles],

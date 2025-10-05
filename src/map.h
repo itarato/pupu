@@ -2,10 +2,18 @@
 
 #include <cstdio>
 #include <unordered_map>
+#include <vector>
 
 #include "background.h"
 #include "common.h"
 #include "raylib.h"
+
+struct HitMap {
+  int north{};
+  int south{};
+  int east{};
+  int west{};
+};
 
 struct Map {
  public:
@@ -36,6 +44,8 @@ struct Map {
     }
 
     std::fclose(file);
+
+    recalculate();
   }
 
   void update() {
@@ -44,7 +54,7 @@ struct Map {
   void draw() const {
     background.draw(Vector2Zero());
 
-    for (auto const& [k, v] : tiles) v.draw(k.to_vector2(), TILE_SIZE, PIXEL_SIZE);
+    for (auto const& [k, v] : tiles) v.draw(k.scale(TILE_SIZE_PX).to_vector2(), TILE_SIZE, PIXEL_SIZE);
   }
 
   void unload() {
@@ -56,4 +66,18 @@ struct Map {
   int tile_width{};
   int tile_height{};
   std::unordered_map<IntVec2, TileSelection> tiles{};
+  std::vector<HitMap> hit_map{};
+
+  void recalculate() {
+    hit_map.clear();
+    hit_map.resize(tile_width * tile_height);
+
+    for (int y = 0; y < tile_height; y++) {
+      for (int x = 0; x < tile_width; x++) {
+        int west_wall = -1;
+        hit_map[y * tile_width + x].west = west_wall;
+        // if (tiles)
+      }
+    }
+  }
 };
