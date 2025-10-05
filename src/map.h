@@ -13,6 +13,11 @@ struct HitMap {
   int south{};
   int east{};
   int west{};
+
+  HitMap() {
+  }
+  ~HitMap() {
+  }
 };
 
 struct Map {
@@ -70,13 +75,31 @@ struct Map {
 
   void recalculate() {
     hit_map.clear();
-    hit_map.resize(tile_width * tile_height);
+    hit_map.resize(tile_width * tile_height, HitMap());
 
     for (int y = 0; y < tile_height; y++) {
+      int west_wall = -1;
+      int east_wall = -1;
+
       for (int x = 0; x < tile_width; x++) {
-        int west_wall = -1;
         hit_map[y * tile_width + x].west = west_wall;
-        // if (tiles)
+        if (tiles.contains(IntVec2{x, y})) west_wall = x;
+
+        hit_map[y * tile_width + (tile_width - 1 - x)].east = east_wall;
+        if (tiles.contains(IntVec2{(tile_width - 1 - x), y})) east_wall = (tile_width - 1 - x);
+      }
+    }
+
+    for (int x = 0; x < tile_width; x++) {
+      int north_wall = -1;
+      int south_wall = -1;
+
+      for (int y = 0; y < tile_height; y++) {
+        hit_map[y * tile_width + x].north = north_wall;
+        if (tiles.contains(IntVec2{x, y})) north_wall = y;
+
+        hit_map[(tile_height - 1 - y) * tile_width + x].south = south_wall;
+        if (tiles.contains(IntVec2{x, (tile_height - 1 - y)})) south_wall = (tile_height - 1 - y);
       }
     }
   }

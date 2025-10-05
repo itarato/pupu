@@ -13,9 +13,6 @@ struct App {
  public:
   App() {
   }
-  ~App() {
-    CloseWindow();
-  }
 
   void init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -40,8 +37,10 @@ struct App {
       EndDrawing();
     }
 
-    asset_manager.unload_assets();
     map.unload();
+    asset_manager.unload_assets();
+
+    CloseWindow();
   }
 
  private:
