@@ -51,25 +51,25 @@ struct App {
     map.draw();
     character.draw();
 
-    HitMap hit_map = map.get_hit_map(GetMousePosition());
-    DrawLineEx({0.f, static_cast<float>(hit_map.north * TILE_SIZE_PX)},
-               {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north * TILE_SIZE_PX)}, PIXEL_SIZE,
-               ORANGE);
-    DrawLineEx({0.f, static_cast<float>(hit_map.south * TILE_SIZE_PX)},
-               {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south * TILE_SIZE_PX)}, PIXEL_SIZE,
-               GREEN);
-    DrawLineEx({static_cast<float>(hit_map.west * TILE_SIZE_PX), 0.f},
-               {static_cast<float>(hit_map.west * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE,
-               BLUE);
-    DrawLineEx({static_cast<float>(hit_map.east * TILE_SIZE_PX), 0.f},
-               {static_cast<float>(hit_map.east * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE,
-               RED);
+    // HitMap hit_map = map.get_hit_map(GetMousePosition());
+    // DrawLineEx({0.f, static_cast<float>(hit_map.north * TILE_SIZE_PX)},
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north * TILE_SIZE_PX)}, PIXEL_SIZE,
+    //            ORANGE);
+    // DrawLineEx({0.f, static_cast<float>(hit_map.south * TILE_SIZE_PX)},
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south * TILE_SIZE_PX)}, PIXEL_SIZE,
+    //            GREEN);
+    // DrawLineEx({static_cast<float>(hit_map.west * TILE_SIZE_PX), 0.f},
+    //            {static_cast<float>(hit_map.west * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE,
+    //            BLUE);
+    // DrawLineEx({static_cast<float>(hit_map.east * TILE_SIZE_PX), 0.f},
+    //            {static_cast<float>(hit_map.east * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE,
+    //            RED);
 
     DrawFPS(0, 0);
   }
 
   void update() {
     map.update();
-    character.update();
+    character.update(map);
   }
 };

@@ -84,8 +84,8 @@ struct Map {
     hit_map.resize(tile_width * tile_height, NULL_HIT_MAP);
 
     for (int y = 0; y < tile_height; y++) {
-      int west_wall = -1;
-      int east_wall = -1;
+      int west_wall = 0;
+      int east_wall = GetScreenWidth();
 
       for (int x = 0; x < tile_width; x++) {
         hit_map[y * tile_width + x].west = west_wall;
@@ -97,8 +97,8 @@ struct Map {
     }
 
     for (int x = 0; x < tile_width; x++) {
-      int north_wall = -1;
-      int south_wall = -1;
+      int north_wall = 0;
+      int south_wall = GetScreenHeight();
 
       for (int y = 0; y < tile_height; y++) {
         hit_map[y * tile_width + x].north = north_wall;
