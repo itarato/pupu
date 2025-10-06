@@ -25,6 +25,7 @@ constexpr int PLAYER_SPRITE_HIT{2};
 constexpr int PLAYER_SPRITE_JUMP{3};
 constexpr int PLAYER_SPRITE_FALL{4};
 constexpr int PLAYER_SPRITE_DOUBLE_JUMP{5};
+constexpr int PLAYER_SPRITE_WALL_JUMP{6};
 
 enum JumpState {
   Ground,
@@ -53,6 +54,8 @@ struct Character {
                                     {32.f, 32.f},
                                     6,
                                     sprite_frame_length});
+    sprite_group.push_sprite(Sprite{
+        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Wall_Jump], {32.f, 32.f}, 5, sprite_frame_length});
   }
 
   void update(Map const& map) {
@@ -103,6 +106,7 @@ struct Character {
       sprite_group.horizontal_reset();
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x += speed_increments();
+
       if (speed.x > max_speed()) speed.x = max_speed();
     } else {
       sprite_group.set_current_sprite(PLAYER_SPRITE_IDLE);
@@ -184,8 +188,10 @@ struct Character {
       multi_jump_count = 0;
     }
 
-    // Override sprite when jumping.
-    if (jump_state == JumpState::Jump) {
+    // Override sprite when jumping / wall grabbing.
+    if (is_grab_wall) {
+      sprite_group.set_current_sprite(PLAYER_SPRITE_WALL_JUMP);
+    } else if (jump_state == JumpState::Jump) {
       sprite_group.set_current_sprite(PLAYER_SPRITE_JUMP);
     } else if (jump_state == JumpState::Fall) {
       sprite_group.set_current_sprite(PLAYER_SPRITE_FALL);
