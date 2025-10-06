@@ -34,10 +34,21 @@ enum JumpState {
   DoubleJump,
 };
 
+enum LifecycleState {
+  Appear,
+  Live,
+};
+
 struct Character {
  public:
-  void init(Vector2 new_pos) {
+  void reset(Vector2 new_pos) {
     pos = new_pos;
+    sprite_group.set_current_sprite(PLAYER_SPRITE_IDLE);
+    jump_state = JumpState::Ground;
+    lifecycle_state = LifecycleState::Appear;
+  }
+
+  void init() {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
     sprite_group.push_sprite(Sprite{
         PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Run], {32.f, 32.f}, 12, sprite_frame_length});
@@ -82,6 +93,7 @@ struct Character {
   Vector2 speed{};
   int multi_jump_count{0};
   JumpState jump_state{JumpState::Ground};
+  LifecycleState lifecycle_state{LifecycleState::Appear};
 
   // Debug
   HitMap hit_map{};

@@ -20,8 +20,9 @@ struct App {
     SetTargetFPS(GetMonitorRefreshRate(0));
 
     asset_manager.preload();
-    character.init({static_cast<float>(GetScreenWidth() / 2), static_cast<float>(TILE_SIZE_PX * 4)});
-    map.reload_from_file();
+    character.init();
+
+    reset();
   }
 
   void run() {
@@ -47,6 +48,12 @@ struct App {
   Map map{};
   Character character{};
   bool pause_update{false};
+
+  void reset() {
+    map.reload_from_file();
+    character.reset({static_cast<float>(GetScreenWidth() / 2), static_cast<float>(TILE_SIZE_PX * 4)});
+    pause_update = false;
+  }
 
   void draw() const {
     map.draw();
@@ -76,5 +83,7 @@ struct App {
     }
 
     if (IsKeyPressed(KEY_P)) pause_update = !pause_update;
+
+    if (IsKeyPressed(KEY_R)) reset();
   }
 };
