@@ -49,6 +49,10 @@ IntVec2 intvec2_from_file(FILE* file) {
   return out;
 }
 
+IntVec2 tile_coord_from_absolute(Vector2 const v) {
+  return IntVec2{static_cast<int>(v.x / TILE_SIZE_PX), static_cast<int>(v.y / TILE_SIZE_PX)};
+}
+
 namespace std {
 template <>
 struct hash<IntVec2> {

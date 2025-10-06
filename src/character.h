@@ -40,14 +40,14 @@ struct Character {
   void draw() const {
     sprite_group.draw(pos);
 
-    DrawLineEx({0.f, static_cast<float>(hit_map.north)},
-               {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north)}, PIXEL_SIZE, ORANGE);
-    DrawLineEx({0.f, static_cast<float>(hit_map.south)},
-               {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south)}, PIXEL_SIZE, GREEN);
-    DrawLineEx({static_cast<float>(hit_map.west), 0.f},
-               {static_cast<float>(hit_map.west), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE, BLUE);
-    DrawLineEx({static_cast<float>(hit_map.east), 0.f},
-               {static_cast<float>(hit_map.east), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE, RED);
+    // DrawLineEx({0.f, static_cast<float>(hit_map.north)},
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north)}, PIXEL_SIZE, ORANGE);
+    // DrawLineEx({0.f, static_cast<float>(hit_map.south)},
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south)}, PIXEL_SIZE, GREEN);
+    // DrawLineEx({static_cast<float>(hit_map.west), 0.f},
+    //            {static_cast<float>(hit_map.west), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE, BLUE);
+    // DrawLineEx({static_cast<float>(hit_map.east), 0.f},
+    //            {static_cast<float>(hit_map.east), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE, RED);
   }
 
  private:
@@ -62,11 +62,11 @@ struct Character {
   void update_movement(Map const& map) {
     hit_map = calculate_hitmap(map);
 
-    if (IsKeyPressed(KEY_I)) {
-      TraceLog(LOG_INFO, "Player top-left=%.2f:%.2f bottom-right=%.2f:%.2f Hitmap north=%d south%d west=%d, east=%d",
-               top_left_corner().x, top_left_corner().y, bottom_right_corner().x, bottom_right_corner().y,
-               hit_map.north, hit_map.south, hit_map.west, hit_map.east);
-    }
+    // if (IsKeyPressed(KEY_I)) {
+    //   TraceLog(LOG_INFO, "Player top-left=%.2f:%.2f bottom-right=%.2f:%.2f Hitmap north=%d south%d west=%d, east=%d",
+    //            top_left_corner().x, top_left_corner().y, bottom_right_corner().x, bottom_right_corner().y,
+    //            hit_map.north, hit_map.south, hit_map.west, hit_map.east);
+    // }
 
     if (IsKeyDown(KEY_LEFT)) {
       sprite_group.horizontal_flip();
@@ -134,12 +134,12 @@ struct Character {
       speed.y = 0.f;
     }
     float south_wall_dist = static_cast<float>(hit_map.south) - bottom_left_corner().y;
-    TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", top_left_corner().y, bottom_right_corner().y,
-             hit_map.south);
+    // TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", top_left_corner().y, bottom_right_corner().y,
+    //          hit_map.south);
     if (south_wall_dist < 0) {
       pos.y += south_wall_dist;
-      TraceLog(LOG_INFO, "Height adjusted with %.2f to %.2f-%.2f", south_wall_dist, pos.y,
-               pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f);
+      // TraceLog(LOG_INFO, "Height adjusted with %.2f to %.2f-%.2f", south_wall_dist, pos.y,
+      //          pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f);
       speed.y = 0.f;
 
       multi_jump_count = 0;
@@ -155,27 +155,27 @@ struct Character {
   }
 
   Vector2 const bottom_left_corner() const {
-    return Vector2{pos.x, pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f};
+    return Vector2{pos.x + (PLAYER_TEXTURE_SIZE_PX / 4.f), pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f};
   }
 
   Vector2 const bottom_right_corner() const {
-    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f, pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f};
+    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f - (PLAYER_TEXTURE_SIZE_PX / 4.f),
+                   pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f};
   }
 
   Vector2 const top_left_corner() const {
-    return Vector2{pos.x, pos.y};
+    return Vector2{pos.x + (PLAYER_TEXTURE_SIZE_PX / 4.f), pos.y};
   }
 
   Vector2 const top_right_corner() const {
-    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f, pos.y};
+    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f - (PLAYER_TEXTURE_SIZE_PX / 4.f), pos.y};
   }
 
   HitMap calculate_hitmap(Map const& map) const {
     HitMap hit_map{};
 
-    IntVec2 top_left_coord = IntVec2{static_cast<int>(pos.x / TILE_SIZE_PX), static_cast<int>(pos.y / TILE_SIZE_PX)};
-    IntVec2 bottom_right_coord = IntVec2{static_cast<int>((pos.x + PLAYER_TEXTURE_SIZE_PX - 1) / TILE_SIZE_PX),
-                                         static_cast<int>((pos.y + PLAYER_TEXTURE_SIZE_PX - 1) / TILE_SIZE_PX)};
+    IntVec2 top_left_coord = tile_coord_from_absolute(top_left_corner());
+    IntVec2 bottom_right_coord = tile_coord_from_absolute(bottom_right_corner());
 
     hit_map.east =
         map.east_wall_of_range(bottom_right_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE_PX - 1;
