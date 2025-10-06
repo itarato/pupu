@@ -34,6 +34,8 @@ struct Sprite {
   }
 
   void update() {
+    if (frame_count == 1) return;
+
     if (frame_stepper.update()) {
       current_frame = (current_frame + 1) % frame_count;
     }

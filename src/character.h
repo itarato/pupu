@@ -19,6 +19,18 @@ constexpr float PLAYER_FALL_BACK_THRESHOLD = -1.6f;
 constexpr float PLAYER_MAX_FALL_SPEED = PLAYER_MAX_REL_SPEED;
 constexpr float PLAYER_MULTI_JUMP_MAX = 2;
 
+constexpr int PLAYER_SPRITE_RUN{0};
+constexpr int PLAYER_SPRITE_IDLE{1};
+constexpr int PLAYER_SPRITE_HIT{2};
+constexpr int PLAYER_SPRITE_JUMP{3};
+constexpr int PLAYER_SPRITE_FALL{4};
+
+enum JumpState {
+  Ground,
+  Jump,
+  Fall,
+};
+
 struct Character {
  public:
   void init(Vector2 new_pos) {
@@ -30,6 +42,10 @@ struct Character {
         PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Idle], {32.f, 32.f}, 11, sprite_frame_length});
     sprite_group.push_sprite(Sprite{
         PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Hit], {32.f, 32.f}, 7, sprite_frame_length});
+    sprite_group.push_sprite(
+        Sprite{PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Jump], {32.f, 32.f}, 1, 0});
+    sprite_group.push_sprite(
+        Sprite{PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Fall], {32.f, 32.f}, 1, 0});
   }
 
   void update(Map const& map) {
@@ -55,6 +71,7 @@ struct Character {
   Vector2 pos{};
   Vector2 speed{};
   int multi_jump_count{0};
+  JumpState jump_state{JumpState::Ground};
 
   // Debug
   HitMap hit_map{};
@@ -70,17 +87,17 @@ struct Character {
 
     if (IsKeyDown(KEY_LEFT)) {
       sprite_group.horizontal_flip();
-      sprite_group.set_current_sprite(0);
+      sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x -= speed_increments();
 
       if (speed.x < -max_speed()) speed.x = -max_speed();
     } else if (IsKeyDown(KEY_RIGHT)) {
       sprite_group.horizontal_reset();
-      sprite_group.set_current_sprite(0);
+      sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x += speed_increments();
       if (speed.x > max_speed()) speed.x = max_speed();
     } else {
-      sprite_group.set_current_sprite(1);
+      sprite_group.set_current_sprite(PLAYER_SPRITE_IDLE);
       speed.x *= PLAYER_MOVEMENT_FRICTION;
 
       if (fabs(speed.x) < PLAYER_ZERO_SPEED_THRESHOLD) speed.x = 0.f;
@@ -96,13 +113,14 @@ struct Character {
     }
     float east_wall_dist = hit_map.east - top_right_corner().x;
     if (east_wall_dist < 0) {
-      pos.x += east_wall_dist - 1.f;
+      pos.x += east_wall_dist;
       speed.x = 0.f;
     }
 
     if (IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
       speed.y = GetFrameTime() * PLAYER_JUMP_SPEED;
       multi_jump_count++;
+      jump_state = JumpState::Jump;
     }
 
     // TODO: Figure out not calculating unnecessary directions (horizontal).
@@ -115,13 +133,16 @@ struct Character {
 
       if (speed.y > PLAYER_FALL_BACK_THRESHOLD) {
         speed.y = 100.f * GetFrameTime();
+        jump_state = JumpState::Fall;
       }
     } else if (speed.y > 0.f) {
       // Falling.
       fps_independent_multiply(&speed.y, PLAYER_GRAVITY_INV);
 
       if (speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED) speed.y = GetFrameTime() * PLAYER_MAX_FALL_SPEED;
+      jump_state = JumpState::Fall;
     } else {
+      jump_state = JumpState::Ground;
       speed.y = 0.5f;
     }
 
@@ -143,6 +164,13 @@ struct Character {
       speed.y = 0.f;
 
       multi_jump_count = 0;
+    }
+
+    // Override sprite when jumping.
+    if (jump_state == JumpState::Jump) {
+      sprite_group.set_current_sprite(PLAYER_SPRITE_JUMP);
+    } else if (jump_state == JumpState::Fall) {
+      sprite_group.set_current_sprite(PLAYER_SPRITE_FALL);
     }
   }
 

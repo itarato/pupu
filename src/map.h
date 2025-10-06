@@ -132,7 +132,7 @@ struct Map {
 
     for (int y = 0; y < tile_height; y++) {
       int west_wall = 0;
-      int east_wall = GetScreenWidth();
+      int east_wall = tile_width;
 
       for (int x = 0; x < tile_width; x++) {
         hit_map[y * tile_width + x].west = west_wall;
@@ -145,7 +145,7 @@ struct Map {
 
     for (int x = 0; x < tile_width; x++) {
       int north_wall = 0;
-      int south_wall = GetScreenHeight();
+      int south_wall = tile_height;
 
       for (int y = 0; y < tile_height; y++) {
         hit_map[y * tile_width + x].north = north_wall;
