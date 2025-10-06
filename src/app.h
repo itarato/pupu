@@ -20,7 +20,7 @@ struct App {
     SetTargetFPS(GetMonitorRefreshRate(0));
 
     asset_manager.preload();
-    character.init({static_cast<float>(GetScreenWidth() / 2), static_cast<float>(GetScreenHeight() / 2)});
+    character.init({static_cast<float>(GetScreenWidth() / 2), static_cast<float>(GetScreenHeight() / 3)});
     map.reload_from_file();
   }
 
