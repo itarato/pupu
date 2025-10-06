@@ -119,12 +119,14 @@ struct Character {
       pos.x -= west_wall_dist;
       speed.x = 0.f;
       is_grab_wall = true;
+      multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
     float east_wall_dist = hit_map.east - top_right_corner().x;
     if (east_wall_dist < 0) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
       is_grab_wall = true;
+      multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
 
     if (IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
