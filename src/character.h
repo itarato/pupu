@@ -24,11 +24,13 @@ constexpr int PLAYER_SPRITE_IDLE{1};
 constexpr int PLAYER_SPRITE_HIT{2};
 constexpr int PLAYER_SPRITE_JUMP{3};
 constexpr int PLAYER_SPRITE_FALL{4};
+constexpr int PLAYER_SPRITE_DOUBLE_JUMP{5};
 
 enum JumpState {
   Ground,
   Jump,
   Fall,
+  DoubleJump,
 };
 
 struct Character {
@@ -46,6 +48,11 @@ struct Character {
         Sprite{PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Jump], {32.f, 32.f}, 1, 0});
     sprite_group.push_sprite(
         Sprite{PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Fall], {32.f, 32.f}, 1, 0});
+    sprite_group.push_sprite(Sprite{PIXEL_SIZE,
+                                    asset_manager.textures[TextureNames::Character1__Double_Jump],
+                                    {32.f, 32.f},
+                                    6,
+                                    sprite_frame_length});
   }
 
   void update(Map const& map) {
@@ -120,7 +127,11 @@ struct Character {
     if (IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
       speed.y = GetFrameTime() * PLAYER_JUMP_SPEED;
       multi_jump_count++;
-      jump_state = JumpState::Jump;
+      if (multi_jump_count == 1) {
+        jump_state = JumpState::Jump;
+      } else {
+        jump_state = JumpState::DoubleJump;
+      }
     }
 
     // TODO: Figure out not calculating unnecessary directions (horizontal).
@@ -171,6 +182,8 @@ struct Character {
       sprite_group.set_current_sprite(PLAYER_SPRITE_JUMP);
     } else if (jump_state == JumpState::Fall) {
       sprite_group.set_current_sprite(PLAYER_SPRITE_FALL);
+    } else if (jump_state == JumpState::DoubleJump) {
+      sprite_group.set_current_sprite(PLAYER_SPRITE_DOUBLE_JUMP);
     }
   }
 
