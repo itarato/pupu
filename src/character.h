@@ -62,6 +62,12 @@ struct Character {
   void update_movement(Map const& map) {
     hit_map = calculate_hitmap(map);
 
+    if (IsKeyPressed(KEY_I)) {
+      TraceLog(LOG_INFO, "Player top-left=%.2f:%.2f bottom-right=%.2f:%.2f Hitmap north=%d south%d west=%d, east=%d",
+               top_left_corner().x, top_left_corner().y, bottom_right_corner().x, bottom_right_corner().y,
+               hit_map.north, hit_map.south, hit_map.west, hit_map.east);
+    }
+
     if (IsKeyDown(KEY_LEFT)) {
       sprite_group.horizontal_flip();
       sprite_group.set_current_sprite(0);
@@ -127,9 +133,13 @@ struct Character {
       pos.y -= north_wall_dist;
       speed.y = 0.f;
     }
-    float south_wall_dist = hit_map.south - bottom_left_corner().y;
+    float south_wall_dist = static_cast<float>(hit_map.south) - bottom_left_corner().y;
+    TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", top_left_corner().y, bottom_right_corner().y,
+             hit_map.south);
     if (south_wall_dist < 0) {
-      pos.y += south_wall_dist - 1.f;
+      pos.y += south_wall_dist;
+      TraceLog(LOG_INFO, "Height adjusted with %.2f to %.2f-%.2f", south_wall_dist, pos.y,
+               pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f);
       speed.y = 0.f;
 
       multi_jump_count = 0;
@@ -149,7 +159,7 @@ struct Character {
   }
 
   Vector2 const bottom_right_corner() const {
-    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX, pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f};
+    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f, pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f};
   }
 
   Vector2 const top_left_corner() const {
@@ -157,15 +167,15 @@ struct Character {
   }
 
   Vector2 const top_right_corner() const {
-    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX, pos.y};
+    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f, pos.y};
   }
 
   HitMap calculate_hitmap(Map const& map) const {
     HitMap hit_map{};
 
     IntVec2 top_left_coord = IntVec2{static_cast<int>(pos.x / TILE_SIZE_PX), static_cast<int>(pos.y / TILE_SIZE_PX)};
-    IntVec2 bottom_right_coord = IntVec2{static_cast<int>((pos.x + PLAYER_TEXTURE_SIZE_PX) / TILE_SIZE_PX),
-                                         static_cast<int>((pos.y + PLAYER_TEXTURE_SIZE_PX) / TILE_SIZE_PX)};
+    IntVec2 bottom_right_coord = IntVec2{static_cast<int>((pos.x + PLAYER_TEXTURE_SIZE_PX - 1) / TILE_SIZE_PX),
+                                         static_cast<int>((pos.y + PLAYER_TEXTURE_SIZE_PX - 1) / TILE_SIZE_PX)};
 
     hit_map.east =
         map.east_wall_of_range(bottom_right_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE_PX - 1;
