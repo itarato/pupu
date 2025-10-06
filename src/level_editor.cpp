@@ -7,7 +7,6 @@
 #include "common.h"
 #include "raylib.h"
 
-constexpr int background_tile_size{64};
 constexpr int tile_width{32};
 constexpr int tile_height{20};
 

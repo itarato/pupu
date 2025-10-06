@@ -99,6 +99,10 @@ struct Character {
       multi_jump_count++;
     }
 
+    // TODO: Figure out not calculating unnecessary directions (horizontal).
+    // Recalculate in order to adjust for horizontal movement.
+    hit_map = calculate_hitmap(map);
+
     if (speed.y < 0.f) {
       // Raising.
       fps_independent_multiply(&speed.y, PLAYER_GRAVITY);
@@ -124,10 +128,8 @@ struct Character {
       speed.y = 0.f;
     }
     float south_wall_dist = hit_map.south - bottom_left_corner().y;
-    TraceLog(LOG_INFO, "South Wall=%d Dist=%.2f", hit_map.south, south_wall_dist);
     if (south_wall_dist < 0) {
       pos.y += south_wall_dist - 1.f;
-      TraceLog(LOG_INFO, "Adusted char height=%.2f", pos.y);
       speed.y = 0.f;
 
       multi_jump_count = 0;
