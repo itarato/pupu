@@ -85,6 +85,7 @@ struct Character {
 
   void update_movement(Map const& map) {
     hit_map = calculate_hitmap(map);
+    bool is_grab_wall{false};
 
     // if (IsKeyPressed(KEY_I)) {
     //   TraceLog(LOG_INFO, "Player top-left=%.2f:%.2f bottom-right=%.2f:%.2f Hitmap north=%d south%d west=%d, east=%d",
@@ -117,11 +118,13 @@ struct Character {
     if (west_wall_dist < 0) {
       pos.x -= west_wall_dist;
       speed.x = 0.f;
+      is_grab_wall = true;
     }
     float east_wall_dist = hit_map.east - top_right_corner().x;
     if (east_wall_dist < 0) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
+      is_grab_wall = true;
     }
 
     if (IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
@@ -151,6 +154,8 @@ struct Character {
       fps_independent_multiply(&speed.y, PLAYER_GRAVITY_INV);
 
       if (speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED) speed.y = GetFrameTime() * PLAYER_MAX_FALL_SPEED;
+      if (is_grab_wall && speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED / 5.f)
+        speed.y = GetFrameTime() * PLAYER_MAX_FALL_SPEED / 5.f;
       jump_state = JumpState::Fall;
     } else {
       jump_state = JumpState::Ground;
