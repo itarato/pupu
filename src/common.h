@@ -6,7 +6,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
-constexpr int PIXEL_SIZE{3};
+constexpr int REFERENCE_FPS{144};
+
+constexpr int PIXEL_SIZE{2};
 constexpr int TILE_SIZE{16};
 constexpr int TILE_SIZE_PX{TILE_SIZE * PIXEL_SIZE};
 
@@ -156,4 +158,12 @@ IntVec2 relative_frame_pos(Rectangle const frame, int const tile_size, int const
   Vector2 mouse_pos = GetMousePosition();
   return IntVec2{mod_reduced(mouse_pos.x - frame.x, tile_size * pixel_size) / pixel_size,
                  mod_reduced(mouse_pos.y - frame.y, tile_size * pixel_size) / pixel_size};
+}
+
+float fps_independent_multiplier() {
+  return static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS());
+}
+
+void fps_independent_multiply(float* v, float mul) {
+  *v *= powf(mul, fps_independent_multiplier());
 }

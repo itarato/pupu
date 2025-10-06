@@ -14,7 +14,8 @@ constexpr float PLAYER_ZERO_SPEED_THRESHOLD = 0.1f;
 constexpr float PLAYER_TEXTURE_SIZE_PX = TILE_SIZE_PX * 2.f;
 constexpr float PLAYER_JUMP_SPEED = -1000.f;
 constexpr float PLAYER_GRAVITY = 0.95f;
-constexpr float PLAYER_FALL_BACK_THRESHOLD = -1.f;
+constexpr float PLAYER_GRAVITY_INV = 1.f / PLAYER_GRAVITY;
+constexpr float PLAYER_FALL_BACK_THRESHOLD = -1.6f;
 constexpr float PLAYER_MAX_FALL_SPEED = PLAYER_MAX_REL_SPEED;
 constexpr float PLAYER_MULTI_JUMP_MAX = 2;
 
@@ -22,14 +23,17 @@ struct Character {
  public:
   void init(Vector2 new_pos) {
     pos = new_pos;
-    sprite_group.push_sprite(Sprite{3.f, asset_manager.textures[TextureNames::Character1__Run], {32.f, 32.f}, 12, 6});
-    sprite_group.push_sprite(Sprite{3.f, asset_manager.textures[TextureNames::Character1__Idle], {32.f, 32.f}, 11, 6});
-    sprite_group.push_sprite(Sprite{3.f, asset_manager.textures[TextureNames::Character1__Hit], {32.f, 32.f}, 7, 6});
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
+    sprite_group.push_sprite(Sprite{
+        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Run], {32.f, 32.f}, 12, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{
+        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Idle], {32.f, 32.f}, 11, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{
+        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Hit], {32.f, 32.f}, 7, sprite_frame_length});
   }
 
   void update(Map const& map) {
     update_movement(map);
-
     sprite_group.update();
   }
 
@@ -97,14 +101,14 @@ struct Character {
 
     if (speed.y < 0.f) {
       // Raising.
-      speed.y *= PLAYER_GRAVITY;
+      fps_independent_multiply(&speed.y, PLAYER_GRAVITY);
 
       if (speed.y > PLAYER_FALL_BACK_THRESHOLD) {
-        speed.y = 0.5f;
+        speed.y = 100.f * GetFrameTime();
       }
     } else if (speed.y > 0.f) {
       // Falling.
-      speed.y /= PLAYER_GRAVITY;
+      fps_independent_multiply(&speed.y, PLAYER_GRAVITY_INV);
 
       if (speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED) speed.y = GetFrameTime() * PLAYER_MAX_FALL_SPEED;
     } else {
