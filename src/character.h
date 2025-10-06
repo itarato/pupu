@@ -164,11 +164,12 @@ struct Character {
   }
 
   Vector2 const top_left_corner() const {
-    return Vector2{pos.x + (PLAYER_TEXTURE_SIZE_PX / 4.f), pos.y};
+    return Vector2{pos.x + (PLAYER_TEXTURE_SIZE_PX / 4.f), pos.y + (PLAYER_TEXTURE_SIZE_PX / 6.f)};
   }
 
   Vector2 const top_right_corner() const {
-    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f - (PLAYER_TEXTURE_SIZE_PX / 4.f), pos.y};
+    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f - (PLAYER_TEXTURE_SIZE_PX / 4.f),
+                   pos.y + (PLAYER_TEXTURE_SIZE_PX / 6.f)};
   }
 
   HitMap calculate_hitmap(Map const& map) const {
