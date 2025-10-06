@@ -63,13 +63,60 @@ struct Map {
     background.unload();
   }
 
+  /**
+   * Absolute window coordinates.
+   */
   HitMap const& get_hit_map(Vector2 const& pos) const {
     int x = static_cast<int>(pos.x / TILE_SIZE_PX);
     int y = static_cast<int>(pos.y / TILE_SIZE_PX);
+    return get_hit_map(x, y);
+  }
 
-    if (x < 0 || y < 0 || x >= tile_width || y >= tile_height) return NULL_HIT_MAP;
+  /**
+   * Absolute window coordinates.
+   */
+  HitMap const& get_hit_map(int x, int y) const {
+    if (x < 0 || y < 0 || x >= tile_width || y >= tile_height) {
+      return NULL_HIT_MAP;
+    } else {
+      return hit_map[y * tile_width + x];
+    }
+  }
 
-    return hit_map[y * tile_width + x];
+  int north_wall_of_range(int minx, int maxx, int y) const {
+    int out = 0;
+    for (int x = minx; x <= maxx; x++) {
+      if (!is_tile_coord_valid(x, y)) continue;
+      out = std::max(out, hit_map[y * tile_width + x].north);
+    }
+    return out;
+  }
+
+  int south_wall_of_range(int minx, int maxx, int y) const {
+    int out = GetScreenHeight();
+    for (int x = minx; x <= maxx; x++) {
+      if (!is_tile_coord_valid(x, y)) continue;
+      out = std::min(out, hit_map[y * tile_width + x].south);
+    }
+    return out;
+  }
+
+  int west_wall_of_range(int x, int miny, int maxy) const {
+    int out = 0;
+    for (int y = miny; y <= maxy; y++) {
+      if (!is_tile_coord_valid(x, y)) continue;
+      out = std::max(out, hit_map[y * tile_width + x].west);
+    }
+    return out;
+  }
+
+  int east_wall_of_range(int x, int miny, int maxy) const {
+    int out = GetScreenWidth();
+    for (int y = miny; y <= maxy; y++) {
+      if (!is_tile_coord_valid(x, y)) continue;
+      out = std::min(out, hit_map[y * tile_width + x].east);
+    }
+    return out;
   }
 
  private:
@@ -108,5 +155,9 @@ struct Map {
         if (tiles.contains(IntVec2{x, (tile_height - 1 - y)})) south_wall = (tile_height - 1 - y);
       }
     }
+  }
+
+  bool is_tile_coord_valid(int x, int y) const {
+    return x >= 0 && y >= 0 && x < tile_width && y < tile_height;
   }
 };

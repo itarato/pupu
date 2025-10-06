@@ -124,8 +124,10 @@ struct Character {
       speed.y = 0.f;
     }
     float south_wall_dist = hit_map.south - bottom_left_corner().y;
+    TraceLog(LOG_INFO, "South Wall=%d Dist=%.2f", hit_map.south, south_wall_dist);
     if (south_wall_dist < 0) {
       pos.y += south_wall_dist - 1.f;
+      TraceLog(LOG_INFO, "Adusted char height=%.2f", pos.y);
       speed.y = 0.f;
 
       multi_jump_count = 0;
@@ -159,15 +161,16 @@ struct Character {
   HitMap calculate_hitmap(Map const& map) const {
     HitMap hit_map{};
 
-    HitMap top_left = map.get_hit_map(top_left_corner());
-    HitMap top_right = map.get_hit_map(top_right_corner());
-    HitMap bottom_left = map.get_hit_map(bottom_left_corner());
-    HitMap bottom_right = map.get_hit_map(bottom_right_corner());
+    IntVec2 top_left_coord = IntVec2{static_cast<int>(pos.x / TILE_SIZE_PX), static_cast<int>(pos.y / TILE_SIZE_PX)};
+    IntVec2 bottom_right_coord = IntVec2{static_cast<int>((pos.x + PLAYER_TEXTURE_SIZE_PX) / TILE_SIZE_PX),
+                                         static_cast<int>((pos.y + PLAYER_TEXTURE_SIZE_PX) / TILE_SIZE_PX)};
 
-    hit_map.east = std::min(top_right.east, bottom_right.east) * TILE_SIZE_PX;
-    hit_map.west = std::max(top_left.west, bottom_left.west) * TILE_SIZE_PX;
-    hit_map.north = std::max(top_left.north, top_right.north) * TILE_SIZE_PX;
-    hit_map.south = std::min(bottom_left.south, bottom_right.south) * TILE_SIZE_PX;
+    hit_map.east =
+        map.east_wall_of_range(bottom_right_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE_PX - 1;
+    hit_map.north = map.north_wall_of_range(top_left_coord.x, bottom_right_coord.x, top_left_coord.y) * TILE_SIZE_PX;
+    hit_map.south =
+        map.south_wall_of_range(top_left_coord.x, bottom_right_coord.x, bottom_right_coord.y) * TILE_SIZE_PX - 1;
+    hit_map.west = map.west_wall_of_range(top_left_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE_PX;
 
     return hit_map;
   }

@@ -46,6 +46,7 @@ struct App {
  private:
   Map map{};
   Character character{};
+  bool pause_update{false};
 
   void draw() const {
     map.draw();
@@ -69,7 +70,11 @@ struct App {
   }
 
   void update() {
-    map.update();
-    character.update(map);
+    if (!pause_update) {
+      map.update();
+      character.update(map);
+    }
+
+    if (IsKeyPressed(KEY_P)) pause_update = !pause_update;
   }
 };
