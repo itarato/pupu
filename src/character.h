@@ -43,7 +43,7 @@ struct Character {
  public:
   void reset(Vector2 new_pos) {
     pos = new_pos;
-    sprite_group.set_current_sprite(PLAYER_SPRITE_IDLE);
+    sprite_group.reset();
     jump_state = JumpState::Ground;
     lifecycle_state = LifecycleState::Appear;
   }
@@ -67,15 +67,28 @@ struct Character {
                                     sprite_frame_length});
     sprite_group.push_sprite(Sprite{
         PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Wall_Jump], {32.f, 32.f}, 5, sprite_frame_length});
+
+    appear_sprite.init_texture(asset_manager.textures[TextureNames::Character__Appear], {96.f, 96.f}, 7,
+                               sprite_frame_length);
   }
 
   void update(Map const& map) {
-    update_movement(map);
-    sprite_group.update();
+    if (lifecycle_state == LifecycleState::Appear) {
+      if (appear_sprite.update()) lifecycle_state = LifecycleState::Live;
+    } else if (lifecycle_state == LifecycleState::Live) {
+      update_movement(map);
+      sprite_group.update();
+    } else {
+      TraceLog(LOG_ERROR, "Invalid lifecycle state");
+    }
   }
 
   void draw() const {
-    sprite_group.draw(pos);
+    if (lifecycle_state == LifecycleState::Appear) {
+      appear_sprite.draw(pos);
+    } else {
+      sprite_group.draw(pos);
+    }
 
     // DrawLineEx({0.f, static_cast<float>(hit_map.north)},
     //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north)}, PIXEL_SIZE, ORANGE);
@@ -89,6 +102,7 @@ struct Character {
 
  private:
   SpriteGroup sprite_group{};
+  Sprite appear_sprite{};
   Vector2 pos{};
   Vector2 speed{};
   int multi_jump_count{0};

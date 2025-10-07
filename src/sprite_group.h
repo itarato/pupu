@@ -7,6 +7,11 @@
 
 struct SpriteGroup {
  public:
+  void reset() {
+    horizontal_reset();
+    set_current_sprite(0);
+  }
+
   void set_current_sprite(size_t new_current_sprite_index) {
     if (new_current_sprite_index >= sprites.size()) {
       TraceLog(LOG_ERROR, "Invalid sprite index");
