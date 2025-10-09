@@ -46,6 +46,7 @@ struct Character {
     sprite_group.reset();
     jump_state = JumpState::Ground;
     lifecycle_state = LifecycleState::Appear;
+    multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
   }
 
   void init() {

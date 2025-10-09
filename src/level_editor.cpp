@@ -7,6 +7,18 @@
 #include "common.h"
 #include "raylib.h"
 
+/**
+ * Missing:
+ * - boxes
+ *  - have render origin (to position)
+ *  - have a hitbox
+ *   - how to contribute to walls?
+ * - checkpoints (collision)
+ * - gems (collision)
+ * - enemies (collision - moving path + MORE)
+ * - traps
+ */
+
 constexpr int tile_width{32};
 constexpr int tile_height{20};
 
