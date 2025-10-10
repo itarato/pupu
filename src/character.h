@@ -114,7 +114,7 @@ struct Character {
   HitMap hit_map{};
 
   void update_movement(Map const& map) {
-    hit_map = calculate_hitmap(map);
+    // hit_map = calculate_hitmap(map);
     bool is_grab_wall{false};
 
     // if (IsKeyPressed(KEY_I)) {
@@ -145,20 +145,20 @@ struct Character {
     pos.x += speed.x;
 
     // Adjust for wall hit.
-    float west_wall_dist = top_left_corner().x - hit_map.west;
-    if (west_wall_dist < 0) {
-      pos.x -= west_wall_dist;
-      speed.x = 0.f;
-      is_grab_wall = true;
-      multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
-    }
-    float east_wall_dist = hit_map.east - top_right_corner().x;
-    if (east_wall_dist < 0) {
-      pos.x += east_wall_dist;
-      speed.x = 0.f;
-      is_grab_wall = true;
-      multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
-    }
+    // float west_wall_dist = top_left_corner().x - hit_map.west;
+    // if (west_wall_dist < 0) {
+    //   pos.x -= west_wall_dist;
+    //   speed.x = 0.f;
+    //   is_grab_wall = true;
+    //   multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
+    // }
+    // float east_wall_dist = hit_map.east - top_right_corner().x;
+    // if (east_wall_dist < 0) {
+    //   pos.x += east_wall_dist;
+    //   speed.x = 0.f;
+    //   is_grab_wall = true;
+    //   multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
+    // }
 
     if (IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
       speed.y = GetFrameTime() * PLAYER_JUMP_SPEED;
@@ -172,7 +172,7 @@ struct Character {
 
     // TODO: Figure out not calculating unnecessary directions (horizontal).
     // Recalculate in order to adjust for horizontal movement.
-    hit_map = calculate_hitmap(map);
+    // hit_map = calculate_hitmap(map);
 
     if (speed.y < 0.f) {
       // Raising.
@@ -198,21 +198,28 @@ struct Character {
     pos.y += speed.y;
 
     // Adjust for wall hit.
-    float north_wall_dist = top_left_corner().y - hit_map.north;
-    if (north_wall_dist < 0) {
-      pos.y -= north_wall_dist;
-      speed.y = 0.f;
-    }
-    float south_wall_dist = static_cast<float>(hit_map.south) - bottom_left_corner().y;
-    // TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", top_left_corner().y, bottom_right_corner().y,
-    //          hit_map.south);
-    if (south_wall_dist < 0) {
-      pos.y += south_wall_dist;
-      // TraceLog(LOG_INFO, "Height adjusted with %.2f to %.2f-%.2f", south_wall_dist, pos.y,
-      //          pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f);
-      speed.y = 0.f;
+    // float north_wall_dist = top_left_corner().y - hit_map.north;
+    // if (north_wall_dist < 0) {
+    //   pos.y -= north_wall_dist;
+    //   speed.y = 0.f;
+    // }
+    // float south_wall_dist = static_cast<float>(hit_map.south) - bottom_left_corner().y;
+    // // TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", top_left_corner().y, bottom_right_corner().y,
+    // //          hit_map.south);
+    // if (south_wall_dist < 0) {
+    //   pos.y += south_wall_dist;
+    //   // TraceLog(LOG_INFO, "Height adjusted with %.2f to %.2f-%.2f", south_wall_dist, pos.y,
+    //   //          pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f);
+    //   speed.y = 0.f;
 
-      multi_jump_count = 0;
+    //   multi_jump_count = 0;
+    // }
+
+    Vector2 compensation = map.calculate_collision_compensation(frame());
+    if (!Vector2Equals(vector_zero, compensation)) {
+      pos = Vector2Add(pos, compensation);
+      if (compensation.x != 0.f) speed.x = 0.f;
+      if (compensation.y != 0.f) speed.y = 0.f;
     }
 
     // Override sprite when jumping / wall grabbing.
@@ -267,5 +274,9 @@ struct Character {
     hit_map.west = map.west_wall_of_range(top_left_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE_PX;
 
     return hit_map;
+  }
+
+  Rectangle const frame() const {
+    return Rectangle{pos.x, pos.y, PLAYER_TEXTURE_SIZE_PX, PLAYER_TEXTURE_SIZE_PX};
   }
 };

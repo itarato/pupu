@@ -15,6 +15,13 @@ struct HitMap {
   int west{-1};
 };
 
+constexpr Vector2 const move_map[4] = {
+    {0, 1.f},
+    {0, -1.f},
+    {1.f, 0},
+    {-1.f, 0},
+};
+
 constexpr HitMap NULL_HIT_MAP{};
 
 struct Map {
@@ -119,6 +126,26 @@ struct Map {
     return out;
   }
 
+  Vector2 calculate_collision_compensation(Rectangle const victim) const {
+    Vector2 total_move = vector_zero;
+    Rectangle current_victim{victim};
+    Rectangle attacker{0.f, 0.f, TILE_SIZE_PX, TILE_SIZE_PX};
+
+    for (auto const& [k, v] : tiles) {
+      attacker.x = k.x * TILE_SIZE_PX;
+      attacker.y = k.y * TILE_SIZE_PX;
+
+      Vector2 compensation = calculate_collision_compensation_for_rect(current_victim, attacker);
+      if (!Vector2Equals(compensation, vector_zero)) {
+        total_move = Vector2Add(total_move, compensation);
+        current_victim.x += compensation.x;
+        current_victim.y += compensation.y;
+      }
+    }
+
+    return total_move;
+  }
+
  private:
   Background background{};
   int tile_width{};
@@ -159,5 +186,27 @@ struct Map {
 
   bool is_tile_coord_valid(int x, int y) const {
     return x >= 0 && y >= 0 && x < tile_width && y < tile_height;
+  }
+
+  Vector2 calculate_collision_compensation_for_rect(Rectangle victim, Rectangle attacker) const {
+    if (!CheckCollisionRecs(victim, attacker)) return vector_zero;
+
+    float distances[4] = {
+        (attacker.y + attacker.height) - victim.y,  // top
+        (victim.y + victim.height) - attacker.y,    // bottom
+        (attacker.x + attacker.width) - victim.x,   // left
+        (victim.x + victim.width) - attacker.x,     // right
+    };
+
+    float min_dist = std::numeric_limits<float>::max();
+    int min_dist_index = -1;
+    for (int i = 0; i < 4; i++) {
+      if (distances[i] < min_dist) {
+        min_dist = distances[i];
+        min_dist_index = i;
+      }
+    }
+
+    return Vector2Scale(move_map[min_dist_index], distances[min_dist_index]);
   }
 };

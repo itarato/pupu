@@ -6,11 +6,13 @@
 #include "raylib.h"
 #include "raymath.h"
 
-constexpr int REFERENCE_FPS{144};
+constexpr int const REFERENCE_FPS{144};
 
-constexpr int PIXEL_SIZE{2};
-constexpr int TILE_SIZE{16};
-constexpr int TILE_SIZE_PX{TILE_SIZE * PIXEL_SIZE};
+constexpr int const PIXEL_SIZE{2};
+constexpr int const TILE_SIZE{16};
+constexpr int const TILE_SIZE_PX{TILE_SIZE * PIXEL_SIZE};
+
+constexpr Vector2 const vector_zero{0.f, 0.f};
 
 #define PANIC(...)                \
   {                               \
