@@ -25,7 +25,7 @@ main: $(OBJ)
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-EDITOR_SRC=$(wildcard src/level_editor.cpp)
+EDITOR_SRC=$(wildcard src/level_editor.cpp lib/imgui/*.cpp lib/rlImGui/*.cpp)
 EDITOR_OBJ=$(addsuffix .o,$(basename $(EDITOR_SRC)))
 
 editor: $(EDITOR_OBJ)
