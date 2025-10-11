@@ -51,7 +51,7 @@ struct App {
 
   void reset() {
     map.reload_from_file();
-    character.reset({static_cast<float>(GetScreenWidth() / 2), static_cast<float>(TILE_SIZE_PX * 4)});
+    character.reset({static_cast<float>(GetScreenWidth() / 3), static_cast<float>(TILE_SIZE_PX * 4)});
     pause_update = false;
   }
 

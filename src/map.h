@@ -6,6 +6,7 @@
 
 #include "background.h"
 #include "common.h"
+#include "interactive_objects.h"
 #include "raylib.h"
 
 struct HitMap {
@@ -27,6 +28,8 @@ constexpr HitMap NULL_HIT_MAP{};
 struct Map {
  public:
   void reload_from_file() {
+    reset();
+
     FILE* file = std::fopen("assets/maps/map.mp", "r");
     if (!file) {
       TraceLog(LOG_ERROR, "Cannot open map file");
@@ -52,18 +55,22 @@ struct Map {
       tiles[tile_pos] = tile_selection;
     }
 
+    interactive_objects.emplace_back();
+
     std::fclose(file);
 
     recalculate();
   }
 
   void update() {
+    for (auto& object : interactive_objects) object.update();
   }
 
   void draw() const {
     background.draw(Vector2Zero());
 
     for (auto const& [k, v] : tiles) v.draw(k.scale(TILE_SIZE_PX).to_vector2(), TILE_SIZE, PIXEL_SIZE);
+    for (auto const& object : interactive_objects) object.draw();
   }
 
   void unload() {
@@ -129,13 +136,9 @@ struct Map {
   Vector2 calculate_collision_compensation(Rectangle const victim) const {
     Vector2 total_move = vector_zero;
     Rectangle current_victim{victim};
-    Rectangle attacker{0.f, 0.f, TILE_SIZE_PX, TILE_SIZE_PX};
 
-    for (auto const& [k, v] : tiles) {
-      attacker.x = k.x * TILE_SIZE_PX;
-      attacker.y = k.y * TILE_SIZE_PX;
-
-      Vector2 compensation = calculate_collision_compensation_for_rect(current_victim, attacker);
+    for (auto const& object : interactive_objects) {
+      Vector2 compensation = calculate_collision_compensation_for_rect(current_victim, object.frame());
       if (!Vector2Equals(compensation, vector_zero)) {
         total_move = Vector2Add(total_move, compensation);
         current_victim.x += compensation.x;
@@ -152,6 +155,13 @@ struct Map {
   int tile_height{};
   std::unordered_map<IntVec2, TileSelection> tiles{};
   std::vector<HitMap> hit_map{};
+  std::vector<MovingObject> interactive_objects{};
+
+  void reset() {
+    tiles.clear();
+    hit_map.clear();
+    interactive_objects.clear();
+  }
 
   void recalculate() {
     hit_map.clear();
