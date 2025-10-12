@@ -48,10 +48,11 @@ struct App {
   Map map{};
   Character character{};
   bool pause_update{false};
+  int pixel_size{DEFAULT_PIXEL_SIZE};
 
   void reset() {
     map.reload_from_file();
-    character.reset({static_cast<float>(GetScreenWidth() / 3), static_cast<float>(TILE_SIZE_PX * 4)});
+    character.reset({static_cast<float>(GetScreenWidth() / 3), static_cast<float>(TILE_SIZE * 4 * pixel_size)});
     pause_update = false;
   }
 

@@ -7,10 +7,9 @@
 #include "raymath.h"
 
 constexpr int const REFERENCE_FPS{144};
+constexpr int const DEFAULT_PIXEL_SIZE{2};
 
-constexpr int const PIXEL_SIZE{2};
 constexpr int const TILE_SIZE{16};
-constexpr int const TILE_SIZE_PX{TILE_SIZE * PIXEL_SIZE};
 
 constexpr Vector2 const vector_zero{0.f, 0.f};
 
@@ -77,8 +76,8 @@ IntVec2 intvec2_from_file(FILE* file) {
   return out;
 }
 
-IntVec2 tile_coord_from_absolute(Vector2 const v) {
-  return IntVec2{static_cast<int>(v.x / TILE_SIZE_PX), static_cast<int>(v.y / TILE_SIZE_PX)};
+IntVec2 tile_coord_from_absolute(Vector2 const v, int const pixel_size) {
+  return IntVec2{static_cast<int>(v.x / (TILE_SIZE * pixel_size)), static_cast<int>(v.y / (TILE_SIZE * pixel_size))};
 }
 
 namespace std {
@@ -136,7 +135,7 @@ struct TileSelection {
   TileSource source{};
   IntVec2 tile_coord{};
 
-  void draw(Vector2 const pos) const {
+  void draw(Vector2 const pos, int const pixel_size) const {
     std::shared_ptr<Texture2D> texture;
     if (source == TileSource::Gui) {
       texture = asset_manager.textures[TextureNames::GuiTiles];
@@ -153,7 +152,7 @@ struct TileSelection {
         *texture,
         {static_cast<float>(tile_coord.x * TILE_SIZE), static_cast<float>(tile_coord.y * TILE_SIZE),
          static_cast<float>(_tile_size.x), static_cast<float>(_tile_size.y)},
-        {pos.x, pos.y, static_cast<float>(_tile_size.x * PIXEL_SIZE), static_cast<float>(_tile_size.y * PIXEL_SIZE)},
+        {pos.x, pos.y, static_cast<float>(_tile_size.x * pixel_size), static_cast<float>(_tile_size.y * pixel_size)},
         Vector2Zero(), 0.f, WHITE);
   }
 

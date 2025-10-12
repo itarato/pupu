@@ -6,18 +6,18 @@
 #include "raymath.h"
 
 constexpr int BACKGROUND_SIZE{64};
-constexpr int BACKGROUND_SIZE_PX{BACKGROUND_SIZE * PIXEL_SIZE};
 
 struct Background {
  public:
-  void draw(const Vector2 pos) const {
+  void draw(const Vector2 pos, int const pixel_size) const {
     if (background_index == -1) return;
 
-    DrawTexturePro(
-        render_texture.texture,
-        {0.f, 0.f, static_cast<float>(tile_width * TILE_SIZE_PX), static_cast<float>(tile_height * TILE_SIZE_PX)},
-        {pos.x, pos.y, static_cast<float>(tile_width * TILE_SIZE_PX), static_cast<float>(tile_height * TILE_SIZE_PX)},
-        vector_zero, 0.f, WHITE);
+    DrawTexturePro(render_texture.texture,
+                   {0.f, 0.f, static_cast<float>(tile_width * TILE_SIZE * pixel_size),
+                    static_cast<float>(tile_height * TILE_SIZE * pixel_size)},
+                   {pos.x, pos.y, static_cast<float>(tile_width * TILE_SIZE * pixel_size),
+                    static_cast<float>(tile_height * TILE_SIZE * pixel_size)},
+                   vector_zero, 0.f, WHITE);
   }
 
   void preload(int index, int new_tile_width, int new_tile_height, int pixel_size) {
@@ -31,17 +31,18 @@ struct Background {
     unload();
 
     background_index = index;
-    render_texture = LoadRenderTexture(tile_width * TILE_SIZE_PX, tile_height * TILE_SIZE_PX);
+    render_texture = LoadRenderTexture(tile_width * TILE_SIZE * pixel_size, tile_height * TILE_SIZE * pixel_size);
 
     BeginTextureMode(render_texture);
 
     for (int y = 0; y < (tile_height + 3) / 4; y++) {
       for (int x = 0; x < (tile_width + 3) / 4; x++) {
-        DrawTexturePro(*asset_manager.textures[TextureNames::Background__0 + background_index],
-                       {0.f, 0.f, BACKGROUND_SIZE, BACKGROUND_SIZE},
-                       {static_cast<float>(BACKGROUND_SIZE_PX * x), static_cast<float>(BACKGROUND_SIZE_PX * y),
-                        static_cast<float>(BACKGROUND_SIZE_PX), static_cast<float>(BACKGROUND_SIZE_PX)},
-                       Vector2Zero(), 0.f, WHITE);
+        DrawTexturePro(
+            *asset_manager.textures[TextureNames::Background__0 + background_index],
+            {0.f, 0.f, BACKGROUND_SIZE, BACKGROUND_SIZE},
+            {static_cast<float>(BACKGROUND_SIZE * pixel_size * x), static_cast<float>(BACKGROUND_SIZE * pixel_size * y),
+             static_cast<float>(BACKGROUND_SIZE * pixel_size), static_cast<float>(BACKGROUND_SIZE * pixel_size)},
+            Vector2Zero(), 0.f, WHITE);
       }
     }
 
