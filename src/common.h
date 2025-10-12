@@ -65,6 +65,9 @@ struct IntVec2 {
   }
 };
 
+constexpr IntVec2 const intvec2_0_0{0, 0};
+constexpr IntVec2 const intvec2_4_4{4, 4};
+
 IntVec2 intvec2_from_file(FILE* file) {
   IntVec2 out{};
 
@@ -123,7 +126,11 @@ struct Stepper {
 enum TileSource {
   Gui,
   Tileset,
+  Box1,
 };
+
+constexpr IntVec2 const TILESIZE_DEFAULT{TILE_SIZE, TILE_SIZE};
+constexpr IntVec2 const TILESIZE_BOX{32, 32};
 
 struct TileSelection {
   TileSource source{};
@@ -135,16 +142,18 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::GuiTiles];
     } else if (source == TileSource::Tileset) {
       texture = asset_manager.textures[TextureNames::TilesetTiles];
+    } else if (source == TileSource::Box1) {
+      texture = asset_manager.textures[TextureNames::Box1__Idle];
     } else {
-      TraceLog(LOG_ERROR, "Invalid tile source");
-      return;
+      PANIC("Invalid tile source");
     }
 
+    IntVec2 _tile_size{tile_size()};
     DrawTexturePro(
         *texture,
         {static_cast<float>(tile_coord.x * TILE_SIZE), static_cast<float>(tile_coord.y * TILE_SIZE),
-         static_cast<float>(TILE_SIZE), static_cast<float>(TILE_SIZE)},
-        {pos.x, pos.y, static_cast<float>(TILE_SIZE * PIXEL_SIZE), static_cast<float>(TILE_SIZE * PIXEL_SIZE)},
+         static_cast<float>(_tile_size.x), static_cast<float>(_tile_size.y)},
+        {pos.x, pos.y, static_cast<float>(_tile_size.x * PIXEL_SIZE), static_cast<float>(_tile_size.y * PIXEL_SIZE)},
         Vector2Zero(), 0.f, WHITE);
   }
 
@@ -160,6 +169,30 @@ struct TileSelection {
       return (tileset_tile_collision_map[tile_coord.y * 16 + tile_coord.x] & direction) > 0;
     } else {
       PANIC("Invalid tile source for collision check");
+    }
+  }
+
+  IntVec2 const tile_size() const {
+    switch (source) {
+      case TileSource::Gui:
+      case TileSource::Tileset:
+        return TILESIZE_DEFAULT;
+      case TileSource::Box1:
+        return TILESIZE_BOX;
+      default:
+        PANIC("Invalid tile source for tilesize");
+    }
+  }
+
+  int const snap() const {
+    switch (source) {
+      case TileSource::Gui:
+      case TileSource::Tileset:
+        return 16;
+      case TileSource::Box1:
+        return 1;
+      default:
+        PANIC("Invalid tile source for snap");
     }
   }
 };

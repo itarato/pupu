@@ -24,6 +24,9 @@ enum TextureNames {
   Background__5,
   GuiTiles,
   TilesetTiles,
+  Box1__Idle,
+  Box2__Idle,
+  Box3__Idle,
 };
 
 struct AssetManager {
@@ -73,6 +76,13 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/GUI.png"));
     textures[TextureNames::TilesetTiles] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Tileset.png"));
+
+    textures[TextureNames::Box1__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/1_Idle.png"));
+    textures[TextureNames::Box2__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/2_Idle.png"));
+    textures[TextureNames::Box3__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/3_Idle.png"));
   }
 
  private:
