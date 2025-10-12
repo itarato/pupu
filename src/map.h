@@ -69,7 +69,7 @@ struct Map {
   void draw() const {
     background.draw(Vector2Zero());
 
-    for (auto const& [k, v] : tiles) v.draw(k.scale(TILE_SIZE_PX).to_vector2(), TILE_SIZE, PIXEL_SIZE);
+    for (auto const& [k, v] : tiles) v.draw(k.scale(TILE_SIZE_PX).to_vector2());
     for (auto const& object : interactive_objects) object.draw();
   }
 
@@ -173,10 +173,13 @@ struct Map {
 
       for (int x = 0; x < tile_width; x++) {
         hit_map[y * tile_width + x].west = west_wall;
-        if (tiles.contains(IntVec2{x, y})) west_wall = x + 1;
+        IntVec2 coord{x, y};
+        if (tiles.contains(coord) && tiles[coord].collide_from(COLLISION_TYPE_LEFT)) west_wall = x + 1;
 
         hit_map[y * tile_width + (tile_width - 1 - x)].east = east_wall;
-        if (tiles.contains(IntVec2{(tile_width - 1 - x), y})) east_wall = (tile_width - 1 - x);
+        IntVec2 coord_inv{(tile_width - 1 - x), y};
+        if (tiles.contains(coord_inv) && tiles[coord_inv].collide_from(COLLISION_TYPE_RIGHT))
+          east_wall = (tile_width - 1 - x);
       }
     }
 
@@ -186,10 +189,13 @@ struct Map {
 
       for (int y = 0; y < tile_height; y++) {
         hit_map[y * tile_width + x].north = north_wall;
-        if (tiles.contains(IntVec2{x, y})) north_wall = y + 1;
+        IntVec2 coord{x, y};
+        if (tiles.contains(coord) && tiles[coord].collide_from(COLLISION_TYPE_BOTTOM)) north_wall = y + 1;
 
         hit_map[(tile_height - 1 - y) * tile_width + x].south = south_wall;
-        if (tiles.contains(IntVec2{x, (tile_height - 1 - y)})) south_wall = (tile_height - 1 - y);
+        IntVec2 coord_inv{x, (tile_height - 1 - y)};
+        if (tiles.contains(coord_inv) && tiles[coord_inv].collide_from(COLLISION_TYPE_TOP))
+          south_wall = (tile_height - 1 - y);
       }
     }
   }

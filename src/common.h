@@ -14,6 +14,29 @@ constexpr int const TILE_SIZE_PX{TILE_SIZE * PIXEL_SIZE};
 
 constexpr Vector2 const vector_zero{0.f, 0.f};
 
+constexpr int const COLLISION_TYPE_NOTHING{0b0};
+constexpr int const COLLISION_TYPE_TOP{0b0001};
+constexpr int const COLLISION_TYPE_BOTTOM{0b0010};
+constexpr int const COLLISION_TYPE_LEFT{0b0100};
+constexpr int const COLLISION_TYPE_RIGHT{0b1000};
+constexpr int const COLLISION_TYPE_ALL{0b1111};
+
+constexpr int tileset_tile_collision_map[16 * 11]{
+    // clang-format off
+    1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
+    1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
+    // clang-format on
+};
+
 #define PANIC(...)                \
   {                               \
     fprintf(stderr, __VA_ARGS__); \
@@ -104,9 +127,9 @@ enum TileSource {
 
 struct TileSelection {
   TileSource source{};
-  IntVec2 tile_pos{};
+  IntVec2 tile_coord{};
 
-  void draw(Vector2 const pos, int const tile_size, int const pixel_size) const {
+  void draw(Vector2 const pos) const {
     std::shared_ptr<Texture2D> texture;
     if (source == TileSource::Gui) {
       texture = asset_manager.textures[TextureNames::GuiTiles];
@@ -119,15 +142,25 @@ struct TileSelection {
 
     DrawTexturePro(
         *texture,
-        {static_cast<float>(tile_pos.x), static_cast<float>(tile_pos.y), static_cast<float>(tile_size),
-         static_cast<float>(tile_size)},
-        {pos.x, pos.y, static_cast<float>(tile_size * pixel_size), static_cast<float>(tile_size * pixel_size)},
+        {static_cast<float>(tile_coord.x * TILE_SIZE), static_cast<float>(tile_coord.y * TILE_SIZE),
+         static_cast<float>(TILE_SIZE), static_cast<float>(TILE_SIZE)},
+        {pos.x, pos.y, static_cast<float>(TILE_SIZE * PIXEL_SIZE), static_cast<float>(TILE_SIZE * PIXEL_SIZE)},
         Vector2Zero(), 0.f, WHITE);
   }
 
   void write(FILE* file) const {
     fwrite(&source, sizeof(int), 1, file);
-    tile_pos.write(file);
+    tile_coord.write(file);
+  }
+
+  bool collide_from(int direction) const {
+    if (source == TileSource::Gui) {
+      return true;
+    } else if (source == TileSource::Tileset) {
+      return (tileset_tile_collision_map[tile_coord.y * 16 + tile_coord.x] & direction) > 0;
+    } else {
+      PANIC("Invalid tile source for collision check");
+    }
   }
 };
 
