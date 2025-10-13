@@ -159,6 +159,8 @@ struct Map {
       if (is_vertical_overlap(abs_hitbox, abs_miny, abs_maxy)) {
         if (abs_hitbox.x < out && (abs_hitbox.x + WALL_CHECK_THRESHOLD * pixel_size) >= abs_x) {
           out = abs_hitbox.x;
+          TraceLog(LOG_INFO, "East wall detected at %d. Hitbox: %.2f %.2f %.2f %.2f", out, abs_hitbox.x, abs_hitbox.y,
+                   abs_hitbox.width, abs_hitbox.height, );
         }
       }
     }
