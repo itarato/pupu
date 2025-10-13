@@ -13,10 +13,6 @@
 
 /**
  * Missing:
- * - boxes
- *  - have render origin (to position)
- *  - have a hitbox
- *   - how to contribute to walls?
  * - checkpoints (collision)
  * - gems (collision)
  * - enemies (collision - moving path + MORE)
