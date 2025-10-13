@@ -136,8 +136,8 @@ struct Character {
 
     // if (IsKeyPressed(KEY_I)) {
     //   TraceLog(LOG_INFO, "Player top-left=%.2f:%.2f bottom-right=%.2f:%.2f Hitmap north=%d south%d west=%d, east=%d",
-    //            hitbox_top_left_corner().x, hitbox_top_left_corner().y, hitbox_bottom_right_corner().x,
-    //            hitbox_bottom_right_corner().y, hit_map.north, hit_map.south, hit_map.west, hit_map.east);
+    //            hitbox_top_left().x, hitbox_top_left().y, hitbox_bottom_right().x,
+    //            hitbox_bottom_right().y, hit_map.north, hit_map.south, hit_map.west, hit_map.east);
     // }
 
     if (IsKeyDown(KEY_LEFT)) {
@@ -162,14 +162,14 @@ struct Character {
     pos.x += speed.x;
 
     // Adjust for wall hit.
-    float west_wall_dist = hitbox_top_left_corner().x - hit_map.west;
+    float west_wall_dist = hitbox_top_left().x - hit_map.west;
     if (west_wall_dist < 0) {
       pos.x -= west_wall_dist;
       speed.x = 0.f;
       is_grab_wall = true;
       multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
-    float east_wall_dist = hit_map.east - hitbox_bottom_right_corner().x;
+    float east_wall_dist = hit_map.east - hitbox_bottom_right().x;
     if (east_wall_dist < 0) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
@@ -215,14 +215,14 @@ struct Character {
     pos.y += speed.y;
 
     // Adjust for wall hit.
-    float north_wall_dist = hitbox_top_left_corner().y - hit_map.north;
+    float north_wall_dist = hitbox_top_left().y - hit_map.north;
     if (north_wall_dist < 0) {
       pos.y -= north_wall_dist;
       speed.y = 0.f;
     }
-    float south_wall_dist = static_cast<float>(hit_map.south) - hitbox_bottom_right_corner().y;
-    // TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", hitbox_top_left_corner().y,
-    // hitbox_bottom_right_corner().y,
+    float south_wall_dist = static_cast<float>(hit_map.south) - hitbox_bottom_right().y;
+    // TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", hitbox_top_left().y,
+    // hitbox_bottom_right().y,
     //          hit_map.south);
     if (south_wall_dist < 0) {
       pos.y += south_wall_dist;
@@ -253,36 +253,32 @@ struct Character {
     return GetFrameTime() * PLAYER_MAX_REL_SPEED / 30.f;
   }
 
-  Vector2 const hitbox_top_left_corner() const {
+  Vector2 const hitbox_top_left() const {
     return Vector2{pos.x + ((PLAYER_TEXTURE_SIZE * pixel_size) / 4.f),
                    pos.y + ((PLAYER_TEXTURE_SIZE * pixel_size) / 6.f)};
   }
 
-  Vector2 const hitbox_bottom_right_corner() const {
+  Vector2 const hitbox_bottom_right() const {
     return Vector2{pos.x + (PLAYER_TEXTURE_SIZE * pixel_size) - 1.f - ((PLAYER_TEXTURE_SIZE * pixel_size) / 4.f),
                    pos.y + (PLAYER_TEXTURE_SIZE * pixel_size) - 1.f};
   }
 
   Rectangle const frame() const {
-    Vector2 top_left_corner{hitbox_top_left_corner()};
-    Vector2 size{Vector2Subtract(hitbox_bottom_right_corner(), top_left_corner)};
+    Vector2 top_left_corner{hitbox_top_left()};
+    Vector2 size{Vector2Subtract(hitbox_bottom_right(), top_left_corner)};
     return Rectangle{top_left_corner.x, top_left_corner.y, size.x, size.y};
   }
 
   HitMap calculate_hitmap(Map const& map) const {
     HitMap hit_map{};
 
-    IntVec2 top_left_coord = tile_coord_from_absolute(hitbox_top_left_corner(), pixel_size);
-    IntVec2 bottom_right_coord = tile_coord_from_absolute(hitbox_bottom_right_corner(), pixel_size);
+    Vector2 _hitbox_top_left{hitbox_top_left()};
+    Vector2 _hitbox_bottom_right{hitbox_bottom_right()};
 
-    hit_map.east = map.east_wall_of_range(hitbox_bottom_right_corner().x, hitbox_top_left_corner().y,
-                                          hitbox_bottom_right_corner().y);
-    hit_map.north =
-        map.north_wall_of_range(hitbox_top_left_corner().x, hitbox_bottom_right_corner().x, hitbox_top_left_corner().y);
-    hit_map.south = map.south_wall_of_range(hitbox_top_left_corner().x, hitbox_bottom_right_corner().x,
-                                            hitbox_bottom_right_corner().y);
-    hit_map.west =
-        map.west_wall_of_range(hitbox_top_left_corner().x, hitbox_top_left_corner().y, hitbox_bottom_right_corner().y);
+    hit_map.east = map.east_wall_of_range(_hitbox_bottom_right.x, _hitbox_top_left.y, _hitbox_bottom_right.y);
+    hit_map.north = map.north_wall_of_range(_hitbox_top_left.x, _hitbox_bottom_right.x, _hitbox_top_left.y);
+    hit_map.south = map.south_wall_of_range(_hitbox_top_left.x, _hitbox_bottom_right.x, _hitbox_bottom_right.y);
+    hit_map.west = map.west_wall_of_range(_hitbox_top_left.x, _hitbox_top_left.y, _hitbox_bottom_right.y);
 
     return hit_map;
   }
