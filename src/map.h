@@ -41,10 +41,10 @@ struct Map {
 
     int background_index{};
     int tiles_count{};
-    if (std::fread(&tile_width, sizeof(int), 1, file) != 1) PANIC("Failed reading input: tile width");
-    if (std::fread(&tile_height, sizeof(int), 1, file) != 1) PANIC("Failed reading input: tile height");
-    if (std::fread(&background_index, sizeof(int), 1, file) != 1) PANIC("Failed reading input: background index");
-    if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) PANIC("Failed reading input: tile count");
+    if (std::fread(&tile_width, sizeof(int), 1, file) != 1) BAIL;
+    if (std::fread(&tile_height, sizeof(int), 1, file) != 1) BAIL;
+    if (std::fread(&background_index, sizeof(int), 1, file) != 1) BAIL;
+    if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) BAIL;
 
     SetWindowSize(tile_width * TILE_SIZE * pixel_size, tile_height * TILE_SIZE * pixel_size);
 

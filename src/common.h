@@ -6,14 +6,6 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define INFO(...) log("\x1b[90mINFO\x1b[0m", __FILE__, __LINE__, __VA_ARGS__)
-#define WARN(...) log("\x1b[93mWARN\x1b[0m", __FILE__, __LINE__, __VA_ARGS__)
-#define DEBUG(...) log("\x1b[94mDEBG\x1b[0m", __FILE__, __LINE__, __VA_ARGS__)
-#define PANIC(...)                                                \
-  {                                                               \
-    log("\x1b[94mPANIC\x1b[0m", __FILE__, __LINE__, __VA_ARGS__); \
-    exit(EXIT_FAILURE);                                           \
-  }
 #define BAIL                                                             \
   {                                                                      \
     fprintf(stderr, "\x1b[94mBAIL\x1b[0m in %s:%d", __FILE__, __LINE__); \
@@ -94,8 +86,8 @@ constexpr IntVec2 const intvec2_4_4{4, 4};
 IntVec2 intvec2_from_file(FILE* file) {
   IntVec2 out{};
 
-  if (std::fread(&out.x, sizeof(int), 1, file) != 1) PANIC("Failed reading x");
-  if (std::fread(&out.y, sizeof(int), 1, file) != 1) PANIC("Failed reading y");
+  if (std::fread(&out.x, sizeof(int), 1, file) != 1) BAIL;
+  if (std::fread(&out.y, sizeof(int), 1, file) != 1) BAIL;
 
   return out;
 }
@@ -176,7 +168,7 @@ struct TileSelection {
     } else if (source == TileSource::Box1) {
       texture = asset_manager.textures[TextureNames::Box1__Idle];
     } else {
-      PANIC("Invalid tile source");
+      BAIL;
     }
 
     IntVec2 _tile_size{tile_size()};
@@ -199,7 +191,7 @@ struct TileSelection {
     } else if (source == TileSource::Tileset) {
       return (tileset_tile_collision_map[tile_coord.y * 16 + tile_coord.x] & direction) > 0;
     } else {
-      PANIC("Invalid tile source for collision check");
+      BAIL;
     }
   }
 
@@ -242,7 +234,7 @@ struct TileSelection {
 
 TileSelection tile_selection_from_file(FILE* file) {
   int tile_source_raw{};
-  if (fread(&tile_source_raw, sizeof(int), 1, file) != 1) PANIC("Cannot read tile source");
+  if (fread(&tile_source_raw, sizeof(int), 1, file) != 1) BAIL;
   IntVec2 pos = intvec2_from_file(file);
 
   TileSource source{};
@@ -257,7 +249,7 @@ TileSelection tile_selection_from_file(FILE* file) {
       source = TileSource::Box1;
       break;
     default:
-      PANIC("Invalid tile source at reading: %d", tile_source_raw);
+      BAIL;
   }
 
   return TileSelection{source, pos};
