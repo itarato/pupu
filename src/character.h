@@ -233,20 +233,6 @@ struct Character {
       multi_jump_count = 0;
     }
 
-    // Vector2 compensation = map.calculate_collision_compensation(frame());
-    // if (!Vector2Equals(vector_zero, compensation)) {
-    //   pos = Vector2Add(pos, compensation);
-    //   // if (compensation.x != 0.f) speed.x = 0.f;
-    //   if (compensation.y != 0.f) {
-    //     jump_state = JumpState::Ground;
-    //     multi_jump_count = 0;
-
-    //     if (compensation.y > 0.f) {
-    //       speed.y = compensation.y * 2.f;
-    //     }
-    //   }
-    // }
-
     // Override sprite when jumping / wall grabbing.
     if (is_grab_wall) {
       sprite_group.set_current_sprite(PLAYER_SPRITE_WALL_JUMP);
@@ -292,11 +278,11 @@ struct Character {
     hit_map.east = map.east_wall_of_range(hitbox_bottom_right_corner().x, hitbox_top_left_corner().y,
                                           hitbox_bottom_right_corner().y);
     hit_map.north =
-        map.north_wall_of_range(top_left_coord.x, bottom_right_coord.x, top_left_coord.y) * TILE_SIZE * pixel_size;
+        map.north_wall_of_range(hitbox_top_left_corner().x, hitbox_bottom_right_corner().x, hitbox_top_left_corner().y);
     hit_map.south = map.south_wall_of_range(hitbox_top_left_corner().x, hitbox_bottom_right_corner().x,
                                             hitbox_bottom_right_corner().y);
     hit_map.west =
-        map.west_wall_of_range(top_left_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE * pixel_size;
+        map.west_wall_of_range(hitbox_top_left_corner().x, hitbox_top_left_corner().y, hitbox_bottom_right_corner().y);
 
     return hit_map;
   }
