@@ -150,6 +150,8 @@ enum TileSource {
   Gui,
   Tileset,
   Box1,
+  Box2,
+  Box3,
 };
 
 constexpr IntVec2 const TILESIZE_DEFAULT{TILE_SIZE, TILE_SIZE};
@@ -167,6 +169,10 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::TilesetTiles];
     } else if (source == TileSource::Box1) {
       texture = asset_manager.textures[TextureNames::Box1__Idle];
+    } else if (source == TileSource::Box2) {
+      texture = asset_manager.textures[TextureNames::Box2__Idle];
+    } else if (source == TileSource::Box3) {
+      texture = asset_manager.textures[TextureNames::Box3__Idle];
     } else {
       BAIL;
     }
@@ -201,6 +207,8 @@ struct TileSelection {
       case TileSource::Tileset:
         return TILESIZE_DEFAULT;
       case TileSource::Box1:
+      case TileSource::Box2:
+      case TileSource::Box3:
         return TILESIZE_BOX;
       default:
         BAIL;
@@ -213,6 +221,8 @@ struct TileSelection {
       case TileSource::Tileset:
         return 16;
       case TileSource::Box1:
+      case TileSource::Box2:
+      case TileSource::Box3:
         return 1;
       default:
         BAIL;
@@ -225,6 +235,8 @@ struct TileSelection {
       case TileSource::Tileset:
         return move(DEFAULT_TILE_HITBOX, pos);
       case TileSource::Box1:
+      case TileSource::Box2:
+      case TileSource::Box3:
         return move(BOX_HITBOX, pos);
       default:
         BAIL;
@@ -247,6 +259,12 @@ TileSelection tile_selection_from_file(FILE* file) {
       break;
     case 2:
       source = TileSource::Box1;
+      break;
+    case 3:
+      source = TileSource::Box2;
+      break;
+    case 4:
+      source = TileSource::Box3;
       break;
     default:
       BAIL;
