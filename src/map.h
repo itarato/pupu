@@ -24,6 +24,7 @@ constexpr Vector2 const move_map[4] = {
 };
 
 constexpr HitMap NULL_HIT_MAP{};
+constexpr float const WALL_CHECK_THRESHOLD{3.f};
 
 struct Map {
  public:
@@ -92,41 +93,44 @@ struct Map {
     background.unload();
   }
 
-  /**
-   * Absolute window coordinates.
-   */
-  HitMap const& get_hit_map(Vector2 const& pos) const {
-    int x = static_cast<int>(pos.x / (TILE_SIZE * pixel_size));
-    int y = static_cast<int>(pos.y / (TILE_SIZE * pixel_size));
-    return get_hit_map(x, y);
-  }
-
-  /**
-   * Absolute window coordinates.
-   */
-  HitMap const& get_hit_map(int x, int y) const {
-    if (x < 0 || y < 0 || x >= tile_width || y >= tile_height) {
-      return NULL_HIT_MAP;
-    } else {
-      return hit_map[y * tile_width + x];
-    }
-  }
-
   int north_wall_of_range(int minx, int maxx, int y) const {
     int out = 0;
     for (int x = minx; x <= maxx; x++) {
       if (!is_tile_coord_valid(x, y)) continue;
       out = std::max(out, hit_map[y * tile_width + x].north);
     }
+
     return out;
   }
 
-  int south_wall_of_range(int minx, int maxx, int y) const {
-    int out = GetScreenHeight();
+  int south_wall_of_range(int abs_minx, int abs_maxx, int abs_y) const {
+    int minx = abs_minx / (TILE_SIZE * pixel_size);
+    int maxx = abs_maxx / (TILE_SIZE * pixel_size);
+    int y = abs_y / (TILE_SIZE * pixel_size);
+
+    int min_y_coord = GetScreenHeight();
     for (int x = minx; x <= maxx; x++) {
       if (!is_tile_coord_valid(x, y)) continue;
-      out = std::min(out, hit_map[y * tile_width + x].south);
+      min_y_coord = std::min(min_y_coord, hit_map[y * tile_width + x].south);
     }
+
+    int out = min_y_coord * TILE_SIZE * pixel_size - 1;
+
+    // Check all non-wall objects.
+    // - if obj [x] overlaps with [minx..maxx]
+    // - check the topmost point
+    // - if overlap is within a threshold: use it
+    for (auto const& [pos, selection] : boxes) {
+      Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
+      if (is_horizontal_overlap(abs_hitbox, abs_minx, abs_maxx)) {
+        TraceLog(LOG_INFO, "Overlap! hitboxy=%.2f out=%d absy=%d", abs_hitbox.y, out, abs_y);
+        if (abs_hitbox.y < out && (abs_hitbox.y + WALL_CHECK_THRESHOLD * pixel_size) >= abs_y) {
+          TraceLog(LOG_INFO, "Overlap. Y=%.2f", abs_hitbox.y);
+          out = abs_hitbox.y;
+        }
+      }
+    }
+
     return out;
   }
 
@@ -148,31 +152,31 @@ struct Map {
     return out;
   }
 
-  Vector2 calculate_collision_compensation(Rectangle const victim) const {
-    Vector2 total_move = vector_zero;
-    Rectangle current_victim{victim};
+  // Vector2 calculate_collision_compensation(Rectangle const victim) const {
+  //   Vector2 total_move = vector_zero;
+  //   Rectangle current_victim{victim};
 
-    for (auto const& object : interactive_objects) {
-      Vector2 compensation = calculate_collision_compensation_for_rect(current_victim, object.frame());
-      if (!Vector2Equals(compensation, vector_zero)) {
-        total_move = Vector2Add(total_move, compensation);
-        current_victim.x += compensation.x;
-        current_victim.y += compensation.y;
-      }
-    }
+  //   for (auto const& object : interactive_objects) {
+  //     Vector2 compensation = calculate_collision_compensation_for_rect(current_victim, object.frame());
+  //     if (!Vector2Equals(compensation, vector_zero)) {
+  //       total_move = Vector2Add(total_move, compensation);
+  //       current_victim.x += compensation.x;
+  //       current_victim.y += compensation.y;
+  //     }
+  //   }
 
-    for (auto const& [pos, selection] : boxes) {
-      Vector2 compensation =
-          calculate_collision_compensation_for_rect(current_victim, upscale(selection.hitbox(pos), pixel_size));
-      if (!Vector2Equals(compensation, vector_zero)) {
-        total_move = Vector2Add(total_move, compensation);
-        current_victim.x += compensation.x;
-        current_victim.y += compensation.y;
-      }
-    }
+  //   for (auto const& [pos, selection] : boxes) {
+  //     Vector2 compensation =
+  //         calculate_collision_compensation_for_rect(current_victim, upscale(selection.hitbox(pos), pixel_size));
+  //     if (!Vector2Equals(compensation, vector_zero)) {
+  //       total_move = Vector2Add(total_move, compensation);
+  //       current_victim.x += compensation.x;
+  //       current_victim.y += compensation.y;
+  //     }
+  //   }
 
-    return total_move;
-  }
+  //   return total_move;
+  // }
 
  private:
   Background background{};
@@ -231,25 +235,25 @@ struct Map {
     return x >= 0 && y >= 0 && x < tile_width && y < tile_height;
   }
 
-  Vector2 calculate_collision_compensation_for_rect(Rectangle victim, Rectangle attacker) const {
-    if (!CheckCollisionRecs(victim, attacker)) return vector_zero;
+  // Vector2 calculate_collision_compensation_for_rect(Rectangle victim, Rectangle attacker) const {
+  //   if (!CheckCollisionRecs(victim, attacker)) return vector_zero;
 
-    float distances[4] = {
-        (attacker.y + attacker.height) - victim.y,  // top
-        (victim.y + victim.height) - attacker.y,    // bottom
-        (attacker.x + attacker.width) - victim.x,   // left
-        (victim.x + victim.width) - attacker.x,     // right
-    };
+  //   float distances[4] = {
+  //       (attacker.y + attacker.height) - victim.y,  // top
+  //       (victim.y + victim.height) - attacker.y,    // bottom
+  //       (attacker.x + attacker.width) - victim.x,   // left
+  //       (victim.x + victim.width) - attacker.x,     // right
+  //   };
 
-    float min_dist = std::numeric_limits<float>::max();
-    int min_dist_index = -1;
-    for (int i = 0; i < 4; i++) {
-      if (distances[i] < min_dist) {
-        min_dist = distances[i];
-        min_dist_index = i;
-      }
-    }
+  //   float min_dist = std::numeric_limits<float>::max();
+  //   int min_dist_index = -1;
+  //   for (int i = 0; i < 4; i++) {
+  //     if (distances[i] < min_dist) {
+  //       min_dist = distances[i];
+  //       min_dist_index = i;
+  //     }
+  //   }
 
-    return Vector2Scale(move_map[min_dist_index], distances[min_dist_index]);
-  }
+  //   return Vector2Scale(move_map[min_dist_index], distances[min_dist_index]);
+  // }
 };
