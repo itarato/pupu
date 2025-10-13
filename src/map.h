@@ -123,9 +123,7 @@ struct Map {
     for (auto const& [pos, selection] : boxes) {
       Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
       if (is_horizontal_overlap(abs_hitbox, abs_minx, abs_maxx)) {
-        TraceLog(LOG_INFO, "Overlap! hitboxy=%.2f out=%d absy=%d", abs_hitbox.y, out, abs_y);
         if (abs_hitbox.y < out && (abs_hitbox.y + WALL_CHECK_THRESHOLD * pixel_size) >= abs_y) {
-          TraceLog(LOG_INFO, "Overlap. Y=%.2f", abs_hitbox.y);
           out = abs_hitbox.y;
         }
       }
@@ -143,12 +141,28 @@ struct Map {
     return out;
   }
 
-  int east_wall_of_range(int x, int miny, int maxy) const {
-    int out = GetScreenWidth();
+  int east_wall_of_range(int abs_x, int abs_miny, int abs_maxy) const {
+    int x = abs_x / (TILE_SIZE * pixel_size);
+    int miny = abs_miny / (TILE_SIZE * pixel_size);
+    int maxy = abs_maxy / (TILE_SIZE * pixel_size);
+
+    int min_x_coord = GetScreenWidth();
     for (int y = miny; y <= maxy; y++) {
       if (!is_tile_coord_valid(x, y)) continue;
-      out = std::min(out, hit_map[y * tile_width + x].east);
+      min_x_coord = std::min(min_x_coord, hit_map[y * tile_width + x].east);
     }
+
+    int out = min_x_coord * TILE_SIZE * pixel_size - 1;
+
+    for (auto const& [pos, selection] : boxes) {
+      Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
+      if (is_vertical_overlap(abs_hitbox, abs_miny, abs_maxy)) {
+        if (abs_hitbox.x < out && (abs_hitbox.x + WALL_CHECK_THRESHOLD * pixel_size) >= abs_x) {
+          out = abs_hitbox.x;
+        }
+      }
+    }
+
     return out;
   }
 

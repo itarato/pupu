@@ -274,7 +274,11 @@ void fps_independent_multiply(float* v, float mul) {
 }
 
 bool is_horizontal_overlap(Rectangle const rect, int const abs_minx, int const abs_maxx) {
-  TraceLog(LOG_INFO, "Overlap check: %.2f-%.2f <> %d-%d", rect.x, rect.x + rect.width - 1, abs_minx, abs_maxx);
   if (rect.x > abs_maxx || (rect.x + rect.width - 1) < abs_minx) return false;
+  return true;
+}
+
+bool is_vertical_overlap(Rectangle const rect, int const abs_miny, int const abs_maxy) {
+  if (rect.y > abs_maxy || (rect.y + rect.height - 1) < abs_miny) return false;
   return true;
 }

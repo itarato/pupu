@@ -289,9 +289,8 @@ struct Character {
     IntVec2 top_left_coord = tile_coord_from_absolute(hitbox_top_left_corner(), pixel_size);
     IntVec2 bottom_right_coord = tile_coord_from_absolute(hitbox_bottom_right_corner(), pixel_size);
 
-    hit_map.east =
-        map.east_wall_of_range(bottom_right_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE * pixel_size -
-        1;
+    hit_map.east = map.east_wall_of_range(hitbox_bottom_right_corner().x, hitbox_top_left_corner().y,
+                                          hitbox_bottom_right_corner().y);
     hit_map.north =
         map.north_wall_of_range(top_left_coord.x, bottom_right_coord.x, top_left_coord.y) * TILE_SIZE * pixel_size;
     hit_map.south = map.south_wall_of_range(hitbox_top_left_corner().x, hitbox_bottom_right_corner().x,
