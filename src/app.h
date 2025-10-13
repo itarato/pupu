@@ -15,7 +15,6 @@ struct App {
   }
 
   void init() {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1024, 768, "Pupu");
     SetTargetFPS(GetMonitorRefreshRate(0));
 
@@ -45,10 +44,10 @@ struct App {
   }
 
  private:
-  Map map{};
-  Character character{};
   bool pause_update{false};
+  Map map{DEFAULT_PIXEL_SIZE};
   int pixel_size{DEFAULT_PIXEL_SIZE};
+  Character character{DEFAULT_PIXEL_SIZE};
 
   void reset() {
     map.reload_from_file();
@@ -62,16 +61,16 @@ struct App {
 
     // HitMap hit_map = map.get_hit_map(GetMousePosition());
     // DrawLineEx({0.f, static_cast<float>(hit_map.north * TILE_SIZE_PX)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north * TILE_SIZE_PX)}, PIXEL_SIZE,
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north * TILE_SIZE_PX)}, pixel_size,
     //            ORANGE);
     // DrawLineEx({0.f, static_cast<float>(hit_map.south * TILE_SIZE_PX)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south * TILE_SIZE_PX)}, PIXEL_SIZE,
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south * TILE_SIZE_PX)}, pixel_size,
     //            GREEN);
     // DrawLineEx({static_cast<float>(hit_map.west * TILE_SIZE_PX), 0.f},
-    //            {static_cast<float>(hit_map.west * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE,
+    //            {static_cast<float>(hit_map.west * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, pixel_size,
     //            BLUE);
     // DrawLineEx({static_cast<float>(hit_map.east * TILE_SIZE_PX), 0.f},
-    //            {static_cast<float>(hit_map.east * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE,
+    //            {static_cast<float>(hit_map.east * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, pixel_size,
     //            RED);
 
     DrawFPS(0, 0);

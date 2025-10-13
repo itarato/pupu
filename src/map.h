@@ -27,6 +27,9 @@ constexpr HitMap NULL_HIT_MAP{};
 
 struct Map {
  public:
+  Map(int const pixel_size) : pixel_size(pixel_size) {
+  }
+
   void reload_from_file() {
     reset();
 
@@ -43,16 +46,27 @@ struct Map {
     if (std::fread(&background_index, sizeof(int), 1, file) != 1) PANIC("Failed reading input: background index");
     if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) PANIC("Failed reading input: tile count");
 
-    SetWindowSize(tile_width * TILE_SIZE_PX, tile_height * TILE_SIZE_PX);
+    SetWindowSize(tile_width * TILE_SIZE * pixel_size, tile_height * TILE_SIZE * pixel_size);
 
-    background.preload(background_index, tile_width, tile_height, PIXEL_SIZE);
+    background.preload(background_index, tile_width, tile_height, pixel_size);
 
-    tiles.clear();
+    walls.clear();
 
     for (int i = 0; i < tiles_count; i++) {
       IntVec2 tile_pos = intvec2_from_file(file);
       TileSelection tile_selection{tile_selection_from_file(file)};
-      tiles[tile_pos] = tile_selection;
+
+      switch (tile_selection.source) {
+        case TileSource::Gui:
+        case TileSource::Tileset:
+          walls[tile_pos] = tile_selection;
+          break;
+        case TileSource::Box1:
+          boxes[tile_pos] = tile_selection;
+          break;
+        default:
+          BAIL;
+      }
     }
 
     interactive_objects.emplace_back();
@@ -67,9 +81,10 @@ struct Map {
   }
 
   void draw() const {
-    background.draw(Vector2Zero());
+    background.draw(Vector2Zero(), pixel_size);
 
-    for (auto const& [k, v] : tiles) v.draw(k.scale(TILE_SIZE_PX).to_vector2());
+    for (auto const& [k, v] : walls) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
+    for (auto const& [k, v] : boxes) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
     for (auto const& object : interactive_objects) object.draw();
   }
 
@@ -81,8 +96,8 @@ struct Map {
    * Absolute window coordinates.
    */
   HitMap const& get_hit_map(Vector2 const& pos) const {
-    int x = static_cast<int>(pos.x / TILE_SIZE_PX);
-    int y = static_cast<int>(pos.y / TILE_SIZE_PX);
+    int x = static_cast<int>(pos.x / (TILE_SIZE * pixel_size));
+    int y = static_cast<int>(pos.y / (TILE_SIZE * pixel_size));
     return get_hit_map(x, y);
   }
 
@@ -146,6 +161,16 @@ struct Map {
       }
     }
 
+    for (auto const& [pos, selection] : boxes) {
+      Vector2 compensation =
+          calculate_collision_compensation_for_rect(current_victim, upscale(selection.hitbox(pos), pixel_size));
+      if (!Vector2Equals(compensation, vector_zero)) {
+        total_move = Vector2Add(total_move, compensation);
+        current_victim.x += compensation.x;
+        current_victim.y += compensation.y;
+      }
+    }
+
     return total_move;
   }
 
@@ -153,12 +178,14 @@ struct Map {
   Background background{};
   int tile_width{};
   int tile_height{};
-  std::unordered_map<IntVec2, TileSelection> tiles{};
+  std::unordered_map<IntVec2, TileSelection> walls{};
+  std::unordered_map<IntVec2, TileSelection> boxes{};
   std::vector<HitMap> hit_map{};
   std::vector<MovingObject> interactive_objects{};
+  int const pixel_size;
 
   void reset() {
-    tiles.clear();
+    walls.clear();
     hit_map.clear();
     interactive_objects.clear();
   }
@@ -173,12 +200,12 @@ struct Map {
 
       for (int x = 0; x < tile_width; x++) {
         hit_map[y * tile_width + x].west = west_wall;
-        IntVec2 coord{x, y};
-        if (tiles.contains(coord) && tiles[coord].collide_from(COLLISION_TYPE_LEFT)) west_wall = x + 1;
+        IntVec2 coord{x * TILE_SIZE, y * TILE_SIZE};
+        if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_LEFT)) west_wall = x + 1;
 
         hit_map[y * tile_width + (tile_width - 1 - x)].east = east_wall;
-        IntVec2 coord_inv{(tile_width - 1 - x), y};
-        if (tiles.contains(coord_inv) && tiles[coord_inv].collide_from(COLLISION_TYPE_RIGHT))
+        IntVec2 coord_inv{(tile_width - 1 - x) * TILE_SIZE, y * TILE_SIZE};
+        if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_RIGHT))
           east_wall = (tile_width - 1 - x);
       }
     }
@@ -189,12 +216,12 @@ struct Map {
 
       for (int y = 0; y < tile_height; y++) {
         hit_map[y * tile_width + x].north = north_wall;
-        IntVec2 coord{x, y};
-        if (tiles.contains(coord) && tiles[coord].collide_from(COLLISION_TYPE_BOTTOM)) north_wall = y + 1;
+        IntVec2 coord{x * TILE_SIZE, y * TILE_SIZE};
+        if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_BOTTOM)) north_wall = y + 1;
 
         hit_map[(tile_height - 1 - y) * tile_width + x].south = south_wall;
-        IntVec2 coord_inv{x, (tile_height - 1 - y)};
-        if (tiles.contains(coord_inv) && tiles[coord_inv].collide_from(COLLISION_TYPE_TOP))
+        IntVec2 coord_inv{x * TILE_SIZE, (tile_height - 1 - y) * TILE_SIZE};
+        if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_TOP))
           south_wall = (tile_height - 1 - y);
       }
     }

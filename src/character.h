@@ -8,10 +8,11 @@
 #include "raylib.h"
 #include "sprite_group.h"
 
+constexpr int PLAYER_TEXTURE_SIZE{32};
+
 constexpr float PLAYER_MAX_REL_SPEED = 500.f;
 constexpr float PLAYER_MOVEMENT_FRICTION = 0.8f;
 constexpr float PLAYER_ZERO_SPEED_THRESHOLD = 0.1f;
-constexpr float PLAYER_TEXTURE_SIZE_PX = TILE_SIZE_PX * 2.f;
 constexpr float PLAYER_JUMP_SPEED = -1000.f;
 constexpr float PLAYER_GRAVITY = 0.95f;
 constexpr float PLAYER_GRAVITY_INV = 1.f / PLAYER_GRAVITY;
@@ -41,6 +42,9 @@ enum LifecycleState {
 
 struct Character {
  public:
+  Character(int const pixel_size) : pixel_size(pixel_size) {
+  }
+
   void reset(Vector2 new_pos) {
     pos = new_pos;
     sprite_group.reset();
@@ -51,23 +55,35 @@ struct Character {
 
   void init() {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Run],
+                                    {32.f, 32.f},
+                                    12,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Idle],
+                                    {32.f, 32.f},
+                                    11,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Hit],
+                                    {32.f, 32.f},
+                                    7,
+                                    sprite_frame_length});
     sprite_group.push_sprite(Sprite{
-        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Run], {32.f, 32.f}, 12, sprite_frame_length});
+        static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Character1__Jump], {32.f, 32.f}, 1, 0});
     sprite_group.push_sprite(Sprite{
-        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Idle], {32.f, 32.f}, 11, sprite_frame_length});
-    sprite_group.push_sprite(Sprite{
-        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Hit], {32.f, 32.f}, 7, sprite_frame_length});
-    sprite_group.push_sprite(
-        Sprite{PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Jump], {32.f, 32.f}, 1, 0});
-    sprite_group.push_sprite(
-        Sprite{PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Fall], {32.f, 32.f}, 1, 0});
-    sprite_group.push_sprite(Sprite{PIXEL_SIZE,
+        static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Character1__Fall], {32.f, 32.f}, 1, 0});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
                                     asset_manager.textures[TextureNames::Character1__Double_Jump],
                                     {32.f, 32.f},
                                     6,
                                     sprite_frame_length});
-    sprite_group.push_sprite(Sprite{
-        PIXEL_SIZE, asset_manager.textures[TextureNames::Character1__Wall_Jump], {32.f, 32.f}, 5, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Wall_Jump],
+                                    {32.f, 32.f},
+                                    5,
+                                    sprite_frame_length});
 
     appear_sprite.init_texture(asset_manager.textures[TextureNames::Character__Appear], {96.f, 96.f}, 7,
                                sprite_frame_length);
@@ -92,16 +108,17 @@ struct Character {
     }
 
     // DrawLineEx({0.f, static_cast<float>(hit_map.north)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north)}, PIXEL_SIZE, ORANGE);
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north)}, pixel_size, ORANGE);
     // DrawLineEx({0.f, static_cast<float>(hit_map.south)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south)}, PIXEL_SIZE, GREEN);
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south)}, pixel_size, GREEN);
     // DrawLineEx({static_cast<float>(hit_map.west), 0.f},
-    //            {static_cast<float>(hit_map.west), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE, BLUE);
+    //            {static_cast<float>(hit_map.west), static_cast<float>(GetScreenHeight())}, pixel_size, BLUE);
     // DrawLineEx({static_cast<float>(hit_map.east), 0.f},
-    //            {static_cast<float>(hit_map.east), static_cast<float>(GetScreenHeight())}, PIXEL_SIZE, RED);
+    //            {static_cast<float>(hit_map.east), static_cast<float>(GetScreenHeight())}, pixel_size, RED);
   }
 
  private:
+  const int pixel_size{DEFAULT_PIXEL_SIZE};
   SpriteGroup sprite_group{};
   Sprite appear_sprite{};
   Vector2 pos{};
@@ -251,12 +268,13 @@ struct Character {
   }
 
   Vector2 const hitbox_top_left_corner() const {
-    return Vector2{pos.x + (PLAYER_TEXTURE_SIZE_PX / 4.f), pos.y + (PLAYER_TEXTURE_SIZE_PX / 6.f)};
+    return Vector2{pos.x + ((PLAYER_TEXTURE_SIZE * pixel_size) / 4.f),
+                   pos.y + ((PLAYER_TEXTURE_SIZE * pixel_size) / 6.f)};
   }
 
   Vector2 const hitbox_bottom_right_corner() const {
-    return Vector2{pos.x + PLAYER_TEXTURE_SIZE_PX - 1.f - (PLAYER_TEXTURE_SIZE_PX / 4.f),
-                   pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f};
+    return Vector2{pos.x + (PLAYER_TEXTURE_SIZE * pixel_size) - 1.f - ((PLAYER_TEXTURE_SIZE * pixel_size) / 4.f),
+                   pos.y + (PLAYER_TEXTURE_SIZE * pixel_size) - 1.f};
   }
 
   Rectangle const frame() const {
@@ -268,15 +286,19 @@ struct Character {
   HitMap calculate_hitmap(Map const& map) const {
     HitMap hit_map{};
 
-    IntVec2 top_left_coord = tile_coord_from_absolute(hitbox_top_left_corner());
-    IntVec2 bottom_right_coord = tile_coord_from_absolute(hitbox_bottom_right_corner());
+    IntVec2 top_left_coord = tile_coord_from_absolute(hitbox_top_left_corner(), pixel_size);
+    IntVec2 bottom_right_coord = tile_coord_from_absolute(hitbox_bottom_right_corner(), pixel_size);
 
     hit_map.east =
-        map.east_wall_of_range(bottom_right_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE_PX - 1;
-    hit_map.north = map.north_wall_of_range(top_left_coord.x, bottom_right_coord.x, top_left_coord.y) * TILE_SIZE_PX;
+        map.east_wall_of_range(bottom_right_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE * pixel_size -
+        1;
+    hit_map.north =
+        map.north_wall_of_range(top_left_coord.x, bottom_right_coord.x, top_left_coord.y) * TILE_SIZE * pixel_size;
     hit_map.south =
-        map.south_wall_of_range(top_left_coord.x, bottom_right_coord.x, bottom_right_coord.y) * TILE_SIZE_PX - 1;
-    hit_map.west = map.west_wall_of_range(top_left_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE_PX;
+        map.south_wall_of_range(top_left_coord.x, bottom_right_coord.x, bottom_right_coord.y) * TILE_SIZE * pixel_size -
+        1;
+    hit_map.west =
+        map.west_wall_of_range(top_left_coord.x, top_left_coord.y, bottom_right_coord.y) * TILE_SIZE * pixel_size;
 
     return hit_map;
   }

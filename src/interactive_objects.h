@@ -18,11 +18,11 @@ struct MovingObject {
   }
 
   void draw() const {
-    DrawRectangleRec(frame(), ORANGE);
+    DrawRectangleRec(frame(), BLACK);
   }
 
   Rectangle frame() const {
-    return Rectangle{pos.x, pos.y, 100.f, 20.f};
+    return Rectangle{pos.x, pos.y, 100.f, 32.f};
   }
 
  private:
