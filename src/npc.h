@@ -2,6 +2,7 @@
 
 #include "asset_manager.h"
 #include "common.h"
+#include "map.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "sprite.h"
@@ -9,16 +10,20 @@
 
 constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
 
-constexpr int const SimpleWalkNpsSpriteFall{0};
-constexpr int const SimpleWalkNpsSpriteHit{1};
-constexpr int const SimpleWalkNpsSpriteIdle{2};
-constexpr int const SimpleWalkNpsSpriteJump{3};
-constexpr int const SimpleWalkNpsSpriteRun{4};
+constexpr size_t const SimpleWalkNpcSpriteFall{0};
+constexpr size_t const SimpleWalkNpcSpriteHit{1};
+constexpr size_t const SimpleWalkNpcSpriteIdle{2};
+constexpr size_t const SimpleWalkNpcSpriteJump{3};
+constexpr size_t const SimpleWalkNpcSpriteRun{4};
+
+enum class SimpleWalkNpcState { Idle, Run, Hit };
 
 struct Npc {
  public:
   virtual void draw() const = 0;
-  virtual void update() = 0;
+  virtual void update(Map const& map) = 0;
+
+  virtual ~Npc() = default;
 };
 
 struct SimpleWalkNpc : Npc {
@@ -45,18 +50,20 @@ struct SimpleWalkNpc : Npc {
                                         asset_manager.textures[TextureNames::Enemy1__Run], SIMPLE_WALK_NPC_SIZE, 12,
                                         sprite_frame_length});
 
-        sprite_group.set_current_sprite(SimpleWalkNpsSpriteIdle);
+        sprite_group.set_current_sprite(SimpleWalkNpcSpriteRun);
         break;
       default:
         BAILF("Invalid: %d", tile_source);
     }
   }
 
+  ~SimpleWalkNpc() = default;
+
   void draw() const override {
     sprite_group.draw(Vector2Scale(pos, pixel_size));
   }
 
-  void update() override {
+  void update(Map const& map) override {
     sprite_group.update();
   }
 
@@ -64,4 +71,5 @@ struct SimpleWalkNpc : Npc {
   Vector2 pos;
   int pixel_size;
   SpriteGroup sprite_group{};
+  SimpleWalkNpcState state{SimpleWalkNpcState::Run};
 };

@@ -82,7 +82,7 @@ struct Map {
   }
 
   void update() {
-    for (auto& npc : npcs) npc->update();
+    for (auto& npc : npcs) npc->update(*this);
   }
 
   void draw() const {
