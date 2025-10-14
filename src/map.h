@@ -69,7 +69,7 @@ struct Map {
           boxes[tile_pos] = tile_selection;
           break;
         case TileSource::Enemy1:
-          npcs.push_back(std::make_shared<Enemy1Npc>(tile_pos));
+          npcs.push_back(std::make_shared<SimpleWalkNpc>(tile_pos, tile_selection.source, pixel_size));
           break;
         default:
           BAIL;
@@ -82,6 +82,7 @@ struct Map {
   }
 
   void update() {
+    for (auto& npc : npcs) npc->update();
   }
 
   void draw() const {
@@ -89,6 +90,8 @@ struct Map {
 
     for (auto const& [k, v] : walls) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
     for (auto const& [k, v] : boxes) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
+
+    for (auto const& npc : npcs) npc->draw();
   }
 
   void unload() {

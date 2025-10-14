@@ -55,6 +55,7 @@ struct Character {
 
   void init() {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
+
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
                                     asset_manager.textures[TextureNames::Character1__Run],
                                     {32.f, 32.f},
