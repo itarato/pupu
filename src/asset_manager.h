@@ -27,6 +27,7 @@ enum TextureNames {
   Box1__Idle,
   Box2__Idle,
   Box3__Idle,
+  Enemy1__Example,
 };
 
 struct AssetManager {
@@ -83,6 +84,9 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/2_Idle.png"));
     textures[TextureNames::Box3__Idle] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/3_Idle.png"));
+
+    textures[TextureNames::Enemy1__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/1/Example.png"));
   }
 
  private:

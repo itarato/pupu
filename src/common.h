@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <cstdlib>
 #include <functional>
 
 #include "raylib.h"
@@ -10,6 +11,12 @@
   {                                                                      \
     fprintf(stderr, "\x1b[94mBAIL\x1b[0m in %s:%d", __FILE__, __LINE__); \
     exit(EXIT_FAILURE);                                                  \
+  }
+
+#define BAILF(...)                                                        \
+  {                                                                       \
+    log("\x1b[94mBAIL\x1b[0m in %s:%d", __FILE__, __LINE__, __VA_ARGS__); \
+    exit(EXIT_FAILURE);                                                   \
   }
 
 constexpr int const REFERENCE_FPS{144};
@@ -28,6 +35,7 @@ constexpr int const COLLISION_TYPE_ALL{0b1111};
 
 constexpr Rectangle const DEFAULT_TILE_HITBOX{0.f, 0.f, TILE_SIZE, TILE_SIZE};
 constexpr Rectangle const BOX_HITBOX{5.f, 5.f, 22.f, 22.f};
+constexpr Rectangle const ENEMY1_HITBOX{14.f, 26.f, 22.f, 23.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
@@ -152,10 +160,12 @@ enum TileSource {
   Box1,
   Box2,
   Box3,
+  Enemy1,
 };
 
 constexpr IntVec2 const TILESIZE_DEFAULT{TILE_SIZE, TILE_SIZE};
 constexpr IntVec2 const TILESIZE_BOX{32, 32};
+constexpr IntVec2 const TILESIZE_ENEMY1{48, 48};
 
 struct TileSelection {
   TileSource source{};
@@ -173,6 +183,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Box2__Idle];
     } else if (source == TileSource::Box3) {
       texture = asset_manager.textures[TextureNames::Box3__Idle];
+    } else if (source == TileSource::Enemy1) {
+      texture = asset_manager.textures[TextureNames::Enemy1__Example];
     } else {
       BAIL;
     }
@@ -210,6 +222,8 @@ struct TileSelection {
       case TileSource::Box2:
       case TileSource::Box3:
         return TILESIZE_BOX;
+      case TileSource::Enemy1:
+        return TILESIZE_ENEMY1;
       default:
         BAIL;
     }
@@ -223,6 +237,7 @@ struct TileSelection {
       case TileSource::Box1:
       case TileSource::Box2:
       case TileSource::Box3:
+      case TileSource::Enemy1:
         return 1;
       default:
         BAIL;
@@ -238,6 +253,8 @@ struct TileSelection {
       case TileSource::Box2:
       case TileSource::Box3:
         return move(BOX_HITBOX, pos);
+      case TileSource::Enemy1:
+        return move(ENEMY1_HITBOX, pos);
       default:
         BAIL;
     }
@@ -266,8 +283,11 @@ TileSelection tile_selection_from_file(FILE* file) {
     case 4:
       source = TileSource::Box3;
       break;
+    case 5:
+      source = TileSource::Enemy1;
+      break;
     default:
-      BAIL;
+      BAILF("Invalid: %d", tile_source_raw);
   }
 
   return TileSelection{source, pos};

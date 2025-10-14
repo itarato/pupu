@@ -29,6 +29,7 @@ int main() {
   asset_manager.preload();
 
   Editor editor{};
+  editor.load_from_file();
 
   while (!WindowShouldClose()) {
     editor.update();

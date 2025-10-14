@@ -1,11 +1,13 @@
 #pragma once
 
 #include <cstdio>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include "background.h"
 #include "common.h"
+#include "npc.h"
 #include "raylib.h"
 
 struct HitMap {
@@ -65,6 +67,9 @@ struct Map {
         case TileSource::Box2:
         case TileSource::Box3:
           boxes[tile_pos] = tile_selection;
+          break;
+        case TileSource::Enemy1:
+          npcs.push_back(std::make_shared<Enemy1Npc>(tile_pos));
           break;
         default:
           BAIL;
@@ -204,6 +209,7 @@ struct Map {
   int tile_height{};
   std::unordered_map<IntVec2, TileSelection> walls{};
   std::unordered_map<IntVec2, TileSelection> boxes{};
+  std::vector<std::shared_ptr<Npc>> npcs{};
   std::vector<HitMap> hit_map{};
   int const pixel_size;
 
