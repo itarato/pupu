@@ -7,7 +7,6 @@
 
 #include "background.h"
 #include "common.h"
-#include "npc.h"
 #include "raylib.h"
 
 struct HitMap {
@@ -32,32 +31,15 @@ struct Map {
   Map(int const pixel_size) : pixel_size(pixel_size) {
   }
 
-  void reload_from_file() {
+  void reload_world(int background_index, int new_tile_width, int new_tile_height,
+                    std::unordered_map<IntVec2, TileSelection>&& tiles) {
     reset();
 
-    FILE* file = std::fopen("assets/maps/map.mp", "r");
-    if (!file) {
-      TraceLog(LOG_ERROR, "Cannot open map file");
-      exit(EXIT_FAILURE);
-    }
+    tile_width = new_tile_width;
+    tile_height = new_tile_height;
+    background.preload(background_index, new_tile_width, new_tile_height, pixel_size);
 
-    int background_index{};
-    int tiles_count{};
-    if (std::fread(&tile_width, sizeof(int), 1, file) != 1) BAIL;
-    if (std::fread(&tile_height, sizeof(int), 1, file) != 1) BAIL;
-    if (std::fread(&background_index, sizeof(int), 1, file) != 1) BAIL;
-    if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) BAIL;
-
-    SetWindowSize(tile_width * TILE_SIZE * pixel_size, tile_height * TILE_SIZE * pixel_size);
-
-    background.preload(background_index, tile_width, tile_height, pixel_size);
-
-    walls.clear();
-
-    for (int i = 0; i < tiles_count; i++) {
-      IntVec2 tile_pos = intvec2_from_file(file);
-      TileSelection tile_selection{tile_selection_from_file(file)};
-
+    for (auto&& [tile_pos, tile_selection] : tiles) {
       switch (tile_selection.source) {
         case TileSource::Gui:
         case TileSource::Tileset:
@@ -68,21 +50,15 @@ struct Map {
         case TileSource::Box3:
           boxes[tile_pos] = tile_selection;
           break;
-        case TileSource::Enemy1:
-          npcs.push_back(std::make_shared<SimpleWalkNpc>(tile_pos, tile_selection.source, pixel_size));
-          break;
         default:
           BAIL;
       }
     }
 
-    std::fclose(file);
-
     recalculate();
   }
 
   void update() {
-    for (auto& npc : npcs) npc->update(*this);
   }
 
   void draw() const {
@@ -90,8 +66,6 @@ struct Map {
 
     for (auto const& [k, v] : walls) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
     for (auto const& [k, v] : boxes) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
-
-    for (auto const& npc : npcs) npc->draw();
   }
 
   void unload() {
@@ -212,7 +186,6 @@ struct Map {
   int tile_height{};
   std::unordered_map<IntVec2, TileSelection> walls{};
   std::unordered_map<IntVec2, TileSelection> boxes{};
-  std::vector<std::shared_ptr<Npc>> npcs{};
   std::vector<HitMap> hit_map{};
   int const pixel_size;
 
