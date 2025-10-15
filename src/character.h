@@ -28,14 +28,14 @@ constexpr int PLAYER_SPRITE_FALL{4};
 constexpr int PLAYER_SPRITE_DOUBLE_JUMP{5};
 constexpr int PLAYER_SPRITE_WALL_JUMP{6};
 
-enum JumpState {
+enum class JumpState {
   Ground,
   Jump,
   Fall,
   DoubleJump,
 };
 
-enum LifecycleState {
+enum class LifecycleState {
   Appear,
   Live,
 };

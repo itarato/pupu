@@ -88,6 +88,10 @@ struct IntVec2 {
   }
 };
 
+IntVec2 vector2_to_intvec2(Vector2 const v) {
+  return IntVec2{static_cast<int>(v.x), static_cast<int>(v.y)};
+}
+
 constexpr IntVec2 const intvec2_0_0{0, 0};
 constexpr IntVec2 const intvec2_4_4{4, 4};
 
@@ -154,7 +158,7 @@ constexpr Rectangle move(Rectangle const rect, IntVec2 const v) {
   return Rectangle{rect.x + v.x, rect.y + v.y, rect.width, rect.height};
 }
 
-enum TileSource {
+enum class TileSource {
   Gui,
   Tileset,
   Box1,
@@ -162,6 +166,22 @@ enum TileSource {
   Box3,
   Enemy1,
 };
+
+Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
+  switch (tile_source) {
+    case TileSource::Gui:
+    case TileSource::Tileset:
+      return move(DEFAULT_TILE_HITBOX, pos);
+    case TileSource::Box1:
+    case TileSource::Box2:
+    case TileSource::Box3:
+      return move(BOX_HITBOX, pos);
+    case TileSource::Enemy1:
+      return move(ENEMY1_HITBOX, pos);
+    default:
+      BAIL;
+  }
+}
 
 constexpr IntVec2 const TILESIZE_DEFAULT{TILE_SIZE, TILE_SIZE};
 constexpr IntVec2 const TILESIZE_BOX{32, 32};
@@ -245,19 +265,7 @@ struct TileSelection {
   }
 
   Rectangle const hitbox(IntVec2 const pos) const {
-    switch (source) {
-      case TileSource::Gui:
-      case TileSource::Tileset:
-        return move(DEFAULT_TILE_HITBOX, pos);
-      case TileSource::Box1:
-      case TileSource::Box2:
-      case TileSource::Box3:
-        return move(BOX_HITBOX, pos);
-      case TileSource::Enemy1:
-        return move(ENEMY1_HITBOX, pos);
-      default:
-        BAIL;
-    }
+    return tile_source_hitbox(source, pos);
   }
 };
 

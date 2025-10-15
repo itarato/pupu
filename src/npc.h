@@ -16,6 +16,8 @@ constexpr size_t const SimpleWalkNpcSpriteIdle{2};
 constexpr size_t const SimpleWalkNpcSpriteJump{3};
 constexpr size_t const SimpleWalkNpcSpriteRun{4};
 
+constexpr float const SimpleWalkNpcSpeed{200.f};
+
 enum class SimpleWalkNpcState { Idle, Run, Hit };
 
 struct Npc {
@@ -65,10 +67,39 @@ struct SimpleWalkNpc : Npc {
 
   void update(Map const& map) override {
     sprite_group.update();
+
+    Rectangle hitbox = upscale(tile_source_hitbox(TileSource::Enemy1, vector2_to_intvec2(pos)), pixel_size);
+
+    int west_wall = map.west_wall_of_range(hitbox.x, hitbox.y, hitbox.y + hitbox.height - 1);
+    int east_wall = map.east_wall_of_range(hitbox.x + hitbox.width - 1, hitbox.y, hitbox.y + hitbox.height - 1);
+
+    TraceLog(LOG_INFO, "West=%d East=%d", west_wall, east_wall);
+
+    pos.x += speed.x * GetFrameTime();
+
+    // Handle walls.
+    if (speed.x > 0) {
+      // Walk right.
+      float wall_overlap = east_wall - (hitbox.x + hitbox.width - 1.f);
+      if (wall_overlap < 0.f) {
+        pos.x += wall_overlap;
+        sprite_group.horizontal_flip();
+        speed.x = -SimpleWalkNpcSpeed;
+      }
+    } else if (speed.x < 0) {
+      // Walk left.
+      float wall_overlap = hitbox.x - west_wall;
+      if (wall_overlap < 0.f) {
+        pos.x -= wall_overlap;
+        sprite_group.horizontal_flip();
+        speed.x = SimpleWalkNpcSpeed;
+      }
+    }
   }
 
  private:
   Vector2 pos;
+  Vector2 speed{-SimpleWalkNpcSpeed, 0.f};
   int pixel_size;
   SpriteGroup sprite_group{};
   SimpleWalkNpcState state{SimpleWalkNpcState::Run};
