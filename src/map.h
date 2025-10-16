@@ -103,7 +103,7 @@ struct Map {
     int maxx = abs_maxx / (TILE_SIZE * pixel_size);
     int y = abs_y / (TILE_SIZE * pixel_size);
 
-    int min_y_coord = GetScreenHeight();
+    int min_y_coord = tile_height;
     for (int x = minx; x <= maxx; x++) {
       if (!is_tile_coord_valid(x, y)) continue;
       min_y_coord = std::min(min_y_coord, hit_map[y * tile_width + x].south);
@@ -157,7 +157,7 @@ struct Map {
     int miny = abs_miny / (TILE_SIZE * pixel_size);
     int maxy = abs_maxy / (TILE_SIZE * pixel_size);
 
-    int min_x_coord = GetScreenWidth();
+    int min_x_coord = tile_width;
     for (int y = miny; y <= maxy; y++) {
       if (!is_tile_coord_valid(x, y)) continue;
       min_x_coord = std::min(min_x_coord, hit_map[y * tile_width + x].east);

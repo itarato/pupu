@@ -17,6 +17,8 @@ struct App {
   }
 
   void init() {
+    SetTraceLogLevel(LOG_DEBUG);
+
     InitWindow(1024, 768, "Pupu");
     SetTargetFPS(GetMonitorRefreshRate(0));
 

@@ -31,7 +31,7 @@ struct Npc {
 struct SimpleWalkNpc : Npc {
  public:
   SimpleWalkNpc(IntVec2 const pos, TileSource const tile_source, int const pixel_size)
-      : pos(pos.to_vector2()), pixel_size(pixel_size) {
+      : pos(pos.scale(pixel_size).to_vector2()), pixel_size(pixel_size) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
 
     switch (tile_source) {
@@ -62,34 +62,39 @@ struct SimpleWalkNpc : Npc {
   ~SimpleWalkNpc() = default;
 
   void draw() const override {
-    sprite_group.draw(Vector2Scale(pos, pixel_size));
+    sprite_group.draw(pos);
   }
 
   void update(Map const& map) override {
     sprite_group.update();
 
-    Rectangle hitbox = upscale(tile_source_hitbox(TileSource::Enemy1, vector2_to_intvec2(pos)), pixel_size);
+    Rectangle _hitbox = hitbox();
+    // debug(hitbox, "Hitbox");
+    // debug(pos, "Pos");
 
-    int west_wall = map.west_wall_of_range(hitbox.x, hitbox.y, hitbox.y + hitbox.height - 1);
-    int east_wall = map.east_wall_of_range(hitbox.x + hitbox.width - 1, hitbox.y, hitbox.y + hitbox.height - 1);
+    int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+    int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
 
-    TraceLog(LOG_INFO, "West=%d East=%d", west_wall, east_wall);
+    // TraceLog(LOG_INFO, "West=%d East=%d", west_wall, east_wall);
 
     pos.x += speed.x * GetFrameTime();
+    _hitbox = hitbox();
 
     // Handle walls.
     if (speed.x > 0) {
       // Walk right.
-      float wall_overlap = east_wall - (hitbox.x + hitbox.width - 1.f);
+      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
       if (wall_overlap < 0.f) {
         pos.x += wall_overlap;
-        sprite_group.horizontal_flip();
+        sprite_group.horizontal_reset();
         speed.x = -SimpleWalkNpcSpeed;
       }
     } else if (speed.x < 0) {
       // Walk left.
-      float wall_overlap = hitbox.x - west_wall;
+      float wall_overlap = _hitbox.x - west_wall;
+      // TraceLog(LOG_INFO, "WestOverlap=%.2f", wall_overlap);
       if (wall_overlap < 0.f) {
+        // TraceLog(LOG_DEBUG, "X changes from %.2f to %.2f", pos.x, pos.x - wall_overlap);
         pos.x -= wall_overlap;
         sprite_group.horizontal_flip();
         speed.x = SimpleWalkNpcSpeed;
@@ -103,4 +108,8 @@ struct SimpleWalkNpc : Npc {
   int pixel_size;
   SpriteGroup sprite_group{};
   SimpleWalkNpcState state{SimpleWalkNpcState::Run};
+
+  Rectangle hitbox() const {
+    return move(upscale(tile_source_hitbox(TileSource::Enemy1, intvec2_0_0), pixel_size), pos);
+  }
 };

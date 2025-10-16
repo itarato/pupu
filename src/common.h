@@ -35,7 +35,7 @@ constexpr int const COLLISION_TYPE_ALL{0b1111};
 
 constexpr Rectangle const DEFAULT_TILE_HITBOX{0.f, 0.f, TILE_SIZE, TILE_SIZE};
 constexpr Rectangle const BOX_HITBOX{5.f, 5.f, 22.f, 22.f};
-constexpr Rectangle const ENEMY1_HITBOX{14.f, 26.f, 22.f, 23.f};
+constexpr Rectangle const ENEMY1_HITBOX{14.f, 26.f, 22.f, 22.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
@@ -155,6 +155,10 @@ constexpr Rectangle upscale(Rectangle const rect, float const scale) {
 }
 
 constexpr Rectangle move(Rectangle const rect, IntVec2 const v) {
+  return Rectangle{rect.x + v.x, rect.y + v.y, rect.width, rect.height};
+}
+
+constexpr Rectangle move(Rectangle const rect, Vector2 const v) {
   return Rectangle{rect.x + v.x, rect.y + v.y, rect.width, rect.height};
 }
 
@@ -327,4 +331,12 @@ bool is_horizontal_overlap(Rectangle const rect, int const abs_minx, int const a
 bool is_vertical_overlap(Rectangle const rect, int const abs_miny, int const abs_maxy) {
   if (rect.y > abs_maxy || (rect.y + rect.height - 1) < abs_miny) return false;
   return true;
+}
+
+void debug(Vector2 v, const char* msg) {
+  TraceLog(LOG_DEBUG, "%s :: Vector2 { %.2f, %.2f }", msg, v.x, v.y);
+}
+
+void debug(Rectangle r, const char* msg) {
+  TraceLog(LOG_DEBUG, "%s :: Rectangle { %.2f, %.2f, %.2f, %.2f }", msg, r.x, r.y, r.width, r.height);
 }
