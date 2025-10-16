@@ -66,38 +66,44 @@ struct SimpleWalkNpc : Npc {
   }
 
   void update(Map const& map) override {
+    movement_timeout.update();
     sprite_group.update();
 
-    Rectangle _hitbox = hitbox();
-    // debug(hitbox, "Hitbox");
-    // debug(pos, "Pos");
+    if (state == SimpleWalkNpcState::Run) {
+      Rectangle _hitbox = hitbox();
+      int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+      int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
 
-    int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
-    int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+      pos.x += speed.x * GetFrameTime();
+      _hitbox = hitbox();
 
-    // TraceLog(LOG_INFO, "West=%d East=%d", west_wall, east_wall);
-
-    pos.x += speed.x * GetFrameTime();
-    _hitbox = hitbox();
-
-    // Handle walls.
-    if (speed.x > 0) {
-      // Walk right.
-      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
-      if (wall_overlap < 0.f) {
-        pos.x += wall_overlap;
-        sprite_group.horizontal_reset();
-        speed.x = -SimpleWalkNpcSpeed;
+      // Handle walls.
+      if (speed.x > 0) {  // Walk right.
+        float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
+        if (wall_overlap < 0.f) {
+          pos.x += wall_overlap;
+          sprite_group.horizontal_reset();
+          speed.x = -SimpleWalkNpcSpeed;
+        }
+      } else if (speed.x < 0) {  // Walk left.
+        float wall_overlap = _hitbox.x - west_wall;
+        if (wall_overlap < 0.f) {
+          pos.x -= wall_overlap;
+          sprite_group.horizontal_flip();
+          speed.x = SimpleWalkNpcSpeed;
+        }
       }
-    } else if (speed.x < 0) {
-      // Walk left.
-      float wall_overlap = _hitbox.x - west_wall;
-      // TraceLog(LOG_INFO, "WestOverlap=%.2f", wall_overlap);
-      if (wall_overlap < 0.f) {
-        // TraceLog(LOG_DEBUG, "X changes from %.2f to %.2f", pos.x, pos.x - wall_overlap);
-        pos.x -= wall_overlap;
-        sprite_group.horizontal_flip();
-        speed.x = SimpleWalkNpcSpeed;
+
+      if (movement_timer.update()) {
+        if (randf() >= 0.8) {
+          state = SimpleWalkNpcState::Idle;
+          sprite_group.set_current_sprite(SimpleWalkNpcSpriteIdle);
+          movement_timeout.set_on_timeout([&]() { this->resume_to_run_state(); }, randf() * 3.f);
+        }
+      }
+    } else if (state == SimpleWalkNpcState::Idle) {
+      if (movement_timer.update()) {
+        if (randf() > 0.6) turn_horizontally();
       }
     }
   }
@@ -108,8 +114,25 @@ struct SimpleWalkNpc : Npc {
   int pixel_size;
   SpriteGroup sprite_group{};
   SimpleWalkNpcState state{SimpleWalkNpcState::Run};
+  Timeout movement_timeout{};
+  RepeatTimer movement_timer{0.3};
 
   Rectangle hitbox() const {
     return move(upscale(tile_source_hitbox(TileSource::Enemy1, intvec2_0_0), pixel_size), pos);
+  }
+
+  void resume_to_run_state() {
+    state = SimpleWalkNpcState::Run;
+    sprite_group.set_current_sprite(SimpleWalkNpcSpriteRun);
+  }
+
+  void turn_horizontally() {
+    if (speed.x < 0) {
+      sprite_group.horizontal_flip();
+      speed.x = SimpleWalkNpcSpeed;
+    } else {
+      sprite_group.horizontal_reset();
+      speed.x = -SimpleWalkNpcSpeed;
+    }
   }
 };

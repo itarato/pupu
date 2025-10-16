@@ -162,6 +162,50 @@ constexpr Rectangle move(Rectangle const rect, Vector2 const v) {
   return Rectangle{rect.x + v.x, rect.y + v.y, rect.width, rect.height};
 }
 
+struct Timeout {
+ public:
+  Timeout() {
+  }
+
+  void update() {
+    if (timeout == 0.0) return;
+
+    if (timeout <= GetTime()) {
+      on_timeout();
+      timeout = 0.0;
+    }
+  }
+
+  void set_on_timeout(std::function<void()> cb, double timeout_seconds) {
+    on_timeout = std::move(cb);
+    timeout = GetTime() + timeout_seconds;
+  }
+
+ private:
+  std::function<void()> on_timeout{};
+  double timeout{0.0};
+};
+
+struct RepeatTimer {
+ public:
+  RepeatTimer(double interval) : interval(interval) {
+    next_tick = GetTime() + interval;
+  }
+
+  bool update() {
+    if (next_tick <= GetTime()) {
+      next_tick = GetTime() + interval;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+ private:
+  double interval;
+  double next_tick;
+};
+
 enum class TileSource {
   Gui,
   Tileset,
@@ -339,4 +383,8 @@ void debug(Vector2 v, const char* msg) {
 
 void debug(Rectangle r, const char* msg) {
   TraceLog(LOG_DEBUG, "%s :: Rectangle { %.2f, %.2f, %.2f, %.2f }", msg, r.x, r.y, r.width, r.height);
+}
+
+float randf() {
+  return static_cast<float>(rand() % 1001) / 1000.f;
 }
