@@ -31,7 +31,7 @@ struct Npc {
 struct SimpleWalkNpc : Npc {
  public:
   SimpleWalkNpc(IntVec2 const pos, TileSource const tile_source, int const pixel_size)
-      : pos(pos.scale(pixel_size).to_vector2()), pixel_size(pixel_size) {
+      : pos(pos.scale(pixel_size).to_vector2()), pixel_size(pixel_size), tile_source(tile_source) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
 
     switch (tile_source) {
@@ -52,11 +52,30 @@ struct SimpleWalkNpc : Npc {
                                         asset_manager.textures[TextureNames::Enemy1__Run], SIMPLE_WALK_NPC_SIZE, 12,
                                         sprite_frame_length});
 
-        sprite_group.set_current_sprite(SimpleWalkNpcSpriteRun);
+        break;
+      case TileSource::Enemy2:
+        sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                        asset_manager.textures[TextureNames::Enemy2__Fall], SIMPLE_WALK_NPC_SIZE, 1,
+                                        sprite_frame_length});
+        sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                        asset_manager.textures[TextureNames::Enemy2__Hit], SIMPLE_WALK_NPC_SIZE, 5,
+                                        sprite_frame_length});
+        sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                        asset_manager.textures[TextureNames::Enemy2__Idle], SIMPLE_WALK_NPC_SIZE, 11,
+                                        sprite_frame_length});
+        sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                        asset_manager.textures[TextureNames::Enemy2__Jump], SIMPLE_WALK_NPC_SIZE, 1,
+                                        sprite_frame_length});
+        sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                        asset_manager.textures[TextureNames::Enemy2__Run], SIMPLE_WALK_NPC_SIZE, 12,
+                                        sprite_frame_length});
+
         break;
       default:
         BAILF("Invalid: %d", tile_source);
     }
+
+    sprite_group.set_current_sprite(SimpleWalkNpcSpriteRun);
   }
 
   ~SimpleWalkNpc() = default;
@@ -111,14 +130,15 @@ struct SimpleWalkNpc : Npc {
  private:
   Vector2 pos;
   Vector2 speed{-SimpleWalkNpcSpeed, 0.f};
-  int pixel_size;
+  int const pixel_size;
   SpriteGroup sprite_group{};
   SimpleWalkNpcState state{SimpleWalkNpcState::Run};
   Timeout movement_timeout{};
   RepeatTimer movement_timer{0.3};
+  TileSource const tile_source;
 
   Rectangle hitbox() const {
-    return move(upscale(tile_source_hitbox(TileSource::Enemy1, intvec2_0_0), pixel_size), pos);
+    return move(upscale(tile_source_hitbox(tile_source, intvec2_0_0), pixel_size), pos);
   }
 
   void resume_to_run_state() {

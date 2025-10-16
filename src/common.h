@@ -213,6 +213,7 @@ enum class TileSource {
   Box2,
   Box3,
   Enemy1,
+  Enemy2,
 };
 
 Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
@@ -225,6 +226,7 @@ Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
     case TileSource::Box3:
       return move(BOX_HITBOX, pos);
     case TileSource::Enemy1:
+    case TileSource::Enemy2:
       return move(ENEMY1_HITBOX, pos);
     default:
       BAIL;
@@ -253,6 +255,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Box3__Idle];
     } else if (source == TileSource::Enemy1) {
       texture = asset_manager.textures[TextureNames::Enemy1__Example];
+    } else if (source == TileSource::Enemy2) {
+      texture = asset_manager.textures[TextureNames::Enemy2__Jump];
     } else {
       BAIL;
     }
@@ -291,6 +295,7 @@ struct TileSelection {
       case TileSource::Box3:
         return TILESIZE_BOX;
       case TileSource::Enemy1:
+      case TileSource::Enemy2:
         return TILESIZE_ENEMY1;
       default:
         BAIL;
@@ -306,6 +311,7 @@ struct TileSelection {
       case TileSource::Box2:
       case TileSource::Box3:
       case TileSource::Enemy1:
+      case TileSource::Enemy2:
         return 1;
       default:
         BAIL;
@@ -341,6 +347,9 @@ TileSelection tile_selection_from_file(FILE* file) {
       break;
     case 5:
       source = TileSource::Enemy1;
+      break;
+    case 6:
+      source = TileSource::Enemy2;
       break;
     default:
       BAILF("Invalid: %d", tile_source_raw);

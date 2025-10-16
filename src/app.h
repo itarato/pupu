@@ -92,6 +92,7 @@ struct App {
           map_tiles[tile_pos] = tile_selection;
           break;
         case TileSource::Enemy1:
+        case TileSource::Enemy2:
           npcs.push_back(std::make_shared<SimpleWalkNpc>(tile_pos, tile_selection.source, pixel_size));
           break;
         default:

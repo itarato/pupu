@@ -33,6 +33,11 @@ enum TextureNames {
   Enemy1__Idle,
   Enemy1__Jump,
   Enemy1__Run,
+  Enemy2__Fall,
+  Enemy2__Hit,
+  Enemy2__Idle,
+  Enemy2__Jump,
+  Enemy2__Run,
 };
 
 struct AssetManager {
@@ -102,6 +107,17 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/1/Jump.png"));
     textures[TextureNames::Enemy1__Run] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/1/Run.png"));
+
+    textures[TextureNames::Enemy2__Fall] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/2/Fall.png"));
+    textures[TextureNames::Enemy2__Hit] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/2/Hit.png"));
+    textures[TextureNames::Enemy2__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/2/Idle.png"));
+    textures[TextureNames::Enemy2__Jump] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/2/Jump.png"));
+    textures[TextureNames::Enemy2__Run] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/2/Run.png"));
   }
 
  private:
