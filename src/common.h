@@ -181,6 +181,10 @@ struct Timeout {
     timeout = GetTime() + timeout_seconds;
   }
 
+  void cancel() {
+    timeout = 0.0f;
+  }
+
  private:
   std::function<void()> on_timeout{};
   double timeout{0.0};

@@ -38,6 +38,7 @@ enum class JumpState {
 enum class LifecycleState {
   Appear,
   Live,
+  Injured,
 };
 
 struct Character {
@@ -93,12 +94,14 @@ struct Character {
   void update(Map const& map) {
     if (lifecycle_state == LifecycleState::Appear) {
       if (appear_sprite.update()) lifecycle_state = LifecycleState::Live;
-    } else if (lifecycle_state == LifecycleState::Live) {
+    } else if (lifecycle_state == LifecycleState::Live || lifecycle_state == LifecycleState::Injured) {
       update_movement(map);
       sprite_group.update();
     } else {
       TraceLog(LOG_ERROR, "Invalid lifecycle state");
     }
+
+    injury_timeout.update();
   }
 
   void draw() const {
@@ -118,6 +121,33 @@ struct Character {
     //            {static_cast<float>(hit_map.east), static_cast<float>(GetScreenHeight())}, pixel_size, RED);
   }
 
+  bool is_falling() const {
+    return jump_state == JumpState::Fall;
+  }
+
+  Rectangle const hitbox() const {
+    Vector2 top_left_corner{hitbox_top_left()};
+    Vector2 size{Vector2Subtract(hitbox_bottom_right(), top_left_corner)};
+    return Rectangle{top_left_corner.x, top_left_corner.y, size.x, size.y};
+  }
+
+  void injure() {
+    if (is_injured()) return;
+
+    TraceLog(LOG_INFO, "CHAR INJURED");
+
+    injury_timeout.cancel();
+    lifecycle_state = LifecycleState::Injured;
+    sprite_group.set_current_sprite(PLAYER_SPRITE_HIT);
+
+    injury_timeout.set_on_timeout([&]() { end_injury(); }, 2.f);
+  }
+
+  void enemy_head_bounce() {
+    speed.y = GetFrameTime() * PLAYER_JUMP_SPEED / 1.5f;
+    jump_state = JumpState::Jump;
+  }
+
  private:
   const int pixel_size{DEFAULT_PIXEL_SIZE};
   SpriteGroup sprite_group{};
@@ -127,6 +157,7 @@ struct Character {
   int multi_jump_count{0};
   JumpState jump_state{JumpState::Ground};
   LifecycleState lifecycle_state{LifecycleState::Appear};
+  Timeout injury_timeout{};
 
   // Debug
   HitMap hit_map{};
@@ -141,13 +172,13 @@ struct Character {
     //            hitbox_bottom_right().y, hit_map.north, hit_map.south, hit_map.west, hit_map.east);
     // }
 
-    if (IsKeyDown(KEY_LEFT)) {
+    if (!is_injured() && IsKeyDown(KEY_LEFT)) {
       sprite_group.horizontal_flip();
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x -= speed_increments();
 
       if (speed.x < -max_speed()) speed.x = -max_speed();
-    } else if (IsKeyDown(KEY_RIGHT)) {
+    } else if (!is_injured() && IsKeyDown(KEY_RIGHT)) {
       sprite_group.horizontal_reset();
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x += speed_increments();
@@ -178,7 +209,7 @@ struct Character {
       multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
 
-    if (IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
+    if (!is_injured() && IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
       speed.y = GetFrameTime() * PLAYER_JUMP_SPEED;
       multi_jump_count++;
       if (multi_jump_count == 1) {
@@ -243,6 +274,8 @@ struct Character {
       sprite_group.set_current_sprite(PLAYER_SPRITE_FALL);
     } else if (jump_state == JumpState::DoubleJump) {
       sprite_group.set_current_sprite(PLAYER_SPRITE_DOUBLE_JUMP);
+    } else if (lifecycle_state == LifecycleState::Injured) {
+      sprite_group.set_current_sprite(PLAYER_SPRITE_HIT);
     }
   }
 
@@ -264,12 +297,6 @@ struct Character {
                    pos.y + (PLAYER_TEXTURE_SIZE * pixel_size) - 1.f};
   }
 
-  Rectangle const frame() const {
-    Vector2 top_left_corner{hitbox_top_left()};
-    Vector2 size{Vector2Subtract(hitbox_bottom_right(), top_left_corner)};
-    return Rectangle{top_left_corner.x, top_left_corner.y, size.x, size.y};
-  }
-
   HitMap calculate_hitmap(Map const& map) const {
     HitMap hit_map{};
 
@@ -282,5 +309,13 @@ struct Character {
     hit_map.west = map.west_wall_of_range(_hitbox_top_left.x, _hitbox_top_left.y, _hitbox_bottom_right.y);
 
     return hit_map;
+  }
+
+  void end_injury() {
+    lifecycle_state = LifecycleState::Live;
+  }
+
+  bool is_injured() const {
+    return lifecycle_state == LifecycleState::Injured;
   }
 };

@@ -24,6 +24,9 @@ struct Npc {
  public:
   virtual void draw() const = 0;
   virtual void update(Map const& map) = 0;
+  virtual Rectangle hitbox() const = 0;
+  virtual void injure() = 0;
+  virtual bool is_injured() const = 0;
 
   virtual ~Npc() = default;
 };
@@ -127,6 +130,22 @@ struct SimpleWalkNpc : Npc {
     }
   }
 
+  Rectangle hitbox() const override {
+    return move(upscale(tile_source_hitbox(tile_source, intvec2_0_0), pixel_size), pos);
+  }
+
+  void injure() override {
+    sprite_group.set_current_sprite(SimpleWalkNpcSpriteHit);
+    state = SimpleWalkNpcState::Hit;
+
+    movement_timeout.cancel();
+    movement_timeout.set_on_timeout([&]() { resume_to_run_state(); }, 3.f);
+  }
+
+  bool is_injured() const override {
+    return state == SimpleWalkNpcState::Hit;
+  }
+
  private:
   Vector2 pos;
   Vector2 speed{-SimpleWalkNpcSpeed, 0.f};
@@ -136,10 +155,6 @@ struct SimpleWalkNpc : Npc {
   Timeout movement_timeout{};
   RepeatTimer movement_timer{0.3};
   TileSource const tile_source;
-
-  Rectangle hitbox() const {
-    return move(upscale(tile_source_hitbox(tile_source, intvec2_0_0), pixel_size), pos);
-  }
 
   void resume_to_run_state() {
     state = SimpleWalkNpcState::Run;

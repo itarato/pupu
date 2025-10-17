@@ -132,10 +132,32 @@ struct App {
       map.update();
       for (auto& npc : npcs) npc->update(map);
       character.update(map);
+
+      update__character_collisions();
     }
 
     if (IsKeyPressed(KEY_P)) pause_update = !pause_update;
 
     if (IsKeyPressed(KEY_R)) reset();
+  }
+
+  void update__character_collisions() {
+    for (auto& npc : npcs) {
+      Rectangle npc_hitbox{npc->hitbox()};
+      Rectangle character_hitbox{character.hitbox()};
+
+      if (CheckCollisionRecs(npc_hitbox, character_hitbox)) {
+        if (character.is_falling()) {
+          if (!npc->is_injured()) {
+            npc->injure();
+            character.enemy_head_bounce();
+          }
+        } else {
+          if (!npc->is_injured()) {
+            character.injure();
+          }
+        }
+      }
+    }
   }
 };
