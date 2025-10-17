@@ -9,6 +9,7 @@
 #include "sprite_group.h"
 
 constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
+constexpr Vector2 const ChargingNpcSize{48.f, 48.f};
 
 constexpr size_t const SimpleWalkNpcSpriteFall{0};
 constexpr size_t const SimpleWalkNpcSpriteHit{1};
@@ -16,7 +17,15 @@ constexpr size_t const SimpleWalkNpcSpriteIdle{2};
 constexpr size_t const SimpleWalkNpcSpriteJump{3};
 constexpr size_t const SimpleWalkNpcSpriteRun{4};
 
+constexpr size_t const ChargingNpcSpriteCharge{0};
+constexpr size_t const ChargingNpcSpriteHit{1};
+constexpr size_t const ChargingNpcSpriteIdle{2};
+constexpr size_t const ChargingNpcSpriteJump{3};
+constexpr size_t const ChargingNpcSpriteWalk{4};
+
 constexpr float const SimpleWalkNpcSpeed{200.f};
+constexpr float const ChargingNpcWalkSpeed{150.f};
+constexpr float const ChargingNpcChargeSpeed{250.f};
 
 enum class SimpleWalkNpcState { Idle, Run, Hit };
 
@@ -170,4 +179,50 @@ struct SimpleWalkNpc : Npc {
       speed.x = -SimpleWalkNpcSpeed;
     }
   }
+};
+
+struct ChargingNpc : Npc {
+ public:
+  ChargingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
+
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Enemy3__Charge], ChargingNpcSize, 12,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Hit],
+                                    ChargingNpcSize, 5, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Idle],
+                                    ChargingNpcSize, 11, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Stun],
+                                    ChargingNpcSize, 8, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Walk],
+                                    ChargingNpcSize, 12, sprite_frame_length});
+
+    sprite_group.set_current_sprite(ChargingNpcSpriteIdle);
+  }
+
+  void draw() const override {
+    sprite_group.draw(pos);
+  }
+
+  void update(Map const& map) override {
+    sprite_group.update();
+  }
+
+  Rectangle hitbox() const override {
+  }
+
+  void injure() override {
+  }
+
+  bool is_injured() const override {
+  }
+
+  virtual ~ChargingNpc() override {
+  }
+
+ private:
+  Vector2 pos;
+  int const pixel_size;
+  SpriteGroup sprite_group{};
 };
