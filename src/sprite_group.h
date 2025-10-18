@@ -21,34 +21,38 @@ struct SpriteGroup {
   }
 
   void horizontal_flip() {
-    for (auto &sprite : sprites) sprite.horizontal_flip();
+    for (auto& sprite : sprites) sprite.horizontal_flip();
   }
 
   void horizontal_reset() {
-    for (auto &sprite : sprites) sprite.horizontal_reset();
+    for (auto& sprite : sprites) sprite.horizontal_reset();
   }
 
-  void update() {
-    current_sprite_mut().update();
+  int update() {
+    return current_sprite_mut().update();
   }
 
-  void draw(Vector2 const &pos) const {
+  void draw(Vector2 const& pos) const {
     current_sprite().draw(pos);
   }
 
-  void push_sprite(Sprite &&sprite) {
+  void push_sprite(Sprite&& sprite) {
     sprites.push_back(std::move(sprite));
+  }
+
+  void restart() {
+    current_sprite_mut().restart();
   }
 
  private:
   std::vector<Sprite> sprites{};
   size_t current_sprite_index{0};
 
-  Sprite &current_sprite_mut() {
+  Sprite& current_sprite_mut() {
     return sprites[current_sprite_index];
   }
 
-  Sprite const &current_sprite() const {
+  Sprite const& current_sprite() const {
     return sprites[current_sprite_index];
   }
 };

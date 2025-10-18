@@ -93,7 +93,7 @@ struct Character {
 
   void update(Map const& map) {
     if (lifecycle_state == LifecycleState::Appear) {
-      if (appear_sprite.update()) lifecycle_state = LifecycleState::Live;
+      if (appear_sprite.update() == 0) lifecycle_state = LifecycleState::Live;
     } else if (lifecycle_state == LifecycleState::Live || lifecycle_state == LifecycleState::Injured) {
       update_movement(map);
       sprite_group.update();

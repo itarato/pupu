@@ -21,9 +21,13 @@ struct Sprite {
   }
 
   void reset() {
+    restart();
+    horizontal_reverse = 1;
+  }
+
+  void restart() {
     frame_stepper.reset();
     current_frame = 0;
-    horizontal_reverse = 1;
   }
 
   void init_texture(std::shared_ptr<Texture2D> new_texture, Vector2 new_size, int new_frame_count,
@@ -34,24 +38,24 @@ struct Sprite {
     frame_stepper.set_threshold(frame_length);
   }
 
-  void draw(Vector2 const &pos) const {
+  void draw(Vector2 const& pos) const {
     DrawTexturePro(*texture, {size.x * current_frame, 0.f, size.x * horizontal_reverse, size.y},
                    {pos.x - origin.x, pos.y - origin.y, size.x * pixel_size, size.y * pixel_size}, origin, 0.f, WHITE);
   }
 
   /**
-   * Returns true on finishing a cycle.
+   * Returns a non negative integer when it's changed to a new sequence.
    */
-  bool update() {
-    if (frame_count == 1) return false;
+  int update() {
+    if (frame_count == 1) return -1;
 
     if (frame_stepper.update()) {
       current_frame = (current_frame + 1) % frame_count;
 
-      return current_frame == 0;
+      return current_frame;
     }
 
-    return false;
+    return -1;
   }
 
   void set_pixel_size(float new_pixel_size) {

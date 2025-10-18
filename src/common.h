@@ -314,6 +314,7 @@ struct TileSelection {
       case TileSource::Enemy1:
       case TileSource::Enemy2:
       case TileSource::Enemy3:
+      case TileSource::Enemy4:
         return TILESIZE_ENEMY1;
       default:
         BAIL;
@@ -331,6 +332,7 @@ struct TileSelection {
       case TileSource::Enemy1:
       case TileSource::Enemy2:
       case TileSource::Enemy3:
+      case TileSource::Enemy4:
         return 1;
       default:
         BAIL;
@@ -372,6 +374,9 @@ TileSelection tile_selection_from_file(FILE* file) {
       break;
     case 7:
       source = TileSource::Enemy3;
+      break;
+    case 8:
+      source = TileSource::Enemy4;
       break;
     default:
       BAILF("Invalid: %d", tile_source_raw);
@@ -424,4 +429,19 @@ void debug(Rectangle r, const char* msg) {
 
 float randf() {
   return static_cast<float>(rand() % 1001) / 1000.f;
+}
+
+bool can_charge_character(int west_wall, int east_wall, Rectangle const& self_hitbox,
+                          Rectangle const& character_hitbox) {
+  if (is_vertical_overlap(self_hitbox, character_hitbox)) {
+    if (west_wall <= character_hitbox.x + character_hitbox.width && character_hitbox.x <= self_hitbox.x) {
+      return true;
+    }
+    if (self_hitbox.x + self_hitbox.width <= character_hitbox.x + character_hitbox.width &&
+        character_hitbox.x <= east_wall) {
+      return true;
+    }
+  }
+
+  return false;
 }

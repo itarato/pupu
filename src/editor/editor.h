@@ -268,6 +268,13 @@ struct Editor {
                static_cast<float>(asset_manager.textures[TextureNames::Enemy3__Example]->height * fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Enemy3, {0, 0}};
       }
+
+      if (rlImGuiImageButtonSize(
+              "Enemy4", &*asset_manager.textures[TextureNames::Enemy4__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Enemy4__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Enemy4__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Enemy4, {0, 0}};
+      }
     }
   }
 

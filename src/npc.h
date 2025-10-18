@@ -313,21 +313,6 @@ struct ChargingNpc : Npc {
   ChargingNpcState state{ChargingNpcState::Walking};
   Timeout hit_timeout{};
 
-  bool can_charge_character(int west_wall, int east_wall, Rectangle const& self_hitbox,
-                            Rectangle const& character_hitbox) const {
-    if (is_vertical_overlap(self_hitbox, character_hitbox)) {
-      if (west_wall <= character_hitbox.x + character_hitbox.width && character_hitbox.x <= self_hitbox.x) {
-        return true;
-      }
-      if (self_hitbox.x + self_hitbox.width <= character_hitbox.x + character_hitbox.width &&
-          character_hitbox.x <= east_wall) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   bool is_charging() const {
     return state == ChargingNpcState::Charging;
   }
@@ -364,14 +349,14 @@ struct ShootingNpc : Npc {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Enemy4__Attack], ChargingNpcSize, 11,
+                                    asset_manager.textures[TextureNames::Enemy4__Attack], ChargingNpcSize, 7,
                                     sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Hit],
-                                    ChargingNpcSize, 12, sprite_frame_length});
-    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Idle],
                                     ChargingNpcSize, 5, sprite_frame_length});
-    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Walk],
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Idle],
                                     ChargingNpcSize, 11, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Walk],
+                                    ChargingNpcSize, 12, sprite_frame_length});
   }
 
   void draw() const override {
@@ -389,6 +374,21 @@ struct ShootingNpc : Npc {
     float speed = state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f;
     pos.x += speed * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
     _hitbox = hitbox();
+
+    if (state == ShootingNpcState::Walk) {
+      Rectangle character_hitbox{character.hitbox()};
+      if (can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
+        state = ShootingNpcState::Attack;
+        sprite_group.set_current_sprite(ShootingNpcSpriteAttack);
+        if (character_hitbox.x <= _hitbox.x) {  // Charge left.
+          sprite_group.horizontal_reset();
+          is_direction_left = true;
+        } else {  // Charge right.
+          sprite_group.horizontal_flip();
+          is_direction_left = false;
+        }
+      }
+    }
 
     // Handle walls.
     if (is_direction_left) {  // Walk left.
