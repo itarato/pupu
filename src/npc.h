@@ -105,6 +105,7 @@ struct SimpleWalkNpc : Npc {
 
   void draw() const override {
     sprite_group.draw(pos);
+    // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
   void update(Map const& map, Character const& character) override {
@@ -223,6 +224,7 @@ struct ChargingNpc : Npc {
 
   void draw() const override {
     sprite_group.draw(pos);
+    // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
   void update(Map const& map, Character const& character) override {
@@ -365,6 +367,7 @@ struct ShootingNpc : Npc {
 
   void draw() const override {
     sprite_group.draw(pos);
+    // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
     for (auto const& bullet : bullets) bullet.draw();
   }
 
@@ -429,7 +432,7 @@ struct ShootingNpc : Npc {
   }
 
   Rectangle hitbox() const override {
-    return move(upscale(tile_source_hitbox(TileSource::Enemy3, intvec2_0_0), pixel_size), pos);
+    return move(upscale(tile_source_hitbox(TileSource::Enemy4, intvec2_0_0), pixel_size), pos);
   }
 
   void injure() override {

@@ -35,7 +35,10 @@ constexpr int const COLLISION_TYPE_ALL{0b1111};
 
 constexpr Rectangle const DEFAULT_TILE_HITBOX{0.f, 0.f, TILE_SIZE, TILE_SIZE};
 constexpr Rectangle const BOX_HITBOX{5.f, 5.f, 22.f, 22.f};
-constexpr Rectangle const ENEMY1_HITBOX{14.f, 26.f, 22.f, 22.f};
+constexpr Rectangle const ENEMY1_HITBOX{14.f, 20.f, 22.f, 28.f};
+constexpr Rectangle const ENEMY2_HITBOX{16.f, 19.f, 16.f, 29.f};
+constexpr Rectangle const ENEMY3_HITBOX{14.f, 19.f, 19.f, 29.f};
+constexpr Rectangle const ENEMY4_HITBOX{12.f, 23.f, 24.f, 25.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
@@ -237,10 +240,13 @@ Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
     case TileSource::Box3:
       return move(BOX_HITBOX, pos);
     case TileSource::Enemy1:
-    case TileSource::Enemy2:
-    case TileSource::Enemy3:
-    case TileSource::Enemy4:
       return move(ENEMY1_HITBOX, pos);
+    case TileSource::Enemy2:
+      return move(ENEMY2_HITBOX, pos);
+    case TileSource::Enemy3:
+      return move(ENEMY3_HITBOX, pos);
+    case TileSource::Enemy4:
+      return move(ENEMY4_HITBOX, pos);
     default:
       BAIL;
   }
