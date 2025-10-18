@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asset_manager.h"
+#include "character.h"
 #include "common.h"
 #include "map.h"
 #include "raylib.h"
@@ -20,11 +21,11 @@ constexpr size_t const SimpleWalkNpcSpriteRun{4};
 constexpr size_t const ChargingNpcSpriteCharge{0};
 constexpr size_t const ChargingNpcSpriteHit{1};
 constexpr size_t const ChargingNpcSpriteIdle{2};
-constexpr size_t const ChargingNpcSpriteJump{3};
+constexpr size_t const ChargingNpcSpriteStun{3};
 constexpr size_t const ChargingNpcSpriteWalk{4};
 
 constexpr float const SimpleWalkNpcSpeed{200.f};
-constexpr float const ChargingNpcWalkSpeed{150.f};
+constexpr float const ChargingNpcWalkSpeed{100.f};
 constexpr float const ChargingNpcChargeSpeed{250.f};
 
 enum class SimpleWalkNpcState { Idle, Run, Hit };
@@ -32,7 +33,7 @@ enum class SimpleWalkNpcState { Idle, Run, Hit };
 struct Npc {
  public:
   virtual void draw() const = 0;
-  virtual void update(Map const& map) = 0;
+  virtual void update(Map const& map, Character const& character) = 0;
   virtual Rectangle hitbox() const = 0;
   virtual void injure() = 0;
   virtual bool is_injured() const = 0;
@@ -96,7 +97,7 @@ struct SimpleWalkNpc : Npc {
     sprite_group.draw(pos);
   }
 
-  void update(Map const& map) override {
+  void update(Map const& map, Character const& character) override {
     movement_timeout.update();
     sprite_group.update();
 
@@ -181,6 +182,13 @@ struct SimpleWalkNpc : Npc {
   }
 };
 
+enum class ChargingNpcState {
+  Walking,
+  Charging,
+  Stunned,
+  Hit,
+};
+
 struct ChargingNpc : Npc {
  public:
   ChargingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
@@ -198,31 +206,141 @@ struct ChargingNpc : Npc {
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Walk],
                                     ChargingNpcSize, 12, sprite_frame_length});
 
-    sprite_group.set_current_sprite(ChargingNpcSpriteIdle);
+    sprite_group.set_current_sprite(ChargingNpcSpriteWalk);
   }
+
+  ~ChargingNpc() = default;
 
   void draw() const override {
     sprite_group.draw(pos);
   }
 
-  void update(Map const& map) override {
+  void update(Map const& map, Character const& character) override {
     sprite_group.update();
+    charge_stunned_timeout.update();
+    hit_timeout.update();
+
+    Rectangle _hitbox = hitbox();
+    int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+    int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+
+    pos.x += speed() * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
+    _hitbox = hitbox();
+
+    if (is_walking()) {
+      Rectangle character_hitbox{character.hitbox()};
+      if (can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
+        state = ChargingNpcState::Charging;
+        sprite_group.set_current_sprite(ChargingNpcSpriteCharge);
+        if (character_hitbox.x <= _hitbox.x) {  // Charge left.
+          sprite_group.horizontal_reset();
+          is_direction_left = true;
+        } else {  // Charge right.
+          sprite_group.horizontal_flip();
+          is_direction_left = false;
+        }
+      }
+    }
+
+    // Handle walls.
+    bool did_hit_wall{false};
+    if (is_direction_left) {  // Walk left.
+      float wall_overlap = _hitbox.x - west_wall;
+      if (wall_overlap < 0.f) {
+        pos.x -= wall_overlap;
+        sprite_group.horizontal_flip();
+        is_direction_left = false;
+        did_hit_wall = true;
+      }
+    } else {  // Walk right.
+      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
+      if (wall_overlap < 0.f) {
+        pos.x += wall_overlap;
+        sprite_group.horizontal_reset();
+        is_direction_left = true;
+        did_hit_wall = true;
+      }
+    }
+
+    if (did_hit_wall) {
+      if (is_charging()) {
+        state = ChargingNpcState::Stunned;
+        sprite_group.set_current_sprite(ChargingNpcSpriteStun);
+        charge_stunned_timeout.cancel();
+        charge_stunned_timeout.set_on_timeout(
+            [&]() {
+              state = ChargingNpcState::Walking;
+              sprite_group.set_current_sprite(ChargingNpcSpriteWalk);
+            },
+            2.f);
+      }
+    }
   }
 
   Rectangle hitbox() const override {
+    return move(upscale(tile_source_hitbox(TileSource::Enemy3, intvec2_0_0), pixel_size), pos);
   }
 
   void injure() override {
+    state = ChargingNpcState::Hit;
+    sprite_group.set_current_sprite(ChargingNpcSpriteHit);
+    hit_timeout.cancel();
+    charge_stunned_timeout.cancel();
+    hit_timeout.set_on_timeout(
+        [&]() {
+          state = ChargingNpcState::Walking;
+          sprite_group.set_current_sprite(ChargingNpcSpriteWalk);
+        },
+        3.f);
   }
 
   bool is_injured() const override {
-  }
-
-  virtual ~ChargingNpc() override {
+    return state == ChargingNpcState::Stunned || state == ChargingNpcState::Hit;
   }
 
  private:
   Vector2 pos;
   int const pixel_size;
   SpriteGroup sprite_group{};
+  bool is_direction_left{true};
+  Timeout charge_stunned_timeout{};
+  ChargingNpcState state{ChargingNpcState::Walking};
+  Timeout hit_timeout{};
+
+  bool can_charge_character(int west_wall, int east_wall, Rectangle const& self_hitbox,
+                            Rectangle const& character_hitbox) const {
+    if (is_vertical_overlap(self_hitbox, character_hitbox)) {
+      if (west_wall <= character_hitbox.x + character_hitbox.width && character_hitbox.x <= self_hitbox.x) {
+        return true;
+      }
+      if (self_hitbox.x + self_hitbox.width <= character_hitbox.x + character_hitbox.width &&
+          character_hitbox.x <= east_wall) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool is_charging() const {
+    return state == ChargingNpcState::Charging;
+  }
+
+  bool is_walking() const {
+    return state == ChargingNpcState::Walking;
+  }
+
+  float speed() const {
+    switch (state) {
+      case ChargingNpcState::Charging:
+        return ChargingNpcChargeSpeed;
+      case ChargingNpcState::Walking:
+        return ChargingNpcWalkSpeed;
+      case ChargingNpcState::Stunned:
+      case ChargingNpcState::Hit:
+        return 0.f;
+      default:
+        BAIL;
+    }
+  }
 };

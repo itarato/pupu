@@ -218,6 +218,7 @@ enum class TileSource {
   Box3,
   Enemy1,
   Enemy2,
+  Enemy3,
 };
 
 Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
@@ -231,6 +232,7 @@ Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
       return move(BOX_HITBOX, pos);
     case TileSource::Enemy1:
     case TileSource::Enemy2:
+    case TileSource::Enemy3:
       return move(ENEMY1_HITBOX, pos);
     default:
       BAIL;
@@ -261,6 +263,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Enemy1__Example];
     } else if (source == TileSource::Enemy2) {
       texture = asset_manager.textures[TextureNames::Enemy2__Jump];
+    } else if (source == TileSource::Enemy3) {
+      texture = asset_manager.textures[TextureNames::Enemy3__Example];
     } else {
       BAIL;
     }
@@ -300,6 +304,7 @@ struct TileSelection {
         return TILESIZE_BOX;
       case TileSource::Enemy1:
       case TileSource::Enemy2:
+      case TileSource::Enemy3:
         return TILESIZE_ENEMY1;
       default:
         BAIL;
@@ -316,6 +321,7 @@ struct TileSelection {
       case TileSource::Box3:
       case TileSource::Enemy1:
       case TileSource::Enemy2:
+      case TileSource::Enemy3:
         return 1;
       default:
         BAIL;
@@ -355,6 +361,9 @@ TileSelection tile_selection_from_file(FILE* file) {
     case 6:
       source = TileSource::Enemy2;
       break;
+    case 7:
+      source = TileSource::Enemy3;
+      break;
     default:
       BAILF("Invalid: %d", tile_source_raw);
   }
@@ -380,13 +389,19 @@ void fps_independent_multiply(float* v, float mul) {
   *v *= powf(mul, fps_independent_multiplier());
 }
 
-bool is_horizontal_overlap(Rectangle const rect, int const abs_minx, int const abs_maxx) {
+bool is_horizontal_overlap(Rectangle const& rect, int const abs_minx, int const abs_maxx) {
   if (rect.x > abs_maxx || (rect.x + rect.width - 1) < abs_minx) return false;
   return true;
 }
 
-bool is_vertical_overlap(Rectangle const rect, int const abs_miny, int const abs_maxy) {
+bool is_vertical_overlap(Rectangle const& rect, int const abs_miny, int const abs_maxy) {
   if (rect.y > abs_maxy || (rect.y + rect.height - 1) < abs_miny) return false;
+  return true;
+}
+
+bool is_vertical_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
+  if (rect_lhs.y > (rect_rhs.y + rect_rhs.height - 1.f) || (rect_lhs.y + rect_lhs.height - 1.f) < rect_rhs.y)
+    return false;
   return true;
 }
 

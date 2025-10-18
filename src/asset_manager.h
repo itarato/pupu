@@ -38,6 +38,7 @@ enum TextureNames {
   Enemy2__Idle,
   Enemy2__Jump,
   Enemy2__Run,
+  Enemy3__Example,
   Enemy3__Charge,
   Enemy3__Hit,
   Enemy3__Idle,
@@ -124,6 +125,8 @@ struct AssetManager {
     textures[TextureNames::Enemy2__Run] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/2/Run.png"));
 
+    textures[TextureNames::Enemy3__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/3/Example.png"));
     textures[TextureNames::Enemy3__Charge] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/3/Charge.png"));
     textures[TextureNames::Enemy3__Hit] =

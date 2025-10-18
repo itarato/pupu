@@ -95,6 +95,9 @@ struct App {
         case TileSource::Enemy2:
           npcs.push_back(std::make_shared<SimpleWalkNpc>(tile_pos, tile_selection.source, pixel_size));
           break;
+        case TileSource::Enemy3:
+          npcs.push_back(std::make_shared<ChargingNpc>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
+          break;
         default:
           BAIL;
       }
@@ -130,7 +133,7 @@ struct App {
   void update() {
     if (!pause_update) {
       map.update();
-      for (auto& npc : npcs) npc->update(map);
+      for (auto& npc : npcs) npc->update(map, character);
       character.update(map);
 
       update__character_collisions();
