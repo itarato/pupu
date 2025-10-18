@@ -31,6 +31,8 @@ struct Editor {
     if (std::fread(&background_index, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) BAIL;
 
+    character_position = intvec2_from_file(file);
+
     background.preload(background_index, tile_width, tile_height, pixel_size);
 
     for (int i = 0; i < tiles_count; i++) {
@@ -67,6 +69,10 @@ struct Editor {
         });
       }
     }
+
+    if (IsMouseButtonDown(2)) {
+      character_position.set_from_vector2(GetMousePosition());
+    }
   }
 
   void draw() {
@@ -75,6 +81,13 @@ struct Editor {
 
     // Tiles.
     for (auto const& [k, v] : tiles) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
+    DrawTexturePro(*asset_manager.textures[TextureNames::Character1__Example],
+                   {0.f, 0.f, static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width),
+                    static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height)},
+                   {static_cast<float>(character_position.x), static_cast<float>(character_position.y),
+                    static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width) * pixel_size,
+                    static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height) * pixel_size},
+                   vector_zero, 0.f, WHITE);
 
     Vector2 mouse_pos = GetMousePosition();
 
@@ -104,6 +117,7 @@ struct Editor {
   const Rectangle tileset_tile_frame{gui_tile_frame.width, background_frame.height, 256.f, 176.f};
   const Rectangle gui_tile_frame_px = upscale(gui_tile_frame, pixel_size);
   const Rectangle tileset_tile_frame_px = upscale(tileset_tile_frame, pixel_size);
+  IntVec2 character_position{};
 
   void reset() {
     tiles.clear();
@@ -120,6 +134,8 @@ struct Editor {
 
     int values[4] = {tile_width, tile_height, background.get_current_index(), static_cast<int>(tiles.size())};
     fwrite(values, sizeof(int), 4, file);
+
+    character_position.write(file);
 
     for (auto const& [k, v] : tiles) {
       k.write(file);

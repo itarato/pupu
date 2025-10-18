@@ -148,6 +148,11 @@ struct Character {
     jump_state = JumpState::Jump;
   }
 
+  void set_position(IntVec2 const& v) {
+    pos.x = static_cast<float>(v.x);
+    pos.y = static_cast<float>(v.y);
+  }
+
  private:
   const int pixel_size{DEFAULT_PIXEL_SIZE};
   SpriteGroup sprite_group{};

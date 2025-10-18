@@ -86,6 +86,11 @@ struct IntVec2 {
   IntVec2 scale(int const scale) const {
     return IntVec2{x * scale, y * scale};
   }
+
+  void set_from_vector2(Vector2 const& v) {
+    x = static_cast<float>(v.x);
+    y = static_cast<float>(v.y);
+  }
 };
 
 IntVec2 vector2_to_intvec2(Vector2 const v) {

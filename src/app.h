@@ -56,6 +56,7 @@ struct App {
 
   void reset() {
     character.reset({static_cast<float>(GetScreenWidth() / 3), static_cast<float>(TILE_SIZE * 4 * pixel_size)});
+    npcs.clear();
     pause_update = false;
 
     reload_world_from_file();
@@ -77,6 +78,8 @@ struct App {
     if (std::fread(&tile_height, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&background_index, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) BAIL;
+
+    character.set_position(intvec2_from_file(file));
 
     SetWindowSize(tile_width * TILE_SIZE * pixel_size, tile_height * TILE_SIZE * pixel_size);
 
