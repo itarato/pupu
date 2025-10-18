@@ -1,6 +1,10 @@
 #pragma once
 
+#include <algorithm>
+#include <list>
+
 #include "asset_manager.h"
+#include "bullet.h"
 #include "character.h"
 #include "common.h"
 #include "map.h"
@@ -361,11 +365,15 @@ struct ShootingNpc : Npc {
 
   void draw() const override {
     sprite_group.draw(pos);
+    for (auto const& bullet : bullets) bullet.draw();
   }
 
   void update(Map const& map, Character const& character) override {
-    sprite_group.update();
+    int sprite_group_sequence = sprite_group.update();
     hit_timeout.update();
+
+    for (auto& bullet : bullets) bullet.update();
+    std::erase_if(bullets, [](auto const& bullet) { return bullet.is_dead(); });
 
     Rectangle _hitbox = hitbox();
     int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
@@ -374,9 +382,9 @@ struct ShootingNpc : Npc {
     float speed = state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f;
     pos.x += speed * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
     _hitbox = hitbox();
+    Rectangle character_hitbox{character.hitbox()};
 
     if (state == ShootingNpcState::Walk) {
-      Rectangle character_hitbox{character.hitbox()};
       if (can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
         state = ShootingNpcState::Attack;
         sprite_group.set_current_sprite(ShootingNpcSpriteAttack);
@@ -386,6 +394,18 @@ struct ShootingNpc : Npc {
         } else {  // Charge right.
           sprite_group.horizontal_flip();
           is_direction_left = false;
+        }
+      }
+    }
+    if (state == ShootingNpcState::Attack) {
+      if (sprite_group_sequence == 4) {
+        bullets.emplace_back(bullet_spawn_point(), pixel_size, is_direction_left ? -400.f : 400.f, west_wall,
+                             east_wall);
+      }
+      if (sprite_group_sequence == 0) {
+        if (!can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
+          state = ShootingNpcState::Walk;
+          sprite_group.set_current_sprite(ShootingNpcSpriteWalk);
         }
       }
     }
@@ -437,4 +457,13 @@ struct ShootingNpc : Npc {
   bool is_direction_left{true};
   Timeout hit_timeout{};
   ShootingNpcState state{ShootingNpcState::Walk};
+  std::list<Bullet> bullets{};
+
+  Vector2 bullet_spawn_point() const {
+    if (is_direction_left) {
+      return Vector2{pos.x + 6.f * pixel_size, pos.y + 24.f * pixel_size};
+    } else {
+      return Vector2{pos.x + 35.f * pixel_size, pos.y + 24.f * pixel_size};
+    }
+  }
 };
