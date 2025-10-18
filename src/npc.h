@@ -32,6 +32,7 @@ constexpr size_t const ShootingNpcSpriteWalk{3};
 constexpr float const SimpleWalkNpcSpeed{200.f};
 constexpr float const ChargingNpcWalkSpeed{100.f};
 constexpr float const ChargingNpcChargeSpeed{300.f};
+constexpr float const ShootingNpcSpeed{200.f};
 
 enum class SimpleWalkNpcState { Idle, Run, Hit };
 
@@ -379,6 +380,32 @@ struct ShootingNpc : Npc {
 
   void update(Map const& map, Character const& character) override {
     sprite_group.update();
+    hit_timeout.update();
+
+    Rectangle _hitbox = hitbox();
+    int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+    int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+
+    float speed = state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f;
+    pos.x += speed * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
+    _hitbox = hitbox();
+
+    // Handle walls.
+    if (is_direction_left) {  // Walk left.
+      float wall_overlap = _hitbox.x - west_wall;
+      if (wall_overlap < 0.f) {
+        pos.x -= wall_overlap;
+        sprite_group.horizontal_flip();
+        is_direction_left = false;
+      }
+    } else {  // Walk right.
+      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
+      if (wall_overlap < 0.f) {
+        pos.x += wall_overlap;
+        sprite_group.horizontal_reset();
+        is_direction_left = true;
+      }
+    }
   }
 
   Rectangle hitbox() const override {
@@ -386,10 +413,19 @@ struct ShootingNpc : Npc {
   }
 
   void injure() override {
+    hit_timeout.cancel();
+    state = ShootingNpcState::Hit;
+    sprite_group.set_current_sprite(ShootingNpcSpriteHit);
+    hit_timeout.set_on_timeout(
+        [&]() {
+          state = ShootingNpcState::Walk;
+          sprite_group.set_current_sprite(ShootingNpcSpriteWalk);
+        },
+        3.f);
   }
 
   bool is_injured() const override {
-    return false;
+    return state == ShootingNpcState::Hit;
   }
 
   ~ShootingNpc() = default;
