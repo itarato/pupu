@@ -224,6 +224,7 @@ enum class TileSource {
   Enemy1,
   Enemy2,
   Enemy3,
+  Enemy4,
 };
 
 Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
@@ -238,6 +239,7 @@ Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
     case TileSource::Enemy1:
     case TileSource::Enemy2:
     case TileSource::Enemy3:
+    case TileSource::Enemy4:
       return move(ENEMY1_HITBOX, pos);
     default:
       BAIL;
@@ -270,6 +272,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Enemy2__Jump];
     } else if (source == TileSource::Enemy3) {
       texture = asset_manager.textures[TextureNames::Enemy3__Example];
+    } else if (source == TileSource::Enemy4) {
+      texture = asset_manager.textures[TextureNames::Enemy4__Example];
     } else {
       BAIL;
     }

@@ -24,9 +24,14 @@ constexpr size_t const ChargingNpcSpriteIdle{2};
 constexpr size_t const ChargingNpcSpriteStun{3};
 constexpr size_t const ChargingNpcSpriteWalk{4};
 
+constexpr size_t const ShootingNpcSpriteAttack{0};
+constexpr size_t const ShootingNpcSpriteHit{1};
+constexpr size_t const ShootingNpcSpriteIdle{2};
+constexpr size_t const ShootingNpcSpriteWalk{3};
+
 constexpr float const SimpleWalkNpcSpeed{200.f};
 constexpr float const ChargingNpcWalkSpeed{100.f};
-constexpr float const ChargingNpcChargeSpeed{250.f};
+constexpr float const ChargingNpcChargeSpeed{300.f};
 
 enum class SimpleWalkNpcState { Idle, Run, Hit };
 
@@ -343,4 +348,57 @@ struct ChargingNpc : Npc {
         BAIL;
     }
   }
+};
+
+enum class ShootingNpcState {
+  Walk,
+  Idle,
+  Attack,
+  Hit,
+};
+
+struct ShootingNpc : Npc {
+ public:
+  ShootingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
+
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Enemy4__Attack], ChargingNpcSize, 11,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Hit],
+                                    ChargingNpcSize, 12, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Idle],
+                                    ChargingNpcSize, 5, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Walk],
+                                    ChargingNpcSize, 11, sprite_frame_length});
+  }
+
+  void draw() const override {
+    sprite_group.draw(pos);
+  }
+
+  void update(Map const& map, Character const& character) override {
+    sprite_group.update();
+  }
+
+  Rectangle hitbox() const override {
+    return move(upscale(tile_source_hitbox(TileSource::Enemy3, intvec2_0_0), pixel_size), pos);
+  }
+
+  void injure() override {
+  }
+
+  bool is_injured() const override {
+    return false;
+  }
+
+  ~ShootingNpc() = default;
+
+ private:
+  Vector2 pos;
+  int const pixel_size;
+  SpriteGroup sprite_group{};
+  bool is_direction_left{true};
+  Timeout hit_timeout{};
+  ShootingNpcState state{ShootingNpcState::Walk};
 };
