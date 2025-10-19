@@ -307,12 +307,13 @@ struct Character {
   HitMap calculate_hitmap(Map const& map) const {
     HitMap hit_map{};
 
+    Rectangle const _hitbox{hitbox()};
     Vector2 _hitbox_top_left{hitbox_top_left()};
     Vector2 _hitbox_bottom_right{hitbox_bottom_right()};
 
     hit_map.east = map.east_wall_of_range(_hitbox_bottom_right.x, _hitbox_top_left.y, _hitbox_bottom_right.y);
-    hit_map.north = map.north_wall_of_range(_hitbox_top_left.x, _hitbox_bottom_right.x, _hitbox_top_left.y);
-    hit_map.south = map.south_wall_of_range(_hitbox_top_left.x, _hitbox_bottom_right.x, _hitbox_bottom_right.y);
+    hit_map.north = map.north_wall_of_range(_hitbox);
+    hit_map.south = map.south_wall_of_range(_hitbox);
     hit_map.west = map.west_wall_of_range(_hitbox_top_left.x, _hitbox_top_left.y, _hitbox_bottom_right.y);
 
     return hit_map;

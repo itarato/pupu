@@ -72,10 +72,10 @@ struct Map {
     background.unload();
   }
 
-  int north_wall_of_range(int abs_minx, int abs_maxx, int abs_y) const {
-    int minx = abs_minx / (TILE_SIZE * pixel_size);
-    int maxx = abs_maxx / (TILE_SIZE * pixel_size);
-    int y = abs_y / (TILE_SIZE * pixel_size);
+  int north_wall_of_range(Rectangle const& rect) const {
+    int minx = leftx(rect) / (TILE_SIZE * pixel_size);
+    int maxx = rightx(rect) / (TILE_SIZE * pixel_size);
+    int y = topy(rect) / (TILE_SIZE * pixel_size);
 
     int max_y_coord = 0;
     for (int x = minx; x <= maxx; x++) {
@@ -87,10 +87,9 @@ struct Map {
 
     for (auto const& [pos, selection] : boxes) {
       Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
-      if (is_horizontal_overlap(abs_hitbox, abs_minx, abs_maxx)) {
-        if ((abs_hitbox.y + abs_hitbox.height) > out &&
-            (abs_hitbox.y + abs_hitbox.height - WALL_CHECK_THRESHOLD * pixel_size) <= abs_y) {
-          out = abs_hitbox.y + abs_hitbox.height;
+      if (is_horizontal_overlap(abs_hitbox, rect)) {
+        if (bottomy(abs_hitbox) > out && (bottomy(abs_hitbox) - WALL_CHECK_THRESHOLD * pixel_size) <= topy(rect)) {
+          out = bottomy(abs_hitbox);
         }
       }
     }
@@ -98,10 +97,10 @@ struct Map {
     return out;
   }
 
-  int south_wall_of_range(int abs_minx, int abs_maxx, int abs_y) const {
-    int minx = abs_minx / (TILE_SIZE * pixel_size);
-    int maxx = abs_maxx / (TILE_SIZE * pixel_size);
-    int y = abs_y / (TILE_SIZE * pixel_size);
+  int south_wall_of_range(Rectangle const& rect) const {
+    int minx = leftx(rect) / (TILE_SIZE * pixel_size);
+    int maxx = rightx(rect) / (TILE_SIZE * pixel_size);
+    int y = bottomy(rect) / (TILE_SIZE * pixel_size);
 
     int min_y_coord = tile_height;
     for (int x = minx; x <= maxx; x++) {
@@ -113,8 +112,8 @@ struct Map {
 
     for (auto const& [pos, selection] : boxes) {
       Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
-      if (is_horizontal_overlap(abs_hitbox, abs_minx, abs_maxx)) {
-        if (abs_hitbox.y < out && (abs_hitbox.y + WALL_CHECK_THRESHOLD * pixel_size) >= abs_y) {
+      if (is_horizontal_overlap(abs_hitbox, rect)) {
+        if (topy(abs_hitbox) < out && (topy(abs_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= bottomy(rect)) {
           out = abs_hitbox.y - 1;
           // TraceLog(LOG_INFO,
           //          "South wall detected at %d. Hitbox: x=%.2f y=%.2f w=%.2f h=%.2f Victim: minx=%d max=%d y=%d", out,

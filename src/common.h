@@ -70,6 +70,22 @@ void log(const char* level, const char* fileName, int lineNo, const char* s, ...
   va_end(args);
 }
 
+float leftx(Rectangle const& rect) {
+  return rect.x;
+}
+
+float rightx(Rectangle const& rect) {
+  return rect.x + rect.width - 1.f;
+}
+
+float topy(Rectangle const& rect) {
+  return rect.y;
+}
+
+float bottomy(Rectangle const& rect) {
+  return rect.y + rect.height - 1.f;
+}
+
 struct IntVec2 {
   int x{0};
   int y{0};
