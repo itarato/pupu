@@ -476,3 +476,57 @@ struct ShootingNpc : Npc {
     }
   }
 };
+
+enum class StumpingNpcState {
+  Fly,
+  Attack,
+  Hit,
+  Idle,
+};
+
+struct StumpingNpc : Npc {
+ public:
+  StumpingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
+
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Enemy5__Attack], ChargingNpcSize, 8,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy5__Fly],
+                                    ChargingNpcSize, 6, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy5__Hit],
+                                    ChargingNpcSize, 5, sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy5__Idle],
+                                    ChargingNpcSize, 6, sprite_frame_length});
+  }
+
+  void draw() const override {
+    sprite_group.draw(pos);
+  }
+
+  void update(Map const& map, Character& character) override {
+    sprite_group.update();
+    hit_timeout.update();
+  }
+
+  Rectangle hitbox() const override {
+    return move(upscale(tile_source_hitbox(TileSource::Enemy5, intvec2_0_0), pixel_size), pos);
+  }
+
+  void injure() override {
+  }
+
+  bool is_injured() const override {
+    return state == StumpingNpcState::Hit;
+  }
+
+  ~StumpingNpc() = default;
+
+ private:
+  Vector2 pos;
+  int const pixel_size;
+  SpriteGroup sprite_group{};
+  bool is_direction_left{true};
+  Timeout hit_timeout{};
+  StumpingNpcState state{StumpingNpcState::Fly};
+};

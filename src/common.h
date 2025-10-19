@@ -39,6 +39,7 @@ constexpr Rectangle const ENEMY1_HITBOX{14.f, 20.f, 22.f, 28.f};
 constexpr Rectangle const ENEMY2_HITBOX{16.f, 19.f, 16.f, 29.f};
 constexpr Rectangle const ENEMY3_HITBOX{14.f, 19.f, 19.f, 29.f};
 constexpr Rectangle const ENEMY4_HITBOX{12.f, 23.f, 24.f, 25.f};
+constexpr Rectangle const ENEMY5_HITBOX{16.f, 19.f, 16.f, 29.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
@@ -228,6 +229,7 @@ enum class TileSource {
   Enemy2,
   Enemy3,
   Enemy4,
+  Enemy5,
 };
 
 Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
@@ -247,6 +249,8 @@ Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
       return move(ENEMY3_HITBOX, pos);
     case TileSource::Enemy4:
       return move(ENEMY4_HITBOX, pos);
+    case TileSource::Enemy5:
+      return move(ENEMY5_HITBOX, pos);
     default:
       BAIL;
   }
