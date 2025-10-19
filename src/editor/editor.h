@@ -111,12 +111,6 @@ struct Editor {
   int tile_width{32};
   int tile_height{20};
   int pixel_size{DEFAULT_PIXEL_SIZE};
-  const Rectangle background_frame{0.f, 0.f, static_cast<float>(TILE_SIZE* tile_width),
-                                   static_cast<float>(TILE_SIZE* tile_height)};
-  const Rectangle gui_tile_frame{0.f, background_frame.height, 240.f, 112.f};
-  const Rectangle tileset_tile_frame{gui_tile_frame.width, background_frame.height, 256.f, 176.f};
-  const Rectangle gui_tile_frame_px = upscale(gui_tile_frame, pixel_size);
-  const Rectangle tileset_tile_frame_px = upscale(tileset_tile_frame, pixel_size);
   IntVec2 character_position{};
 
   void reset() {
@@ -286,6 +280,7 @@ struct Editor {
   }
 
   Rectangle const game_area() const {
-    return upscale(background_frame, pixel_size);
+    return {0.f, 0.f, static_cast<float>(TILE_SIZE * tile_width * pixel_size),
+            static_cast<float>(TILE_SIZE * tile_height * pixel_size)};
   }
 };
