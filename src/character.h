@@ -134,8 +134,6 @@ struct Character {
   void injure() {
     if (is_injured()) return;
 
-    TraceLog(LOG_INFO, "CHAR INJURED");
-
     injury_timeout.cancel();
     lifecycle_state = LifecycleState::Injured;
     sprite_group.set_current_sprite(PLAYER_SPRITE_HIT);
@@ -151,6 +149,10 @@ struct Character {
   void set_position(IntVec2 const& v) {
     pos.x = static_cast<float>(v.x);
     pos.y = static_cast<float>(v.y);
+  }
+
+  bool is_injured() const {
+    return lifecycle_state == LifecycleState::Injured;
   }
 
  private:
@@ -318,9 +320,5 @@ struct Character {
 
   void end_injury() {
     lifecycle_state = LifecycleState::Live;
-  }
-
-  bool is_injured() const {
-    return lifecycle_state == LifecycleState::Injured;
   }
 };

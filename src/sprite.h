@@ -70,6 +70,10 @@ struct Sprite {
     horizontal_reverse = 1;
   }
 
+  std::shared_ptr<Texture2D> const get_texture() const {
+    return texture;
+  }
+
  private:
   float pixel_size{1.f};
   std::shared_ptr<Texture2D> texture;

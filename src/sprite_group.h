@@ -44,15 +44,15 @@ struct SpriteGroup {
     current_sprite_mut().restart();
   }
 
+  Sprite const& current_sprite() const {
+    return sprites[current_sprite_index];
+  }
+
  private:
   std::vector<Sprite> sprites{};
   size_t current_sprite_index{0};
 
   Sprite& current_sprite_mut() {
-    return sprites[current_sprite_index];
-  }
-
-  Sprite const& current_sprite() const {
     return sprites[current_sprite_index];
   }
 };

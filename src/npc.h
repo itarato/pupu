@@ -43,7 +43,7 @@ enum class SimpleWalkNpcState { Idle, Run, Hit };
 struct Npc {
  public:
   virtual void draw() const = 0;
-  virtual void update(Map const& map, Character const& character) = 0;
+  virtual void update(Map const& map, Character& character) = 0;
   virtual Rectangle hitbox() const = 0;
   virtual void injure() = 0;
   virtual bool is_injured() const = 0;
@@ -108,7 +108,7 @@ struct SimpleWalkNpc : Npc {
     // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
-  void update(Map const& map, Character const& character) override {
+  void update(Map const& map, Character& character) override {
     movement_timeout.update();
     sprite_group.update();
 
@@ -227,7 +227,7 @@ struct ChargingNpc : Npc {
     // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
-  void update(Map const& map, Character const& character) override {
+  void update(Map const& map, Character& character) override {
     sprite_group.update();
     charge_stunned_timeout.update();
     hit_timeout.update();
@@ -371,11 +371,17 @@ struct ShootingNpc : Npc {
     for (auto const& bullet : bullets) bullet.draw();
   }
 
-  void update(Map const& map, Character const& character) override {
+  void update(Map const& map, Character& character) override {
     int sprite_group_sequence = sprite_group.update();
     hit_timeout.update();
 
-    for (auto& bullet : bullets) bullet.update();
+    for (auto& bullet : bullets) {
+      bullet.update();
+      if (CheckCollisionRecs(character.hitbox(), bullet.hitbox())) {
+        character.injure();
+        bullet.set_target_hit();
+      }
+    }
     std::erase_if(bullets, [](auto const& bullet) { return bullet.is_dead(); });
 
     Rectangle _hitbox = hitbox();
@@ -388,7 +394,7 @@ struct ShootingNpc : Npc {
     Rectangle character_hitbox{character.hitbox()};
 
     if (state == ShootingNpcState::Walk) {
-      if (can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
+      if (!character.is_injured() && can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
         state = ShootingNpcState::Attack;
         sprite_group.set_current_sprite(ShootingNpcSpriteAttack);
         if (character_hitbox.x <= _hitbox.x) {  // Charge left.
@@ -406,7 +412,7 @@ struct ShootingNpc : Npc {
                              east_wall);
       }
       if (sprite_group_sequence == 0) {
-        if (!can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
+        if (!can_charge_character(west_wall, east_wall, _hitbox, character_hitbox) || character.is_injured()) {
           state = ShootingNpcState::Walk;
           sprite_group.set_current_sprite(ShootingNpcSpriteWalk);
         }

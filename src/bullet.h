@@ -29,6 +29,15 @@ struct Bullet {
     return pos.x < west_wall || pos.x > east_wall;
   }
 
+  Rectangle hitbox() const {
+    std::shared_ptr<Texture2D> const texture = sprite_group.current_sprite().get_texture();
+    return Rectangle{pos.x, pos.y, static_cast<float>(texture->width), static_cast<float>(texture->height)};
+  }
+
+  void set_target_hit() {
+    target_hit = true;
+  }
+
  private:
   Vector2 pos;
   int const pixel_size;
@@ -36,4 +45,5 @@ struct Bullet {
   SpriteGroup sprite_group{};
   int const west_wall;
   int const east_wall;
+  bool target_hit{false};
 };
