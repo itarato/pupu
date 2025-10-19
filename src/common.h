@@ -284,6 +284,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Enemy3__Example];
     } else if (source == TileSource::Enemy4) {
       texture = asset_manager.textures[TextureNames::Enemy4__Example];
+    } else if (source == TileSource::Enemy5) {
+      texture = asset_manager.textures[TextureNames::Enemy5__Example];
     } else {
       BAIL;
     }
@@ -325,6 +327,7 @@ struct TileSelection {
       case TileSource::Enemy2:
       case TileSource::Enemy3:
       case TileSource::Enemy4:
+      case TileSource::Enemy5:
         return TILESIZE_ENEMY1;
       default:
         BAIL;
@@ -343,6 +346,7 @@ struct TileSelection {
       case TileSource::Enemy2:
       case TileSource::Enemy3:
       case TileSource::Enemy4:
+      case TileSource::Enemy5:
         return 1;
       default:
         BAIL;
@@ -387,6 +391,9 @@ TileSelection tile_selection_from_file(FILE* file) {
       break;
     case 8:
       source = TileSource::Enemy4;
+      break;
+    case 9:
+      source = TileSource::Enemy5;
       break;
     default:
       BAILF("Invalid: %d", tile_source_raw);

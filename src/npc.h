@@ -509,28 +509,26 @@ struct StumpingNpc : Npc {
     hit_timeout.update();
 
     Rectangle _hitbox = hitbox();
-    int north_wall = map.north_wall_of_range(_hitbox.x, _hitbox.x + _hitbox.width - 1, _hitbox.y);
-    int south_wall = map.south_wall_of_range(_hitbox.x, _hitbox.x + _hitbox.width - 1, _hitbox.y + _hitbox.height - 1);
+    int north_wall = map.north_wall_of_range(_hitbox.x, _hitbox.x + _hitbox.width - 1.f, _hitbox.y);
+    int south_wall =
+        map.south_wall_of_range(_hitbox.x, _hitbox.x + _hitbox.width - 1.f, _hitbox.y + _hitbox.height - 1.f);
 
-    float speed = state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f;
-    pos.x += speed * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
+    pos.y += speed() * GetFrameTime();
     _hitbox = hitbox();
     Rectangle character_hitbox{character.hitbox()};
 
     // Handle walls.
-    if (is_direction_left) {  // Walk left.
-      float wall_overlap = _hitbox.x - west_wall;
+    if (state == StumpingNpcState::Fly) {  // Upwards.
+      float wall_overlap = _hitbox.y - north_wall;
       if (wall_overlap < 0.f) {
-        pos.x -= wall_overlap;
-        sprite_group.horizontal_flip();
-        is_direction_left = false;
+        pos.y -= wall_overlap;
+        state = StumpingNpcState::Idle;
       }
-    } else {  // Walk right.
-      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
+    } else if (state == StumpingNpcState::Attack) {  // Downwards.
+      float wall_overlap = south_wall - (_hitbox.y + _hitbox.height - 1.f);
       if (wall_overlap < 0.f) {
-        pos.x += wall_overlap;
-        sprite_group.horizontal_reset();
-        is_direction_left = true;
+        pos.y += wall_overlap;
+        state = StumpingNpcState::Fly;
       }
     }
   }
@@ -555,4 +553,18 @@ struct StumpingNpc : Npc {
   bool is_direction_left{true};
   Timeout hit_timeout{};
   StumpingNpcState state{StumpingNpcState::Fly};
+
+  float speed() const {
+    switch (state) {
+      case StumpingNpcState::Attack:
+        return 300.f;
+      case StumpingNpcState::Fly:
+        return -100.f;
+      case StumpingNpcState::Hit:
+      case StumpingNpcState::Idle:
+        return 0.f;
+      default:
+        BAIL;
+    }
+  }
 };
