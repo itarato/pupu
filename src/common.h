@@ -232,28 +232,32 @@ enum class TileSource {
   Enemy5,
 };
 
-Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
+Rectangle const tile_source_hitbox(TileSource tile_source) {
   switch (tile_source) {
     case TileSource::Gui:
     case TileSource::Tileset:
-      return move(DEFAULT_TILE_HITBOX, pos);
+      return DEFAULT_TILE_HITBOX;
     case TileSource::Box1:
     case TileSource::Box2:
     case TileSource::Box3:
-      return move(BOX_HITBOX, pos);
+      return BOX_HITBOX;
     case TileSource::Enemy1:
-      return move(ENEMY1_HITBOX, pos);
+      return ENEMY1_HITBOX;
     case TileSource::Enemy2:
-      return move(ENEMY2_HITBOX, pos);
+      return ENEMY2_HITBOX;
     case TileSource::Enemy3:
-      return move(ENEMY3_HITBOX, pos);
+      return ENEMY3_HITBOX;
     case TileSource::Enemy4:
-      return move(ENEMY4_HITBOX, pos);
+      return ENEMY4_HITBOX;
     case TileSource::Enemy5:
-      return move(ENEMY5_HITBOX, pos);
+      return ENEMY5_HITBOX;
     default:
       BAIL;
   }
+}
+
+Rectangle const tile_source_hitbox(TileSource tile_source, IntVec2 const pos) {
+  return move(tile_source_hitbox(tile_source), pos);
 }
 
 constexpr IntVec2 const TILESIZE_DEFAULT{TILE_SIZE, TILE_SIZE};

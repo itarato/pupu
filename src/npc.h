@@ -157,7 +157,7 @@ struct SimpleWalkNpc : Npc {
   }
 
   Rectangle hitbox() const override {
-    return move(upscale(tile_source_hitbox(tile_source, intvec2_0_0), pixel_size), pos);
+    return move(upscale(tile_source_hitbox(tile_source), pixel_size), pos);
   }
 
   void injure() override {
@@ -295,7 +295,7 @@ struct ChargingNpc : Npc {
   }
 
   Rectangle hitbox() const override {
-    return move(upscale(tile_source_hitbox(TileSource::Enemy3, intvec2_0_0), pixel_size), pos);
+    return move(upscale(tile_source_hitbox(TileSource::Enemy3), pixel_size), pos);
   }
 
   void injure() override {
@@ -444,7 +444,7 @@ struct ShootingNpc : Npc {
   }
 
   Rectangle hitbox() const override {
-    return move(upscale(tile_source_hitbox(TileSource::Enemy4, intvec2_0_0), pixel_size), pos);
+    return move(upscale(tile_source_hitbox(TileSource::Enemy4), pixel_size), pos);
   }
 
   void injure() override {
@@ -552,7 +552,7 @@ struct StompingNpc : Npc {
   }
 
   Rectangle hitbox() const override {
-    return move(upscale(tile_source_hitbox(TileSource::Enemy5, intvec2_0_0), pixel_size), pos);
+    return move(upscale(tile_source_hitbox(TileSource::Enemy5), pixel_size), pos);
   }
 
   void injure() override {
