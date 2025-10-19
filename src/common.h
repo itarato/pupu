@@ -39,7 +39,7 @@ constexpr Rectangle const ENEMY1_HITBOX{14.f, 20.f, 22.f, 28.f};
 constexpr Rectangle const ENEMY2_HITBOX{16.f, 19.f, 16.f, 29.f};
 constexpr Rectangle const ENEMY3_HITBOX{14.f, 19.f, 19.f, 29.f};
 constexpr Rectangle const ENEMY4_HITBOX{12.f, 23.f, 24.f, 25.f};
-constexpr Rectangle const ENEMY5_HITBOX{16.f, 19.f, 16.f, 29.f};
+constexpr Rectangle const ENEMY5_HITBOX{10.f, 2.f, 26.f, 30.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
@@ -421,12 +421,18 @@ void fps_independent_multiply(float* v, float mul) {
 }
 
 bool is_horizontal_overlap(Rectangle const& rect, int const abs_minx, int const abs_maxx) {
-  if (rect.x > abs_maxx || (rect.x + rect.width - 1) < abs_minx) return false;
+  if (rect.x > abs_maxx || (rect.x + rect.width - 1.f) < abs_minx) return false;
+  return true;
+}
+
+bool is_horizontal_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
+  if (rect_lhs.x > (rect_rhs.x + rect_rhs.width - 1.f) || (rect_lhs.x + rect_lhs.width - 1.f) < rect_rhs.x)
+    return false;
   return true;
 }
 
 bool is_vertical_overlap(Rectangle const& rect, int const abs_miny, int const abs_maxy) {
-  if (rect.y > abs_maxy || (rect.y + rect.height - 1) < abs_miny) return false;
+  if (rect.y > abs_maxy || (rect.y + rect.height - 1.f) < abs_miny) return false;
   return true;
 }
 
@@ -448,14 +454,25 @@ float randf() {
   return static_cast<float>(rand() % 1001) / 1000.f;
 }
 
-bool can_charge_character(int west_wall, int east_wall, Rectangle const& self_hitbox,
-                          Rectangle const& character_hitbox) {
+bool can_charge_character_horizontal(int west_wall, int east_wall, Rectangle const& self_hitbox,
+                                     Rectangle const& character_hitbox) {
   if (is_vertical_overlap(self_hitbox, character_hitbox)) {
     if (west_wall <= character_hitbox.x + character_hitbox.width && character_hitbox.x <= self_hitbox.x) {
       return true;
     }
     if (self_hitbox.x + self_hitbox.width <= character_hitbox.x + character_hitbox.width &&
         character_hitbox.x <= east_wall) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool can_charge_character_vertical(int south_wall, Rectangle const& self_hitbox, Rectangle const& character_hitbox) {
+  if (is_horizontal_overlap(self_hitbox, character_hitbox)) {
+    if (south_wall >= character_hitbox.y + character_hitbox.height &&
+        character_hitbox.y >= self_hitbox.y + self_hitbox.height) {
       return true;
     }
   }

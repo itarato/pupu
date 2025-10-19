@@ -33,6 +33,11 @@ constexpr size_t const ShootingNpcSpriteHit{1};
 constexpr size_t const ShootingNpcSpriteIdle{2};
 constexpr size_t const ShootingNpcSpriteWalk{3};
 
+constexpr size_t const StompingNpcSpriteAttack{0};
+constexpr size_t const StompingNpcSpriteFly{1};
+constexpr size_t const StompingNpcSpriteHit{2};
+constexpr size_t const StompingNpcSpriteIdle{3};
+
 constexpr float const SimpleWalkNpcSpeed{200.f};
 constexpr float const ChargingNpcWalkSpeed{100.f};
 constexpr float const ChargingNpcChargeSpeed{300.f};
@@ -241,7 +246,7 @@ struct ChargingNpc : Npc {
 
     if (is_walking()) {
       Rectangle character_hitbox{character.hitbox()};
-      if (can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
+      if (can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox)) {
         state = ChargingNpcState::Charging;
         sprite_group.set_current_sprite(ChargingNpcSpriteCharge);
         if (character_hitbox.x <= _hitbox.x) {  // Charge left.
@@ -394,7 +399,7 @@ struct ShootingNpc : Npc {
     Rectangle character_hitbox{character.hitbox()};
 
     if (state == ShootingNpcState::Walk) {
-      if (!character.is_injured() && can_charge_character(west_wall, east_wall, _hitbox, character_hitbox)) {
+      if (!character.is_injured() && can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox)) {
         state = ShootingNpcState::Attack;
         sprite_group.set_current_sprite(ShootingNpcSpriteAttack);
         if (character_hitbox.x <= _hitbox.x) {  // Charge left.
@@ -412,7 +417,8 @@ struct ShootingNpc : Npc {
                              east_wall);
       }
       if (sprite_group_sequence == 0) {
-        if (!can_charge_character(west_wall, east_wall, _hitbox, character_hitbox) || character.is_injured()) {
+        if (!can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox) ||
+            character.is_injured()) {
           state = ShootingNpcState::Walk;
           sprite_group.set_current_sprite(ShootingNpcSpriteWalk);
         }
@@ -477,16 +483,16 @@ struct ShootingNpc : Npc {
   }
 };
 
-enum class StumpingNpcState {
-  Fly,
+enum class StompingNpcState {
   Attack,
+  Fly,
   Hit,
   Idle,
 };
 
-struct StumpingNpc : Npc {
+struct StompingNpc : Npc {
  public:
-  StumpingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
+  StompingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
@@ -498,10 +504,13 @@ struct StumpingNpc : Npc {
                                     ChargingNpcSize, 5, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy5__Idle],
                                     ChargingNpcSize, 6, sprite_frame_length});
+
+    sprite_group.set_current_sprite(StompingNpcSpriteFly);
   }
 
   void draw() const override {
     sprite_group.draw(pos);
+    DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
   void update(Map const& map, Character& character) override {
@@ -517,18 +526,27 @@ struct StumpingNpc : Npc {
     _hitbox = hitbox();
     Rectangle character_hitbox{character.hitbox()};
 
+    if (state == StompingNpcState::Idle) {
+      if (can_charge_character_vertical(south_wall, _hitbox, character_hitbox)) {
+        state = StompingNpcState::Attack;
+        sprite_group.set_current_sprite(StompingNpcSpriteAttack);
+      }
+    }
+
     // Handle walls.
-    if (state == StumpingNpcState::Fly) {  // Upwards.
+    if (state == StompingNpcState::Fly) {  // Upwards.
       float wall_overlap = _hitbox.y - north_wall;
       if (wall_overlap < 0.f) {
         pos.y -= wall_overlap;
-        state = StumpingNpcState::Idle;
+        state = StompingNpcState::Idle;
+        sprite_group.set_current_sprite(StompingNpcSpriteIdle);
       }
-    } else if (state == StumpingNpcState::Attack) {  // Downwards.
+    } else if (state == StompingNpcState::Attack) {  // Downwards.
       float wall_overlap = south_wall - (_hitbox.y + _hitbox.height - 1.f);
       if (wall_overlap < 0.f) {
         pos.y += wall_overlap;
-        state = StumpingNpcState::Fly;
+        state = StompingNpcState::Fly;
+        sprite_group.set_current_sprite(StompingNpcSpriteFly);
       }
     }
   }
@@ -541,27 +559,26 @@ struct StumpingNpc : Npc {
   }
 
   bool is_injured() const override {
-    return state == StumpingNpcState::Hit;
+    return state == StompingNpcState::Hit;
   }
 
-  ~StumpingNpc() = default;
+  ~StompingNpc() = default;
 
  private:
   Vector2 pos;
   int const pixel_size;
   SpriteGroup sprite_group{};
-  bool is_direction_left{true};
   Timeout hit_timeout{};
-  StumpingNpcState state{StumpingNpcState::Fly};
+  StompingNpcState state{StompingNpcState::Fly};
 
   float speed() const {
     switch (state) {
-      case StumpingNpcState::Attack:
+      case StompingNpcState::Attack:
         return 300.f;
-      case StumpingNpcState::Fly:
-        return -100.f;
-      case StumpingNpcState::Hit:
-      case StumpingNpcState::Idle:
+      case StompingNpcState::Fly:
+        return -50.f;
+      case StompingNpcState::Hit:
+      case StompingNpcState::Idle:
         return 0.f;
       default:
         BAIL;

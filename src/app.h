@@ -105,7 +105,7 @@ struct App {
           npcs.push_back(std::make_shared<ShootingNpc>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
           break;
         case TileSource::Enemy5:
-          npcs.push_back(std::make_shared<StumpingNpc>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
+          npcs.push_back(std::make_shared<StompingNpc>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
           break;
         default:
           BAIL;
