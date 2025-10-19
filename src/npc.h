@@ -507,6 +507,32 @@ struct StumpingNpc : Npc {
   void update(Map const& map, Character& character) override {
     sprite_group.update();
     hit_timeout.update();
+
+    Rectangle _hitbox = hitbox();
+    int north_wall = map.north_wall_of_range(_hitbox.x, _hitbox.x + _hitbox.width - 1, _hitbox.y);
+    int south_wall = map.south_wall_of_range(_hitbox.x, _hitbox.x + _hitbox.width - 1, _hitbox.y + _hitbox.height - 1);
+
+    float speed = state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f;
+    pos.x += speed * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
+    _hitbox = hitbox();
+    Rectangle character_hitbox{character.hitbox()};
+
+    // Handle walls.
+    if (is_direction_left) {  // Walk left.
+      float wall_overlap = _hitbox.x - west_wall;
+      if (wall_overlap < 0.f) {
+        pos.x -= wall_overlap;
+        sprite_group.horizontal_flip();
+        is_direction_left = false;
+      }
+    } else {  // Walk right.
+      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
+      if (wall_overlap < 0.f) {
+        pos.x += wall_overlap;
+        sprite_group.horizontal_reset();
+        is_direction_left = true;
+      }
+    }
   }
 
   Rectangle hitbox() const override {
