@@ -50,6 +50,11 @@ enum TextureNames {
   Enemy4__Hit,
   Enemy4__Idle,
   Enemy4__Walk,
+  Enemy5__Example,
+  Enemy5__Attack,
+  Enemy5__Fly,
+  Enemy5__Hit,
+  Enemy5__Idle,
   BulletShort,
   BulletLong,
 };
@@ -163,6 +168,17 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/4/Cannonball1.png"));
     textures[TextureNames::BulletLong] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/4/Cannonball2.png"));
+
+    textures[TextureNames::Enemy5__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/5/Example.png"));
+    textures[TextureNames::Enemy5__Attack] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/5/Attack.png"));
+    textures[TextureNames::Enemy5__Fly] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/5/Fly.png"));
+    textures[TextureNames::Enemy5__Hit] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/5/Hit.png"));
+    textures[TextureNames::Enemy5__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/5/Idle.png"));
   }
 
  private:
