@@ -510,7 +510,7 @@ struct StompingNpc : Npc {
 
   void draw() const override {
     sprite_group.draw(pos);
-    DrawRectangleLinesEx(hitbox(), pixel_size, RED);
+    // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
   void update(Map const& map, Character& character) override {
@@ -556,6 +556,15 @@ struct StompingNpc : Npc {
   }
 
   void injure() override {
+    hit_timeout.cancel();
+    state = StompingNpcState::Hit;
+    sprite_group.set_current_sprite(StompingNpcSpriteHit);
+    hit_timeout.set_on_timeout(
+        [&]() {
+          sprite_group.set_current_sprite(StompingNpcSpriteFly);
+          state = StompingNpcState::Fly;
+        },
+        3.f);
   }
 
   bool is_injured() const override {

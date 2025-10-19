@@ -91,6 +91,8 @@ struct App {
       switch (tile_selection.source) {
         case TileSource::Gui:
         case TileSource::Tileset:
+        case TileSource::Box1:
+        case TileSource::Box2:
         case TileSource::Box3:
           map_tiles[tile_pos] = tile_selection;
           break;
@@ -108,7 +110,7 @@ struct App {
           npcs.push_back(std::make_shared<StompingNpc>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
           break;
         default:
-          BAIL;
+          BAILF("Invalid: %d", tile_selection.source);
       }
     }
 
