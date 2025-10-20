@@ -55,7 +55,7 @@ struct Character {
   }
 
   void init() {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GetMonitorRefreshRate(0) / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
                                     asset_manager.textures[TextureNames::Character1__Run],
@@ -155,11 +155,8 @@ struct Character {
   LifecycleState lifecycle_state{LifecycleState::Appear};
   Timeout injury_timeout{};
 
-  // Debug
-  HitMap hit_map{};
-
   void update_movement(Map const& map) {
-    hit_map = calculate_hitmap(map);
+    HitMap hit_map = calculate_hitmap(map);
     bool is_grab_wall{false};
 
     if (!is_injured() && IsKeyDown(KEY_LEFT)) {
@@ -167,13 +164,13 @@ struct Character {
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x -= speed_increments();
 
-      if (speed.x < -max_speed()) speed.x = -max_speed();
+      if (speed.x < -PLAYER_MAX_REL_SPEED) speed.x = -PLAYER_MAX_REL_SPEED;
     } else if (!is_injured() && IsKeyDown(KEY_RIGHT)) {
       sprite_group.horizontal_reset();
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x += speed_increments();
 
-      if (speed.x > max_speed()) speed.x = max_speed();
+      if (speed.x > PLAYER_MAX_REL_SPEED) speed.x = PLAYER_MAX_REL_SPEED;
     } else {
       sprite_group.set_current_sprite(PLAYER_SPRITE_IDLE);
       speed.x *= PLAYER_MOVEMENT_FRICTION;
@@ -181,7 +178,7 @@ struct Character {
       if (fabs(speed.x) < PLAYER_ZERO_SPEED_THRESHOLD) speed.x = 0.f;
     }
 
-    pos.x += speed.x;
+    pos.x += speed.x * GetFrameTime();
     Rectangle _hitbox{hitbox()};
 
     // Adjust for wall hit.
@@ -263,12 +260,8 @@ struct Character {
     }
   }
 
-  float max_speed() const {
-    return GetFrameTime() * PLAYER_MAX_REL_SPEED;
-  }
-
   float speed_increments() const {
-    return GetFrameTime() * PLAYER_MAX_REL_SPEED / 30.f;
+    return (PLAYER_MAX_REL_SPEED / (30.f * FPSMultiplier));
   }
 
   HitMap calculate_hitmap(Map const& map) const {

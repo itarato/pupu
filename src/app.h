@@ -13,14 +13,14 @@
 
 struct App {
  public:
-  App() {
-  }
-
   void init() {
     SetTraceLogLevel(LOG_DEBUG);
 
     InitWindow(1024, 768, "Pupu");
-    SetTargetFPS(GetMonitorRefreshRate(0));
+
+    GameFPS = GetMonitorRefreshRate(0);
+    FPSMultiplier = static_cast<float>(GameFPS) / 144.f;
+    SetTargetFPS(GameFPS);
 
     asset_manager.preload();
     character.init();

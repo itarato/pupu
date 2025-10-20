@@ -19,6 +19,10 @@
     exit(EXIT_FAILURE);                                                   \
   }
 
+// Set after window initialization.
+static int GameFPS{};
+static float FPSMultiplier{};
+
 constexpr int const REFERENCE_FPS{144};
 constexpr int const DEFAULT_PIXEL_SIZE{2};
 
