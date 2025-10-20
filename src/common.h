@@ -464,11 +464,10 @@ float randf() {
 bool can_charge_character_horizontal(int west_wall, int east_wall, Rectangle const& self_hitbox,
                                      Rectangle const& character_hitbox) {
   if (is_vertical_overlap(self_hitbox, character_hitbox)) {
-    if (west_wall <= character_hitbox.x + character_hitbox.width && character_hitbox.x <= self_hitbox.x) {
+    if (west_wall <= rightx(character_hitbox) && leftx(character_hitbox) <= leftx(self_hitbox)) {
       return true;
     }
-    if (self_hitbox.x + self_hitbox.width <= character_hitbox.x + character_hitbox.width &&
-        character_hitbox.x <= east_wall) {
+    if (rightx(self_hitbox) <= rightx(character_hitbox) && leftx(character_hitbox) <= east_wall) {
       return true;
     }
   }
