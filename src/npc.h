@@ -119,8 +119,8 @@ struct SimpleWalkNpc : Npc {
 
     if (state == SimpleWalkNpcState::Run) {
       Rectangle _hitbox = hitbox();
-      int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
-      int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+      int west_wall = map.west_wall_of_range(_hitbox);
+      int east_wall = map.east_wall_of_range(_hitbox);
 
       pos.x += speed.x * GetFrameTime();
       _hitbox = hitbox();
@@ -238,8 +238,8 @@ struct ChargingNpc : Npc {
     hit_timeout.update();
 
     Rectangle _hitbox = hitbox();
-    int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
-    int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+    int west_wall = map.west_wall_of_range(_hitbox);
+    int east_wall = map.east_wall_of_range(_hitbox);
 
     pos.x += speed() * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
     _hitbox = hitbox();
@@ -390,8 +390,8 @@ struct ShootingNpc : Npc {
     std::erase_if(bullets, [](auto const& bullet) { return bullet.is_dead(); });
 
     Rectangle _hitbox = hitbox();
-    int west_wall = map.west_wall_of_range(_hitbox.x, _hitbox.y, _hitbox.y + _hitbox.height - 1);
-    int east_wall = map.east_wall_of_range(_hitbox.x + _hitbox.width - 1, _hitbox.y, _hitbox.y + _hitbox.height - 1);
+    int west_wall = map.west_wall_of_range(_hitbox);
+    int east_wall = map.east_wall_of_range(_hitbox);
 
     float speed = state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f;
     pos.x += speed * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
