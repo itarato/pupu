@@ -475,6 +475,7 @@ bool can_charge_character_horizontal(int west_wall, int east_wall, Rectangle con
   return false;
 }
 
+// Note: Only downward check.
 bool can_charge_character_vertical(int south_wall, Rectangle const& self_hitbox, Rectangle const& character_hitbox) {
   if (is_horizontal_overlap(self_hitbox, character_hitbox)) {
     return south_wall >= bottomy(character_hitbox) && character_hitbox.y >= bottomy(self_hitbox);
