@@ -124,20 +124,6 @@ struct App {
     for (auto const& npc : npcs) npc->draw();
     character.draw();
 
-    // HitMap hit_map = map.get_hit_map(GetMousePosition());
-    // DrawLineEx({0.f, static_cast<float>(hit_map.north * TILE_SIZE_PX)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north * TILE_SIZE_PX)}, pixel_size,
-    //            ORANGE);
-    // DrawLineEx({0.f, static_cast<float>(hit_map.south * TILE_SIZE_PX)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south * TILE_SIZE_PX)}, pixel_size,
-    //            GREEN);
-    // DrawLineEx({static_cast<float>(hit_map.west * TILE_SIZE_PX), 0.f},
-    //            {static_cast<float>(hit_map.west * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, pixel_size,
-    //            BLUE);
-    // DrawLineEx({static_cast<float>(hit_map.east * TILE_SIZE_PX), 0.f},
-    //            {static_cast<float>(hit_map.east * TILE_SIZE_PX), static_cast<float>(GetScreenHeight())}, pixel_size,
-    //            RED);
-
     DrawFPS(0, 0);
   }
 

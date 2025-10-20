@@ -115,9 +115,6 @@ struct Map {
       if (is_horizontal_overlap(abs_hitbox, rect)) {
         if (topy(abs_hitbox) < out && (topy(abs_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= bottomy(rect)) {
           out = abs_hitbox.y - 1;
-          // TraceLog(LOG_INFO,
-          //          "South wall detected at %d. Hitbox: x=%.2f y=%.2f w=%.2f h=%.2f Victim: minx=%d max=%d y=%d", out,
-          //          abs_hitbox.x, abs_hitbox.y, abs_hitbox.width, abs_hitbox.height, abs_minx, abs_maxx, abs_y);
         }
       }
     }
@@ -168,9 +165,6 @@ struct Map {
       if (is_vertical_overlap(abs_hitbox, rect)) {
         if (leftx(abs_hitbox) < out && (leftx(abs_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= leftx(rect)) {
           out = abs_hitbox.x - 1;
-          // TraceLog(LOG_INFO,
-          //          "East wall detected at %d. Hitbox: x=%.2f y=%.2f w=%.2f h=%.2f Victim: x=%d miny=%d maxy=%d", out,
-          //          abs_hitbox.x, abs_hitbox.y, abs_hitbox.width, abs_hitbox.height, abs_x, abs_miny, abs_maxy);
         }
       }
     }

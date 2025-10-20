@@ -110,15 +110,6 @@ struct Character {
     } else {
       sprite_group.draw(pos);
     }
-
-    // DrawLineEx({0.f, static_cast<float>(hit_map.north)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.north)}, pixel_size, ORANGE);
-    // DrawLineEx({0.f, static_cast<float>(hit_map.south)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south)}, pixel_size, GREEN);
-    // DrawLineEx({static_cast<float>(hit_map.west), 0.f},
-    //            {static_cast<float>(hit_map.west), static_cast<float>(GetScreenHeight())}, pixel_size, BLUE);
-    // DrawLineEx({static_cast<float>(hit_map.east), 0.f},
-    //            {static_cast<float>(hit_map.east), static_cast<float>(GetScreenHeight())}, pixel_size, RED);
   }
 
   bool is_falling() const {
@@ -126,9 +117,7 @@ struct Character {
   }
 
   Rectangle const hitbox() const {
-    Vector2 top_left_corner{hitbox_top_left()};
-    Vector2 size{Vector2Subtract(hitbox_bottom_right(), top_left_corner)};
-    return Rectangle{top_left_corner.x, top_left_corner.y, size.x, size.y};
+    return move(upscale(CHARACTER_HITBOX, pixel_size), pos);
   }
 
   void injure() {
@@ -173,12 +162,6 @@ struct Character {
     hit_map = calculate_hitmap(map);
     bool is_grab_wall{false};
 
-    // if (IsKeyPressed(KEY_I)) {
-    //   TraceLog(LOG_INFO, "Player top-left=%.2f:%.2f bottom-right=%.2f:%.2f Hitmap north=%d south%d west=%d, east=%d",
-    //            hitbox_top_left().x, hitbox_top_left().y, hitbox_bottom_right().x,
-    //            hitbox_bottom_right().y, hit_map.north, hit_map.south, hit_map.west, hit_map.east);
-    // }
-
     if (!is_injured() && IsKeyDown(KEY_LEFT)) {
       sprite_group.horizontal_flip();
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
@@ -199,16 +182,17 @@ struct Character {
     }
 
     pos.x += speed.x;
+    Rectangle _hitbox{hitbox()};
 
     // Adjust for wall hit.
-    float west_wall_dist = hitbox_top_left().x - hit_map.west;
+    float west_wall_dist = leftx(_hitbox) - hit_map.west;
     if (west_wall_dist < 0) {
       pos.x -= west_wall_dist;
       speed.x = 0.f;
       is_grab_wall = true;
       multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
-    float east_wall_dist = hit_map.east - hitbox_bottom_right().x;
+    float east_wall_dist = hit_map.east - rightx(_hitbox);
     if (east_wall_dist < 0) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
@@ -226,8 +210,6 @@ struct Character {
       }
     }
 
-    // TODO: Figure out not calculating unnecessary directions (horizontal).
-    // Recalculate in order to adjust for horizontal movement.
     hit_map = calculate_hitmap(map);
 
     if (speed.y < 0.f) {
@@ -252,23 +234,18 @@ struct Character {
     }
 
     pos.y += speed.y;
+    _hitbox = hitbox();
 
     // Adjust for wall hit.
-    float north_wall_dist = hitbox_top_left().y - hit_map.north;
+    float north_wall_dist = topy(_hitbox) - hit_map.north;
     if (north_wall_dist < 0) {
       pos.y -= north_wall_dist;
       speed.y = 0.f;
     }
-    float south_wall_dist = static_cast<float>(hit_map.south) - hitbox_bottom_right().y;
-    // TraceLog(LOG_INFO, "Player top=%.2f bottom=%.2f Hitmap south%d", hitbox_top_left().y,
-    // hitbox_bottom_right().y,
-    //          hit_map.south);
+    float south_wall_dist = static_cast<float>(hit_map.south) - bottomy(_hitbox);
     if (south_wall_dist < 0) {
       pos.y += south_wall_dist;
-      // TraceLog(LOG_INFO, "Height adjusted with %.2f to %.2f-%.2f", south_wall_dist, pos.y,
-      //          pos.y + PLAYER_TEXTURE_SIZE_PX - 1.f);
       speed.y = 0.f;
-
       multi_jump_count = 0;
     }
 
@@ -292,16 +269,6 @@ struct Character {
 
   float speed_increments() const {
     return GetFrameTime() * PLAYER_MAX_REL_SPEED / 30.f;
-  }
-
-  Vector2 const hitbox_top_left() const {
-    return Vector2{pos.x + ((PLAYER_TEXTURE_SIZE * pixel_size) / 4.f),
-                   pos.y + ((PLAYER_TEXTURE_SIZE * pixel_size) / 6.f)};
-  }
-
-  Vector2 const hitbox_bottom_right() const {
-    return Vector2{pos.x + (PLAYER_TEXTURE_SIZE * pixel_size) - 1.f - ((PLAYER_TEXTURE_SIZE * pixel_size) / 4.f),
-                   pos.y + (PLAYER_TEXTURE_SIZE * pixel_size) - 1.f};
   }
 
   HitMap calculate_hitmap(Map const& map) const {

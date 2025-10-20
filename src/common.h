@@ -33,6 +33,7 @@ constexpr int const COLLISION_TYPE_LEFT{0b0100};
 constexpr int const COLLISION_TYPE_RIGHT{0b1000};
 constexpr int const COLLISION_TYPE_ALL{0b1111};
 
+constexpr Rectangle const CHARACTER_HITBOX{8.f, 6.f, 16.f, 26.f};
 constexpr Rectangle const DEFAULT_TILE_HITBOX{0.f, 0.f, TILE_SIZE, TILE_SIZE};
 constexpr Rectangle const BOX_HITBOX{5.f, 5.f, 22.f, 22.f};
 constexpr Rectangle const ENEMY1_HITBOX{14.f, 20.f, 22.f, 28.f};
