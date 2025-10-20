@@ -11,14 +11,15 @@
 constexpr int PLAYER_TEXTURE_SIZE{32};
 
 constexpr float PLAYER_MAX_REL_SPEED = 500.f;
-constexpr float PLAYER_MOVEMENT_FRICTION = 0.8f;
+constexpr float PLAYER_MOVEMENT_FRICTION = 0.9f;
 constexpr float PLAYER_ZERO_SPEED_THRESHOLD = 0.1f;
-constexpr float PLAYER_JUMP_SPEED = -1000.f;
-constexpr float PLAYER_GRAVITY = 0.95f;
+constexpr float PLAYER_JUMP_SPEED = -750.f;
+constexpr float PLAYER_GRAVITY = 0.96f;
 constexpr float PLAYER_GRAVITY_INV = 1.f / PLAYER_GRAVITY;
-constexpr float PLAYER_FALL_BACK_THRESHOLD = -1.6f;
+constexpr float PLAYER_FALL_BACK_THRESHOLD = -100.f;
 constexpr float PLAYER_MAX_FALL_SPEED = PLAYER_MAX_REL_SPEED;
 constexpr float PLAYER_MULTI_JUMP_MAX = 2;
+constexpr float const PlayerStartFallSpeed = 2.f;
 
 constexpr int PLAYER_SPRITE_RUN{0};
 constexpr int PLAYER_SPRITE_IDLE{1};
@@ -98,7 +99,7 @@ struct Character {
       update_movement(map);
       sprite_group.update();
     } else {
-      TraceLog(LOG_ERROR, "Invalid lifecycle state");
+      BAIL;
     }
 
     injury_timeout.update();
@@ -131,7 +132,7 @@ struct Character {
   }
 
   void enemy_head_bounce() {
-    speed.y = GetFrameTime() * PLAYER_JUMP_SPEED / 1.5f;
+    speed.y = PLAYER_JUMP_SPEED / 1.5f;
     jump_state = JumpState::Jump;
   }
 
@@ -173,7 +174,7 @@ struct Character {
       if (speed.x > PLAYER_MAX_REL_SPEED) speed.x = PLAYER_MAX_REL_SPEED;
     } else {
       sprite_group.set_current_sprite(PLAYER_SPRITE_IDLE);
-      speed.x *= PLAYER_MOVEMENT_FRICTION;
+      fps_independent_multiply(&speed.x, PLAYER_MOVEMENT_FRICTION);
 
       if (fabs(speed.x) < PLAYER_ZERO_SPEED_THRESHOLD) speed.x = 0.f;
     }
@@ -198,7 +199,7 @@ struct Character {
     }
 
     if (!is_injured() && IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
-      speed.y = GetFrameTime() * PLAYER_JUMP_SPEED;
+      speed.y = PLAYER_JUMP_SPEED;
       multi_jump_count++;
       if (multi_jump_count == 1) {
         jump_state = JumpState::Jump;
@@ -214,23 +215,24 @@ struct Character {
       fps_independent_multiply(&speed.y, PLAYER_GRAVITY);
 
       if (speed.y > PLAYER_FALL_BACK_THRESHOLD) {
-        speed.y = 100.f * GetFrameTime();
+        speed.y = PlayerStartFallSpeed;  // Start falling.
         jump_state = JumpState::Fall;
       }
     } else if (speed.y > 0.f) {
       // Falling.
       fps_independent_multiply(&speed.y, PLAYER_GRAVITY_INV);
 
-      if (speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED) speed.y = GetFrameTime() * PLAYER_MAX_FALL_SPEED;
-      if (is_grab_wall && speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED / 5.f)
-        speed.y = GetFrameTime() * PLAYER_MAX_FALL_SPEED / 5.f;
+      if (speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED) speed.y = PLAYER_MAX_FALL_SPEED;
+      if (is_grab_wall && speed.y > GetFrameTime() * PLAYER_MAX_FALL_SPEED / 5.f) {
+        speed.y = PLAYER_MAX_FALL_SPEED / 5.f;
+      }
       jump_state = JumpState::Fall;
     } else {
       jump_state = JumpState::Ground;
-      speed.y = 0.5f;
+      speed.y = PlayerStartFallSpeed;
     }
 
-    pos.y += speed.y;
+    pos.y += speed.y * GetFrameTime();
     _hitbox = hitbox();
 
     // Adjust for wall hit.
@@ -261,7 +263,7 @@ struct Character {
   }
 
   float speed_increments() const {
-    return (PLAYER_MAX_REL_SPEED / (30.f * FPSMultiplier));
+    return (PLAYER_MAX_REL_SPEED / (30.f / FPSMultiplier));
   }
 
   HitMap calculate_hitmap(Map const& map) const {

@@ -19,11 +19,11 @@
     exit(EXIT_FAILURE);                                                   \
   }
 
+constexpr int const ReferenceFPS{144};
 // Set after window initialization.
 static int GameFPS{};
 static float FPSMultiplier{};
 
-constexpr int const REFERENCE_FPS{144};
 constexpr int const DEFAULT_PIXEL_SIZE{2};
 
 constexpr int const TILE_SIZE{16};
@@ -437,12 +437,8 @@ IntVec2 relative_frame_pos(Rectangle const frame, int const tile_size, int const
                  mod_reduced(mouse_pos.y - frame.y, tile_size * pixel_size) / pixel_size};
 }
 
-float fps_independent_multiplier() {
-  return static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS());
-}
-
 void fps_independent_multiply(float* v, float mul) {
-  *v *= powf(mul, fps_independent_multiplier());
+  *v *= powf(mul, FPSMultiplier);
 }
 
 bool is_horizontal_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
