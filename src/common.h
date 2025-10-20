@@ -442,25 +442,19 @@ void fps_independent_multiply(float* v, float mul) {
 }
 
 bool is_horizontal_overlap(Rectangle const& rect, int const abs_minx, int const abs_maxx) {
-  if (rect.x > abs_maxx || (rect.x + rect.width - 1.f) < abs_minx) return false;
-  return true;
+  return leftx(rect) <= abs_maxx && (rect.x + rect.width - 1.f) >= abs_minx;
 }
 
 bool is_horizontal_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
-  if (rect_lhs.x > (rect_rhs.x + rect_rhs.width - 1.f) || (rect_lhs.x + rect_lhs.width - 1.f) < rect_rhs.x)
-    return false;
-  return true;
+  return rect_lhs.x <= (rect_rhs.x + rect_rhs.width - 1.f) && (rect_lhs.x + rect_lhs.width - 1.f) >= rect_rhs.x;
 }
 
 bool is_vertical_overlap(Rectangle const& rect, int const abs_miny, int const abs_maxy) {
-  if (rect.y > abs_maxy || (rect.y + rect.height - 1.f) < abs_miny) return false;
-  return true;
+  return rect.y <= abs_maxy && (rect.y + rect.height - 1.f) >= abs_miny;
 }
 
 bool is_vertical_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
-  if (rect_lhs.y > (rect_rhs.y + rect_rhs.height - 1.f) || (rect_lhs.y + rect_lhs.height - 1.f) < rect_rhs.y)
-    return false;
-  return true;
+  return rect_lhs.y <= (rect_rhs.y + rect_rhs.height - 1.f) && (rect_lhs.y + rect_lhs.height - 1.f) >= rect_rhs.y;
 }
 
 void debug(Vector2 v, const char* msg) {
@@ -492,10 +486,7 @@ bool can_charge_character_horizontal(int west_wall, int east_wall, Rectangle con
 
 bool can_charge_character_vertical(int south_wall, Rectangle const& self_hitbox, Rectangle const& character_hitbox) {
   if (is_horizontal_overlap(self_hitbox, character_hitbox)) {
-    if (south_wall >= character_hitbox.y + character_hitbox.height &&
-        character_hitbox.y >= self_hitbox.y + self_hitbox.height) {
-      return true;
-    }
+    return south_wall >= bottomy(character_hitbox) && character_hitbox.y >= bottomy(self_hitbox);
   }
 
   return false;
