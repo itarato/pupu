@@ -441,20 +441,12 @@ void fps_independent_multiply(float* v, float mul) {
   *v *= powf(mul, fps_independent_multiplier());
 }
 
-bool is_horizontal_overlap(Rectangle const& rect, int const abs_minx, int const abs_maxx) {
-  return leftx(rect) <= abs_maxx && (rect.x + rect.width - 1.f) >= abs_minx;
-}
-
 bool is_horizontal_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
-  return rect_lhs.x <= (rect_rhs.x + rect_rhs.width - 1.f) && (rect_lhs.x + rect_lhs.width - 1.f) >= rect_rhs.x;
-}
-
-bool is_vertical_overlap(Rectangle const& rect, int const abs_miny, int const abs_maxy) {
-  return rect.y <= abs_maxy && (rect.y + rect.height - 1.f) >= abs_miny;
+  return leftx(rect_lhs) <= rightx(rect_rhs) && rightx(rect_lhs) >= leftx(rect_rhs);
 }
 
 bool is_vertical_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
-  return rect_lhs.y <= (rect_rhs.y + rect_rhs.height - 1.f) && (rect_lhs.y + rect_lhs.height - 1.f) >= rect_rhs.y;
+  return topy(rect_lhs) <= bottomy(rect_rhs) && bottomy(rect_lhs) >= topy(rect_rhs);
 }
 
 void debug(Vector2 v, const char* msg) {
