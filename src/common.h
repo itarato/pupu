@@ -46,7 +46,7 @@ constexpr Rectangle const ENEMY3_HITBOX{14.f, 19.f, 19.f, 29.f};
 constexpr Rectangle const ENEMY4_HITBOX{12.f, 23.f, 24.f, 25.f};
 constexpr Rectangle const ENEMY5_HITBOX{10.f, 2.f, 26.f, 30.f};
 
-constexpr Rectangle const Trap1Hitbox{10.f, 2.f, 26.f, 30.f};
+constexpr Rectangle const Trap1Hitbox{8.f, 34.f, 32.f, 10.f};
 
 constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
 

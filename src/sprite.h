@@ -47,6 +47,7 @@ struct Sprite {
    * Returns a non negative integer when it's changed to a new sequence.
    */
   int update() {
+    if (paused) return -1;
     if (frame_count == 1) return -1;
 
     if (frame_stepper.update()) {
@@ -74,6 +75,14 @@ struct Sprite {
     return texture;
   }
 
+  void stop() {
+    paused = true;
+  }
+
+  void play() {
+    paused = false;
+  }
+
  private:
   float pixel_size{1.f};
   std::shared_ptr<Texture2D> texture;
@@ -83,4 +92,5 @@ struct Sprite {
   Vector2 origin{0.f, 0.f};
   int current_frame{0};
   int horizontal_reverse{1};
+  int paused{false};
 };

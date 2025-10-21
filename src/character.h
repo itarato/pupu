@@ -144,6 +144,12 @@ struct Character {
     return lifecycle_state == LifecycleState::Injured;
   }
 
+  void bouncing_trap_interact() {
+    multi_jump_count = 1;
+    speed.y = PLAYER_JUMP_SPEED * 2.5f;
+    jump_state = JumpState::Jump;
+  }
+
  private:
   const int pixel_size{DEFAULT_PIXEL_SIZE};
   SpriteGroup sprite_group{};
