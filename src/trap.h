@@ -47,3 +47,35 @@ struct BouncingTrap : Trap {
   int const pixel_size;
   Sprite sprite;
 };
+
+struct CircleSawTrap : Trap {
+ public:
+  CircleSawTrap(Vector2 pos, int const pixel_size) : pos(pos), pixel_size(pixel_size), sprite(pixel_size) {
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    sprite.init_texture(asset_manager.textures[TextureNames::Trap2], SIMPLE_WALK_NPC_SIZE, 7, sprite_frame_length);
+  }
+
+  void draw() const override {
+    sprite.draw(pos);
+    // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
+  }
+
+  virtual void update(Map const& map, Character& character) override {
+    sprite.update();
+
+    if (CheckCollisionRecs(hitbox(), character.hitbox())) {
+      character.injure();
+    }
+  }
+
+  virtual Rectangle hitbox() const override {
+    return move(upscale(tile_source_hitbox(TileSource::Trap2), pixel_size), pos);
+  }
+
+  virtual ~CircleSawTrap() = default;
+
+ private:
+  Vector2 pos;
+  int const pixel_size;
+  Sprite sprite;
+};

@@ -303,6 +303,15 @@ struct Editor {
                static_cast<float>(asset_manager.textures[TextureNames::Trap1__Example]->height * fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Trap1, {0, 0}};
       }
+
+      ImGui::SameLine();
+
+      if (rlImGuiImageButtonSize(
+              "Trap2", &*asset_manager.textures[TextureNames::Trap2__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Trap2__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Trap2__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Trap2, {0, 0}};
+      }
     }
   }
 

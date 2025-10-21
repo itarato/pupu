@@ -110,6 +110,8 @@ struct Character {
     } else {
       sprite_group.draw(pos);
     }
+
+    // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
   bool is_falling() const {
