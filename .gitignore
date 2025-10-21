@@ -1,4 +1,5 @@
 main
 src/*.o
 imgui.ini
-./editor
+/editor
+!/editor/
