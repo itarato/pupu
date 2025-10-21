@@ -17,6 +17,7 @@ enum TextureNames {
   Character1__Wall_Jump,
   Character1__Example,
   Character__Appear,
+  Character__Disappear,
   Background__0,
   Background__1,
   Background__2,
@@ -94,6 +95,8 @@ struct AssetManager {
 
     textures[TextureNames::Character__Appear] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/Appearing.png"));
+    textures[TextureNames::Character__Disappear] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/Disappearing.png"));
 
     textures[TextureNames::Background__0] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/7 Levels/Tiled/Backgrounds/1.png"));

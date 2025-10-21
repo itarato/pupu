@@ -456,6 +456,12 @@ inline int mod_reduced(const int v, const int mod) {
   return v - (v % mod);
 }
 
+inline Vector2 mod_reduced(const Vector2 v, const int mod) {
+  int x = static_cast<int>(v.x);
+  int y = static_cast<int>(v.y);
+  return Vector2{static_cast<float>(mod_reduced(x, mod)), static_cast<float>(mod_reduced(y, mod))};
+}
+
 IntVec2 relative_frame_pos(Rectangle const frame, int const tile_size, int const pixel_size) {
   Vector2 mouse_pos = GetMousePosition();
   return IntVec2{mod_reduced(mouse_pos.x - frame.x, tile_size * pixel_size) / pixel_size,

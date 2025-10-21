@@ -71,7 +71,8 @@ struct Editor {
     }
 
     if (IsMouseButtonDown(2)) {
-      character_position.set_from_vector2(GetMousePosition());
+      character_position.x = mouse_pos.x / pixel_size;
+      character_position.y = mouse_pos.y / pixel_size;
     }
   }
 
@@ -81,13 +82,14 @@ struct Editor {
 
     // Tiles.
     for (auto const& [k, v] : tiles) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
-    DrawTexturePro(*asset_manager.textures[TextureNames::Character1__Example],
-                   {0.f, 0.f, static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width),
-                    static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height)},
-                   {static_cast<float>(character_position.x), static_cast<float>(character_position.y),
-                    static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width) * pixel_size,
-                    static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height) * pixel_size},
-                   vector_zero, 0.f, WHITE);
+    DrawTexturePro(
+        *asset_manager.textures[TextureNames::Character1__Example],
+        {0.f, 0.f, static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width),
+         static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height)},
+        {static_cast<float>(character_position.x * pixel_size), static_cast<float>(character_position.y * pixel_size),
+         static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width) * pixel_size,
+         static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height) * pixel_size},
+        vector_zero, 0.f, WHITE);
 
     Vector2 mouse_pos = GetMousePosition();
 

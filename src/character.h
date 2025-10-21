@@ -28,6 +28,8 @@ constexpr int PLAYER_SPRITE_FALL{4};
 constexpr int PLAYER_SPRITE_DOUBLE_JUMP{5};
 constexpr int PLAYER_SPRITE_WALL_JUMP{6};
 
+constexpr Vector2 const AppearDisappearSpriteOffset{-32.f, -32.f};
+
 enum class JumpState {
   Ground,
   Jump,
@@ -37,16 +39,18 @@ enum class JumpState {
 
 enum class LifecycleState {
   Appear,
+  Disappear,
   Live,
   Injured,
 };
 
 struct Character {
  public:
-  Character(int const pixel_size) : pixel_size(pixel_size) {
+  Character(int const pixel_size) : pixel_size(pixel_size), appear_sprite(pixel_size), disappear_sprite(pixel_size) {
   }
 
   void reset(Vector2 new_pos) {
+    spawn_location = new_pos;
     pos = new_pos;
     sprite_group.reset();
     jump_state = JumpState::Ground;
@@ -89,11 +93,16 @@ struct Character {
 
     appear_sprite.init_texture(asset_manager.textures[TextureNames::Character__Appear], {96.f, 96.f}, 7,
                                sprite_frame_length);
+
+    disappear_sprite.init_texture(asset_manager.textures[TextureNames::Character__Disappear], {96.f, 96.f}, 7,
+                                  sprite_frame_length);
   }
 
   void update(Map const& map) {
     if (lifecycle_state == LifecycleState::Appear) {
       if (appear_sprite.update() == 0) lifecycle_state = LifecycleState::Live;
+    } else if (lifecycle_state == LifecycleState::Disappear) {
+      if (disappear_sprite.update() == 0) reset(spawn_location);
     } else if (lifecycle_state == LifecycleState::Live || lifecycle_state == LifecycleState::Injured) {
       update_movement(map);
       sprite_group.update();
@@ -106,7 +115,9 @@ struct Character {
 
   void draw() const {
     if (lifecycle_state == LifecycleState::Appear) {
-      appear_sprite.draw(pos);
+      appear_sprite.draw(Vector2Add(pos, Vector2Scale(AppearDisappearSpriteOffset, pixel_size)));
+    } else if (lifecycle_state == LifecycleState::Disappear) {
+      disappear_sprite.draw(Vector2Add(pos, Vector2Scale(AppearDisappearSpriteOffset, pixel_size)));
     } else {
       sprite_group.draw(pos);
     }
@@ -122,7 +133,13 @@ struct Character {
     return move(upscale(CHARACTER_HITBOX, pixel_size), pos);
   }
 
-  void injure() {
+  void injure(bool const should_restart = false) {
+    if (should_restart) {
+      lifecycle_state = LifecycleState::Disappear;
+      injury_timeout.cancel();
+      return;
+    }
+
     if (is_injured()) return;
 
     injury_timeout.cancel();
@@ -155,25 +172,31 @@ struct Character {
  private:
   const int pixel_size{DEFAULT_PIXEL_SIZE};
   SpriteGroup sprite_group{};
-  Sprite appear_sprite{};
+  Sprite appear_sprite;
+  Sprite disappear_sprite;
   Vector2 pos{};
   Vector2 speed{};
   int multi_jump_count{0};
   JumpState jump_state{JumpState::Ground};
   LifecycleState lifecycle_state{LifecycleState::Appear};
   Timeout injury_timeout{};
+  Vector2 spawn_location{};
+
+  bool is_live() const {
+    return lifecycle_state == LifecycleState::Live;
+  }
 
   void update_movement(Map const& map) {
     HitMap hit_map = calculate_hitmap(map);
     bool is_grab_wall{false};
 
-    if (!is_injured() && IsKeyDown(KEY_LEFT)) {
+    if (is_live() && IsKeyDown(KEY_LEFT)) {
       sprite_group.horizontal_flip();
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x -= speed_increments();
 
       if (speed.x < -PLAYER_MAX_REL_SPEED) speed.x = -PLAYER_MAX_REL_SPEED;
-    } else if (!is_injured() && IsKeyDown(KEY_RIGHT)) {
+    } else if (is_live() && IsKeyDown(KEY_RIGHT)) {
       sprite_group.horizontal_reset();
       sprite_group.set_current_sprite(PLAYER_SPRITE_RUN);
       speed.x += speed_increments();
@@ -205,7 +228,7 @@ struct Character {
       multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
 
-    if (!is_injured() && IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
+    if (is_live() && IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
       speed.y = PLAYER_JUMP_SPEED;
       multi_jump_count++;
       if (multi_jump_count == 1) {

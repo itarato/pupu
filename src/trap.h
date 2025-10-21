@@ -64,7 +64,7 @@ struct CircleSawTrap : Trap {
     sprite.update();
 
     if (CheckCollisionRecs(hitbox(), character.hitbox())) {
-      character.injure();
+      character.injure(true);
     }
   }
 

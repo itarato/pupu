@@ -57,7 +57,6 @@ struct App {
   std::vector<std::shared_ptr<Trap>> traps{};
 
   void reset() {
-    character.reset({static_cast<float>(GetScreenWidth() / 3), static_cast<float>(TILE_SIZE * 4 * pixel_size)});
     npcs.clear();
     traps.clear();
     pause_update = false;
@@ -82,7 +81,7 @@ struct App {
     if (std::fread(&background_index, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) BAIL;
 
-    character.set_position(intvec2_from_file(file));
+    character.reset(intvec2_from_file(file).scale(pixel_size).to_vector2());
 
     SetWindowSize(tile_width * TILE_SIZE * pixel_size, tile_height * TILE_SIZE * pixel_size);
 
