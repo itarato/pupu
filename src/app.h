@@ -10,6 +10,7 @@
 #include "raylib.h"
 #include "sprite.h"
 #include "sprite_group.h"
+#include "trap.h"
 
 struct App {
  public:
@@ -19,7 +20,6 @@ struct App {
     InitWindow(1024, 768, "Pupu");
 
     GameFPS = GetMonitorRefreshRate(0);
-    // GameFPS = 30;
     FPSMultiplier = static_cast<float>(ReferenceFPS) / static_cast<float>(GameFPS);
     SetTargetFPS(GameFPS);
 
@@ -54,10 +54,12 @@ struct App {
   int pixel_size{DEFAULT_PIXEL_SIZE};
   Character character{DEFAULT_PIXEL_SIZE};
   std::vector<std::shared_ptr<Npc>> npcs{};
+  std::vector<std::shared_ptr<Trap>> traps{};
 
   void reset() {
     character.reset({static_cast<float>(GetScreenWidth() / 3), static_cast<float>(TILE_SIZE * 4 * pixel_size)});
     npcs.clear();
+    traps.clear();
     pause_update = false;
 
     reload_world_from_file();
@@ -110,6 +112,9 @@ struct App {
         case TileSource::Enemy5:
           npcs.push_back(std::make_shared<StompingNpc>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
           break;
+        case TileSource::Trap1:
+          traps.push_back(std::make_shared<BouncingTrap>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
+          break;
         default:
           BAILF("Invalid: %d", tile_selection.source);
       }
@@ -123,6 +128,7 @@ struct App {
   void draw() const {
     map.draw();
     for (auto const& npc : npcs) npc->draw();
+    for (auto const& trap : traps) trap->draw();
     character.draw();
 
     DrawFPS(0, 0);
@@ -132,6 +138,7 @@ struct App {
     if (!pause_update) {
       map.update();
       for (auto& npc : npcs) npc->update(map, character);
+      for (auto& trap : traps) trap->update(map, character);
       character.update(map);
 
       update__character_collisions();

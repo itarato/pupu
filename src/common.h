@@ -30,7 +30,7 @@ constexpr int const TILE_SIZE{16};
 
 constexpr Vector2 const vector_zero{0.f, 0.f};
 
-constexpr int const COLLISION_TYPE_NOTHING{0b0};
+constexpr int const COLLISION_TYPE_NOTHING{0b0000};
 constexpr int const COLLISION_TYPE_TOP{0b0001};
 constexpr int const COLLISION_TYPE_BOTTOM{0b0010};
 constexpr int const COLLISION_TYPE_LEFT{0b0100};
@@ -47,6 +47,8 @@ constexpr Rectangle const ENEMY4_HITBOX{12.f, 23.f, 24.f, 25.f};
 constexpr Rectangle const ENEMY5_HITBOX{10.f, 2.f, 26.f, 30.f};
 
 constexpr Rectangle const Trap1Hitbox{10.f, 2.f, 26.f, 30.f};
+
+constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off

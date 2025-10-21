@@ -13,7 +13,6 @@
 #include "sprite.h"
 #include "sprite_group.h"
 
-constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
 constexpr Vector2 const ChargingNpcSize{48.f, 48.f};
 
 constexpr size_t const SimpleWalkNpcSpriteFall{0};
