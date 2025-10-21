@@ -153,6 +153,7 @@ struct Editor {
     draw_gui_pane_walls();
     draw_gui_pane_boxes();
     draw_gui_pane_enemies();
+    draw_gui_pane_traps();
 
     ImGui::End();
 
@@ -171,7 +172,10 @@ struct Editor {
 
       if (bgr_need_redraw) background.preload(new_background_tile_index, tile_width, tile_height, pixel_size);
 
+      ImGui::Separator();
+
       if (ImGui::Button("Reset editor")) reset();
+      ImGui::SameLine();
       if (ImGui::Button("Save")) export_to_file();
     }
   }
@@ -224,12 +228,16 @@ struct Editor {
         tile_selection = TileSelection{TileSource::Box1, {0, 0}};
       }
 
+      ImGui::SameLine();
+
       if (rlImGuiImageButtonSize(
               "Box2", &*asset_manager.textures[TextureNames::Box2__Idle],
               {static_cast<float>(asset_manager.textures[TextureNames::Box2__Idle]->width * fixed_pixel_size),
                static_cast<float>(asset_manager.textures[TextureNames::Box2__Idle]->height * fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Box2, {0, 0}};
       }
+
+      ImGui::SameLine();
 
       if (rlImGuiImageButtonSize(
               "Box3", &*asset_manager.textures[TextureNames::Box3__Idle],
@@ -249,12 +257,16 @@ struct Editor {
         tile_selection = TileSelection{TileSource::Enemy1, {0, 0}};
       }
 
+      ImGui::SameLine();
+
       if (rlImGuiImageButtonSize(
               "Enemy2", &*asset_manager.textures[TextureNames::Enemy2__Fall],
               {static_cast<float>(asset_manager.textures[TextureNames::Enemy2__Fall]->width * fixed_pixel_size),
                static_cast<float>(asset_manager.textures[TextureNames::Enemy2__Fall]->height * fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Enemy2, {0, 0}};
       }
+
+      ImGui::SameLine();
 
       if (rlImGuiImageButtonSize(
               "Enemy3", &*asset_manager.textures[TextureNames::Enemy3__Example],
@@ -263,6 +275,8 @@ struct Editor {
         tile_selection = TileSelection{TileSource::Enemy3, {0, 0}};
       }
 
+      ImGui::SameLine();
+
       if (rlImGuiImageButtonSize(
               "Enemy4", &*asset_manager.textures[TextureNames::Enemy4__Example],
               {static_cast<float>(asset_manager.textures[TextureNames::Enemy4__Example]->width * fixed_pixel_size),
@@ -270,11 +284,24 @@ struct Editor {
         tile_selection = TileSelection{TileSource::Enemy4, {0, 0}};
       }
 
+      ImGui::SameLine();
+
       if (rlImGuiImageButtonSize(
               "Enemy5", &*asset_manager.textures[TextureNames::Enemy5__Example],
               {static_cast<float>(asset_manager.textures[TextureNames::Enemy5__Example]->width * fixed_pixel_size),
                static_cast<float>(asset_manager.textures[TextureNames::Enemy5__Example]->height * fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Enemy5, {0, 0}};
+      }
+    }
+  }
+
+  void draw_gui_pane_traps() {
+    if (ImGui::CollapsingHeader("Traps")) {
+      if (rlImGuiImageButtonSize(
+              "Trap1", &*asset_manager.textures[TextureNames::Trap1__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Trap1__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Trap1__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Trap1, {0, 0}};
       }
     }
   }

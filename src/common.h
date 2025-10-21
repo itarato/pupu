@@ -46,6 +46,8 @@ constexpr Rectangle const ENEMY3_HITBOX{14.f, 19.f, 19.f, 29.f};
 constexpr Rectangle const ENEMY4_HITBOX{12.f, 23.f, 24.f, 25.f};
 constexpr Rectangle const ENEMY5_HITBOX{10.f, 2.f, 26.f, 30.f};
 
+constexpr Rectangle const Trap1Hitbox{10.f, 2.f, 26.f, 30.f};
+
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
     1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
@@ -251,6 +253,7 @@ enum class TileSource {
   Enemy3,
   Enemy4,
   Enemy5,
+  Trap1,
 };
 
 Rectangle const tile_source_hitbox(TileSource tile_source) {
@@ -272,6 +275,8 @@ Rectangle const tile_source_hitbox(TileSource tile_source) {
       return ENEMY4_HITBOX;
     case TileSource::Enemy5:
       return ENEMY5_HITBOX;
+    case TileSource::Trap1:
+      return Trap1Hitbox;
     default:
       BAIL;
   }
@@ -311,6 +316,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Enemy4__Example];
     } else if (source == TileSource::Enemy5) {
       texture = asset_manager.textures[TextureNames::Enemy5__Example];
+    } else if (source == TileSource::Trap1) {
+      texture = asset_manager.textures[TextureNames::Trap1__Example];
     } else {
       BAIL;
     }
@@ -353,6 +360,7 @@ struct TileSelection {
       case TileSource::Enemy3:
       case TileSource::Enemy4:
       case TileSource::Enemy5:
+      case TileSource::Trap1:
         return TILESIZE_ENEMY1;
       default:
         BAIL;
@@ -372,6 +380,7 @@ struct TileSelection {
       case TileSource::Enemy3:
       case TileSource::Enemy4:
       case TileSource::Enemy5:
+      case TileSource::Trap1:
         return 1;
       default:
         BAIL;
@@ -419,6 +428,9 @@ TileSelection tile_selection_from_file(FILE* file) {
       break;
     case 9:
       source = TileSource::Enemy5;
+      break;
+    case 10:
+      source = TileSource::Trap1;
       break;
     default:
       BAILF("Invalid: %d", tile_source_raw);
