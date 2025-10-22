@@ -48,8 +48,11 @@ constexpr Rectangle const ENEMY5_HITBOX{10.f, 2.f, 26.f, 30.f};
 
 constexpr Rectangle const Trap1Hitbox{8.f, 34.f, 32.f, 10.f};
 constexpr Rectangle const Trap2Hitbox{10.f, 10.f, 28.f, 28.f};
+constexpr Rectangle const Trap4Hitbox{16.f, 38.f, 16.f, 10.f};
 
 constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
+
+constexpr Rectangle const OutsideRectangle{-100.f, -100.f, 0.f, 0.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
@@ -228,16 +231,20 @@ struct Timeout {
 struct RepeatTimer {
  public:
   RepeatTimer(double interval) : interval(interval) {
-    next_tick = GetTime() + interval;
+    reset();
   }
 
   bool update() {
     if (next_tick <= GetTime()) {
-      next_tick = GetTime() + interval;
+      reset();
       return true;
     } else {
       return false;
     }
+  }
+
+  void reset() {
+    next_tick = GetTime() + interval;
   }
 
  private:
@@ -258,6 +265,7 @@ enum class TileSource {
   Enemy5,
   Trap1,
   Trap2,
+  Trap4,
 };
 
 Rectangle const tile_source_hitbox(TileSource tile_source) {
@@ -283,6 +291,8 @@ Rectangle const tile_source_hitbox(TileSource tile_source) {
       return Trap1Hitbox;
     case TileSource::Trap2:
       return Trap2Hitbox;
+    case TileSource::Trap4:
+      return Trap4Hitbox;
     default:
       BAIL;
   }
@@ -326,6 +336,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Trap1__Example];
     } else if (source == TileSource::Trap2) {
       texture = asset_manager.textures[TextureNames::Trap2__Example];
+    } else if (source == TileSource::Trap4) {
+      texture = asset_manager.textures[TextureNames::Trap4__Example];
     } else {
       BAIL;
     }
@@ -370,6 +382,7 @@ struct TileSelection {
       case TileSource::Enemy5:
       case TileSource::Trap1:
       case TileSource::Trap2:
+      case TileSource::Trap4:
         return TILESIZE_ENEMY1;
       default:
         BAIL;
@@ -391,6 +404,7 @@ struct TileSelection {
       case TileSource::Enemy5:
       case TileSource::Trap1:
       case TileSource::Trap2:
+      case TileSource::Trap4:
         return 1;
       default:
         BAIL;
@@ -444,6 +458,9 @@ TileSelection tile_selection_from_file(FILE* file) {
       break;
     case 11:
       source = TileSource::Trap2;
+      break;
+    case 12:
+      source = TileSource::Trap4;
       break;
     default:
       BAILF("Invalid: %d", tile_source_raw);

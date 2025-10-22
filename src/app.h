@@ -117,6 +117,9 @@ struct App {
         case TileSource::Trap2:
           traps.push_back(std::make_shared<CircleSawTrap>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
           break;
+        case TileSource::Trap4:
+          traps.push_back(std::make_shared<SpikeTrap>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
+          break;
         default:
           BAILF("Invalid: %d", tile_selection.source);
       }
