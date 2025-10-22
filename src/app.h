@@ -96,6 +96,7 @@ struct App {
         case TileSource::Box1:
         case TileSource::Box2:
         case TileSource::Box3:
+        case TileSource::Trap5:
           map_tiles[tile_pos] = tile_selection;
           break;
         case TileSource::Enemy1:

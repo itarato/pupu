@@ -7,6 +7,7 @@
 
 #include "background.h"
 #include "common.h"
+#include "interactive_object.h"
 #include "raylib.h"
 
 struct HitMap {
@@ -50,6 +51,10 @@ struct Map {
         case TileSource::Box3:
           boxes[tile_pos] = tile_selection;
           break;
+        case TileSource::Trap5:
+          interactive_objects.push_back(
+              std::make_shared<DisappearingPlank>(pixel_size, tile_pos.scale(pixel_size).to_vector2()));
+          break;
         default:
           BAIL;
       }
@@ -59,6 +64,7 @@ struct Map {
   }
 
   void update() {
+    for (auto& interactive_object : interactive_objects) interactive_object->update();
   }
 
   void draw() const {
@@ -66,6 +72,7 @@ struct Map {
 
     for (auto const& [k, v] : walls) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
     for (auto const& [k, v] : boxes) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
+    for (auto const& interactive_object : interactive_objects) interactive_object->draw();
   }
 
   void unload() {
@@ -180,6 +187,7 @@ struct Map {
   std::unordered_map<IntVec2, TileSelection> boxes{};
   std::vector<HitMap> hit_map{};
   int const pixel_size;
+  std::vector<std::shared_ptr<InteractiveObject>> interactive_objects{};
 
   void reset() {
     walls.clear();

@@ -64,6 +64,8 @@ enum TextureNames {
   Trap2,
   Trap4__Example,
   Trap4,
+  Trap5__Example,
+  Trap5,
 };
 
 struct AssetManager {
@@ -198,6 +200,9 @@ struct AssetManager {
     textures[TextureNames::Trap4__Example] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/6 Traps/4_Example.png"));
     textures[TextureNames::Trap4] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/6 Traps/4.png"));
+    textures[TextureNames::Trap5__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/6 Traps/5_Example.png"));
+    textures[TextureNames::Trap5] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/6 Traps/5.png"));
   }
 
  private:
