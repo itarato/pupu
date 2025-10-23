@@ -50,6 +50,7 @@ constexpr Rectangle const Trap1Hitbox{8.f, 34.f, 32.f, 10.f};
 constexpr Rectangle const Trap2Hitbox{10.f, 10.f, 28.f, 28.f};
 constexpr Rectangle const Trap4Hitbox{16.f, 38.f, 16.f, 10.f};
 constexpr Rectangle const Trap5Hitbox{8.f, 20.f, 32.f, 8.f};
+constexpr Rectangle const Trap5Hitbox__UpperSurface{8.f, 18.f, 32.f, 8.f};
 
 constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
 
@@ -246,6 +247,11 @@ struct RepeatTimer {
 
   void reset() {
     next_tick = GetTime() + interval;
+  }
+
+  void reset(double new_interval) {
+    interval = new_interval;
+    next_tick = GetTime() + new_interval;
   }
 
  private:

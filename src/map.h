@@ -63,8 +63,8 @@ struct Map {
     recalculate();
   }
 
-  void update() {
-    for (auto& interactive_object : interactive_objects) interactive_object->update();
+  void update(Rectangle const& character_hitbox) {
+    for (auto& interactive_object : interactive_objects) interactive_object->update(character_hitbox);
   }
 
   void draw() const {
