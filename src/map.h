@@ -93,12 +93,12 @@ struct Map {
     int out = max_y_coord * TILE_SIZE * pixel_size;
 
     for (auto const& [pos, selection] : boxes) {
-      Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
-      if (is_horizontal_overlap(abs_hitbox, rect)) {
-        if (bottomy(abs_hitbox) > out && (bottomy(abs_hitbox) - WALL_CHECK_THRESHOLD * pixel_size) <= topy(rect)) {
-          out = bottomy(abs_hitbox);
-        }
-      }
+      check_north_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+    }
+
+    for (auto const& interactive_object : interactive_objects) {
+      if ((interactive_object->collision_directions() & COLLISION_TYPE_BOTTOM) == 0) continue;
+      check_north_collision(&out, interactive_object->hitbox(), rect);
     }
 
     return out;
@@ -118,12 +118,12 @@ struct Map {
     int out = min_y_coord * TILE_SIZE * pixel_size - 1;
 
     for (auto const& [pos, selection] : boxes) {
-      Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
-      if (is_horizontal_overlap(abs_hitbox, rect)) {
-        if (topy(abs_hitbox) < out && (topy(abs_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= bottomy(rect)) {
-          out = abs_hitbox.y - 1;
-        }
-      }
+      check_south_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+    }
+
+    for (auto const& interactive_object : interactive_objects) {
+      if ((interactive_object->collision_directions() & COLLISION_TYPE_TOP) == 0) continue;
+      check_south_collision(&out, interactive_object->hitbox(), rect);
     }
 
     return out;
@@ -143,12 +143,12 @@ struct Map {
     int out = max_x_coord * TILE_SIZE * pixel_size;
 
     for (auto const& [pos, selection] : boxes) {
-      Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
-      if (is_vertical_overlap(abs_hitbox, rect)) {
-        if (rightx(abs_hitbox) > out && (rightx(abs_hitbox) - WALL_CHECK_THRESHOLD * pixel_size) <= leftx(rect)) {
-          out = rightx(abs_hitbox);
-        }
-      }
+      check_west_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+    }
+
+    for (auto const& interactive_object : interactive_objects) {
+      if ((interactive_object->collision_directions() & COLLISION_TYPE_RIGHT) == 0) continue;
+      check_west_collision(&out, interactive_object->hitbox(), rect);
     }
 
     return out;
@@ -168,12 +168,12 @@ struct Map {
     int out = min_x_coord * TILE_SIZE * pixel_size - 1;
 
     for (auto const& [pos, selection] : boxes) {
-      Rectangle abs_hitbox = upscale(selection.hitbox(pos), pixel_size);
-      if (is_vertical_overlap(abs_hitbox, rect)) {
-        if (leftx(abs_hitbox) < out && (leftx(abs_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= leftx(rect)) {
-          out = abs_hitbox.x - 1;
-        }
-      }
+      check_east_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+    }
+
+    for (auto const& interactive_object : interactive_objects) {
+      if ((interactive_object->collision_directions() & COLLISION_TYPE_LEFT) == 0) continue;
+      check_east_collision(&out, interactive_object->hitbox(), rect);
     }
 
     return out;
@@ -233,5 +233,41 @@ struct Map {
 
   bool is_tile_coord_valid(int x, int y) const {
     return x >= 0 && y >= 0 && x < tile_width && y < tile_height;
+  }
+
+  void check_north_collision(int* out, Rectangle const& map_object_hitbox, Rectangle const& collidee_hitbox) const {
+    if (is_horizontal_overlap(map_object_hitbox, collidee_hitbox)) {
+      if (bottomy(map_object_hitbox) > *out &&
+          (bottomy(map_object_hitbox) - WALL_CHECK_THRESHOLD * pixel_size) <= topy(collidee_hitbox)) {
+        *out = bottomy(map_object_hitbox);
+      }
+    }
+  }
+
+  void check_south_collision(int* out, Rectangle const& map_object_hitbox, Rectangle const& collidee_hitbox) const {
+    if (is_horizontal_overlap(map_object_hitbox, collidee_hitbox)) {
+      if (topy(map_object_hitbox) < *out &&
+          (topy(map_object_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= bottomy(collidee_hitbox)) {
+        *out = map_object_hitbox.y - 1;
+      }
+    }
+  }
+
+  void check_east_collision(int* out, Rectangle const& map_object_hitbox, Rectangle const& collidee_hitbox) const {
+    if (is_vertical_overlap(map_object_hitbox, collidee_hitbox)) {
+      if (leftx(map_object_hitbox) < *out &&
+          (leftx(map_object_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= leftx(collidee_hitbox)) {
+        *out = map_object_hitbox.x - 1;
+      }
+    }
+  }
+
+  void check_west_collision(int* out, Rectangle const& map_object_hitbox, Rectangle const& collidee_hitbox) const {
+    if (is_vertical_overlap(map_object_hitbox, collidee_hitbox)) {
+      if (rightx(map_object_hitbox) > *out &&
+          (rightx(map_object_hitbox) - WALL_CHECK_THRESHOLD * pixel_size) <= leftx(collidee_hitbox)) {
+        *out = rightx(map_object_hitbox);
+      }
+    }
   }
 };
