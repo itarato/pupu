@@ -12,6 +12,14 @@
 
 constexpr const int fixed_pixel_size{2};
 
+static std::vector<const char*> group_list_names{};
+
+struct InteractiveGroup {
+ public:
+ private:
+  std::vector<IntVec2> elems{};
+};
+
 struct Editor {
  public:
   Editor() {
@@ -114,6 +122,8 @@ struct Editor {
   int tile_height{20};
   int pixel_size{DEFAULT_PIXEL_SIZE};
   IntVec2 character_position{};
+  std::vector<InteractiveGroup> interactive_groups{};
+  int active_interactive_group{-1};
 
   void reset() {
     tiles.clear();
@@ -156,6 +166,7 @@ struct Editor {
     draw_gui_pane_boxes();
     draw_gui_pane_enemies();
     draw_gui_pane_traps();
+    draw_gui_pane_groups();
 
     ImGui::End();
 
@@ -340,6 +351,37 @@ struct Editor {
               {static_cast<float>(asset_manager.textures[TextureNames::Trap6__Example]->width * fixed_pixel_size),
                static_cast<float>(asset_manager.textures[TextureNames::Trap6__Example]->height * fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Trap6, {0, 0}};
+      }
+    }
+  }
+
+  void draw_gui_pane_groups() {
+    char group_name_buf[16]{};
+
+    if (ImGui::CollapsingHeader("Group Management")) {
+      if (ImGui::Button("+ New group")) {
+        interactive_groups.emplace_back();
+
+        while (interactive_groups.size() > group_list_names.size()) {
+          sprintf(group_name_buf, "Group %lu", group_list_names.size());
+          char* new_group_name = strdup(group_name_buf);
+          group_list_names.push_back(new_group_name);
+        }
+      }
+
+      ImGui::Separator();
+
+      if (interactive_groups.size() == 0) {
+        ImGui::Text("No groups");
+        return;
+      }
+
+      const char** items = group_list_names.data();
+      ImGui::Combo("Groups", &active_interactive_group, items, group_list_names.size());
+
+      if (active_interactive_group < 0 || active_interactive_group >= static_cast<int>(interactive_groups.size())) {
+        ImGui::Text("No group selected");
+        return;
       }
     }
   }
