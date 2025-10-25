@@ -21,23 +21,23 @@ enum class SpecialOperation {
 };
 
 enum class ObjectBehaviourType {
-  VerticalMovement,
   HorizontalMovement,
+  VerticalMovement,
 };
 
 struct ObjectBehaviour {
   ObjectBehaviourType type;
   union {
-    IntVec2 movement_range;
+    int movement_range;
   };
 };
 
 ObjectBehaviour make_object_behaviour__vertical_movement() {
-  return ObjectBehaviour{ObjectBehaviourType::VerticalMovement, IntVec2{0, 0}};
+  return ObjectBehaviour{ObjectBehaviourType::VerticalMovement, 0};
 }
 
 ObjectBehaviour make_object_behaviour__horizontal_movement() {
-  return ObjectBehaviour{ObjectBehaviourType::HorizontalMovement, IntVec2{0, 0}};
+  return ObjectBehaviour{ObjectBehaviourType::HorizontalMovement, 0};
 }
 
 struct InteractiveGroup {
@@ -50,7 +50,11 @@ struct InteractiveGroup {
     return elems;
   }
 
-  std::vector<ObjectBehaviour>& get_behaviours() {
+  std::vector<ObjectBehaviour>& get_behaviours_mut() {
+    return behaviours;
+  }
+
+  std::vector<ObjectBehaviour> const& get_behaviours() const {
     return behaviours;
   }
 
@@ -171,6 +175,28 @@ struct Editor {
         tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
                              static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
                             pixel_size);
+      }
+    }
+
+    for (auto const& interactive_group : interactive_groups) {
+      for (auto const& behaviour : interactive_group.get_behaviours()) {
+        for (auto const& elem_coord : interactive_group.get_elems()) {
+          TileSelection const& elem_tile_selection = tiles.at(elem_coord);
+          Rectangle const elem_hitbox = elem_tile_selection.hitbox(elem_coord, pixel_size);
+
+          switch (behaviour.type) {
+            case ObjectBehaviourType::HorizontalMovement:
+              DrawLineEx({elem_hitbox.x, elem_hitbox.y}, {elem_hitbox.x + behaviour.movement_range, elem_hitbox.y},
+                         pixel_size, RED);
+              break;
+            case ObjectBehaviourType::VerticalMovement:
+              DrawLineEx({elem_hitbox.x, elem_hitbox.y}, {elem_hitbox.x, elem_hitbox.y + behaviour.movement_range},
+                         pixel_size, RED);
+              break;
+            default:
+              BAIL;
+          }
+        }
       }
     }
 
@@ -476,17 +502,15 @@ struct Editor {
             static_cast<ObjectBehaviourType>(selected_behaviour));
       }
 
-      for (auto& behaviour : interactive_groups[active_interactive_group].get_behaviours()) {
+      for (auto& behaviour : interactive_groups[active_interactive_group].get_behaviours_mut()) {
         switch (behaviour.type) {
           case ObjectBehaviourType::HorizontalMovement:
             ImGui::Text("Behaviour: horizontal movement");
-            ImGui::SliderInt("Left limit", &behaviour.movement_range.x, 0, GetScreenWidth());
-            ImGui::SliderInt("Right limit", &behaviour.movement_range.y, 0, GetScreenWidth());
+            ImGui::SliderInt("Right movement", &behaviour.movement_range, 0, GetScreenWidth());
             break;
           case ObjectBehaviourType::VerticalMovement:
             ImGui::Text("Behaviour: vertical movement");
-            ImGui::SliderInt("Top limit", &behaviour.movement_range.x, 0, GetScreenWidth());
-            ImGui::SliderInt("Bottom limit", &behaviour.movement_range.y, 0, GetScreenWidth());
+            ImGui::SliderInt("Down movement", &behaviour.movement_range, 0, GetScreenWidth());
             break;
           default:
             BAIL;
