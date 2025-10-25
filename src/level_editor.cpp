@@ -22,7 +22,7 @@
 int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
-  InitWindow(1800, 800, "Pupu Level Editor");
+  InitWindow(1800, 1200, "Pupu Level Editor");
   SetTargetFPS(30);
   rlImGuiSetup(true);
 

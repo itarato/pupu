@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <list>
 
 #include "../asset_manager.h"
 #include "../background.h"
@@ -14,10 +15,62 @@ constexpr const int fixed_pixel_size{2};
 
 static std::vector<const char*> group_list_names{};
 
+enum class SpecialOperation {
+  Nothing,
+  GroupElemSelect,
+};
+
+enum class ObjectBehaviourType {
+  VerticalMovement,
+  HorizontalMovement,
+};
+
+struct ObjectBehaviour {
+  ObjectBehaviourType type;
+  union {
+    IntVec2 movement_range;
+  };
+};
+
+ObjectBehaviour make_object_behaviour__vertical_movement() {
+  return ObjectBehaviour{ObjectBehaviourType::VerticalMovement, IntVec2{0, 0}};
+}
+
+ObjectBehaviour make_object_behaviour__horizontal_movement() {
+  return ObjectBehaviour{ObjectBehaviourType::HorizontalMovement, IntVec2{0, 0}};
+}
+
 struct InteractiveGroup {
  public:
+  void add_elem(IntVec2 const coord) {
+    elems.push_back(coord);
+  }
+
+  std::vector<IntVec2> const& get_elems() const {
+    return elems;
+  }
+
+  std::vector<ObjectBehaviour>& get_behaviours() {
+    return behaviours;
+  }
+
+  void add_behaviour(ObjectBehaviourType type) {
+    switch (type) {
+      case ObjectBehaviourType::HorizontalMovement:
+        behaviours.push_back(make_object_behaviour__horizontal_movement());
+        break;
+      case ObjectBehaviourType::VerticalMovement:
+        behaviours.push_back(make_object_behaviour__vertical_movement());
+        break;
+      default:
+        BAIL;
+        break;
+    }
+  }
+
  private:
   std::vector<IntVec2> elems{};
+  std::vector<ObjectBehaviour> behaviours{};
 };
 
 struct Editor {
@@ -56,12 +109,24 @@ struct Editor {
   void update() {
     Vector2 mouse_pos = GetMousePosition();
 
-    if (IsMouseButtonDown(0)) {
-      if (CheckCollisionPointRec(mouse_pos, game_area())) {
-        // Draw tile.
-        IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size) / pixel_size,
-                          mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size) / pixel_size};
-        tiles[int_coord] = tile_selection;
+    if (CheckCollisionPointRec(mouse_pos, game_area())) {
+      if (special_operation == SpecialOperation::Nothing) {
+        if (IsMouseButtonDown(0)) {
+          // Draw tile.
+          IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size) / pixel_size,
+                            mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size) / pixel_size};
+          tiles[int_coord] = tile_selection;
+        }
+      } else if (special_operation == SpecialOperation::GroupElemSelect) {
+        if (IsMouseButtonReleased(0)) {
+          for (auto const& [tile_pos, tile_selection] : tiles) {
+            if (CheckCollisionPointRec(mouse_pos, tile_selection.hitbox(tile_pos, pixel_size))) {
+              interactive_groups[active_interactive_group].add_elem(tile_pos);
+              break;
+            }
+          }
+          special_operation = SpecialOperation::Nothing;
+        }
       }
     }
 
@@ -72,7 +137,7 @@ struct Editor {
           IntVec2 const& pos = p.first;
           TileSelection const& selection = p.second;
 
-          const Rectangle hitbox = upscale(selection.hitbox(pos), pixel_size);
+          const Rectangle hitbox = selection.hitbox(pos, pixel_size);
           return CheckCollisionPointRec(mouse_pos, hitbox);
         });
       }
@@ -102,9 +167,11 @@ struct Editor {
     Vector2 mouse_pos = GetMousePosition();
 
     if (CheckCollisionPointRec(mouse_pos, game_area())) {
-      tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
-                           static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
-                          pixel_size);
+      if (special_operation == SpecialOperation::Nothing) {
+        tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
+                             static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
+                            pixel_size);
+      }
     }
 
     draw_gui();
@@ -112,6 +179,11 @@ struct Editor {
 
   void unload() {
     background.unload();
+    const char** group_list_names_raw = group_list_names.data();
+    for (int i = 0; i < static_cast<int>(group_list_names.size()); i++) {
+      char* word = const_cast<char*>(group_list_names_raw[i]);
+      free(word);
+    }
   }
 
  private:
@@ -124,6 +196,7 @@ struct Editor {
   IntVec2 character_position{};
   std::vector<InteractiveGroup> interactive_groups{};
   int active_interactive_group{-1};
+  SpecialOperation special_operation{SpecialOperation::Nothing};
 
   void reset() {
     tiles.clear();
@@ -382,6 +455,42 @@ struct Editor {
       if (active_interactive_group < 0 || active_interactive_group >= static_cast<int>(interactive_groups.size())) {
         ImGui::Text("No group selected");
         return;
+      }
+
+      for (auto const& elem_pos : interactive_groups[active_interactive_group].get_elems()) {
+        auto const& tile_selection = tiles[elem_pos];
+        DrawRectangleLinesEx(tile_selection.hitbox(elem_pos, pixel_size), pixel_size, ORANGE);
+      }
+
+      if (ImGui::Button("Add elem")) {
+        special_operation = SpecialOperation::GroupElemSelect;
+      }
+
+      ImGui::Separator();
+
+      const char* behaviour_names[] = {"Horizontal movement", "Vertical movement"};
+      static int selected_behaviour{0};
+      ImGui::Combo("Behaviour", &selected_behaviour, behaviour_names, IM_ARRAYSIZE(behaviour_names));
+      if (ImGui::Button("Add behaviour")) {
+        interactive_groups[active_interactive_group].add_behaviour(
+            static_cast<ObjectBehaviourType>(selected_behaviour));
+      }
+
+      for (auto& behaviour : interactive_groups[active_interactive_group].get_behaviours()) {
+        switch (behaviour.type) {
+          case ObjectBehaviourType::HorizontalMovement:
+            ImGui::Text("Behaviour: horizontal movement");
+            ImGui::SliderInt("Left limit", &behaviour.movement_range.x, 0, GetScreenWidth());
+            ImGui::SliderInt("Right limit", &behaviour.movement_range.y, 0, GetScreenWidth());
+            break;
+          case ObjectBehaviourType::VerticalMovement:
+            ImGui::Text("Behaviour: vertical movement");
+            ImGui::SliderInt("Top limit", &behaviour.movement_range.x, 0, GetScreenWidth());
+            ImGui::SliderInt("Bottom limit", &behaviour.movement_range.y, 0, GetScreenWidth());
+            break;
+          default:
+            BAIL;
+        }
       }
     }
   }

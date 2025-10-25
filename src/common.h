@@ -436,6 +436,10 @@ struct TileSelection {
   Rectangle const hitbox(IntVec2 const pos) const {
     return tile_source_hitbox(source, pos);
   }
+
+  Rectangle const hitbox(IntVec2 const pos, int const pixel_size) const {
+    return upscale(tile_source_hitbox(source, pos), pixel_size);
+  }
 };
 
 TileSelection tile_selection_from_file(FILE* file) {
