@@ -5,12 +5,15 @@
 
 #include "asset_manager.h"
 #include "character.h"
+#include "interactive_group.h"
 #include "map.h"
 #include "npc.h"
 #include "raylib.h"
 #include "sprite.h"
 #include "sprite_group.h"
 #include "trap.h"
+
+int GameFPS{};
 
 struct App {
  public:
@@ -71,15 +74,21 @@ struct App {
       exit(EXIT_FAILURE);
     }
 
+    int version{};
     int background_index{};
     int tiles_count{};
     int tile_width{};
     int tile_height{};
+    int interactive_object_count{};
+
+    if (std::fread(&version, sizeof(int), 1, file) != 1) BAIL;
+    if (version != 10) BAIL;
 
     if (std::fread(&tile_width, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&tile_height, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&background_index, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) BAIL;
+    if (std::fread(&interactive_object_count, sizeof(int), 1, file) != 1) BAIL;
 
     character.reset(intvec2_from_file(file).scale(pixel_size).to_vector2());
 
@@ -127,6 +136,11 @@ struct App {
         default:
           BAILF("Invalid: %d", tile_selection.source);
       }
+    }
+
+    std::vector<InteractiveGroup> interactive_groups{};
+    for (int i = 0; i < interactive_object_count; i++) {
+      interactive_groups.push_back(interactive_group_from_file(file));
     }
 
     std::fclose(file);

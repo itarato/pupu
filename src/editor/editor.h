@@ -6,75 +6,20 @@
 #include "../asset_manager.h"
 #include "../background.h"
 #include "../common.h"
+#include "../interactive_group.h"
 #include "common.h"
 #include "imgui.h"
 #include "raylib.h"
 #include "rlImGui.h"
 
 constexpr const int fixed_pixel_size{2};
+constexpr const int MAP_FILE_WRITE_VERSION{10};
 
 static std::vector<const char*> group_list_names{};
 
 enum class SpecialOperation {
   Nothing,
   GroupElemSelect,
-};
-
-enum class ObjectBehaviourType {
-  HorizontalMovement,
-  VerticalMovement,
-};
-
-struct ObjectBehaviour {
-  ObjectBehaviourType type;
-  union {
-    int movement_range;
-  };
-};
-
-ObjectBehaviour make_object_behaviour__vertical_movement() {
-  return ObjectBehaviour{ObjectBehaviourType::VerticalMovement, 0};
-}
-
-ObjectBehaviour make_object_behaviour__horizontal_movement() {
-  return ObjectBehaviour{ObjectBehaviourType::HorizontalMovement, 0};
-}
-
-struct InteractiveGroup {
- public:
-  void add_elem(IntVec2 const coord) {
-    elems.push_back(coord);
-  }
-
-  std::vector<IntVec2> const& get_elems() const {
-    return elems;
-  }
-
-  std::vector<ObjectBehaviour>& get_behaviours_mut() {
-    return behaviours;
-  }
-
-  std::vector<ObjectBehaviour> const& get_behaviours() const {
-    return behaviours;
-  }
-
-  void add_behaviour(ObjectBehaviourType type) {
-    switch (type) {
-      case ObjectBehaviourType::HorizontalMovement:
-        behaviours.push_back(make_object_behaviour__horizontal_movement());
-        break;
-      case ObjectBehaviourType::VerticalMovement:
-        behaviours.push_back(make_object_behaviour__vertical_movement());
-        break;
-      default:
-        BAIL;
-        break;
-    }
-  }
-
- private:
-  std::vector<IntVec2> elems{};
-  std::vector<ObjectBehaviour> behaviours{};
 };
 
 struct Editor {
@@ -89,12 +34,27 @@ struct Editor {
     FILE* file = std::fopen("assets/maps/map.mp", "r");
     if (!file) BAILF("Cannot open map file");
 
-    int background_index{};
-    int tiles_count{};
+    int version{};
+    if (std::fread(&version, sizeof(int), 1, file) != 1) {
+      TraceLog(LOG_ERROR, "Cannot find version. Skipping reading map file.");
+      std::fclose(file);
+      return;
+    }
+
+    if (version != 10) {
+      TraceLog(LOG_ERROR, "Version mismatch. Skipping reading map file.");
+      std::fclose(file);
+      return;
+    }
+
     if (std::fread(&tile_width, sizeof(int), 1, file) != 1) BAIL;
     if (std::fread(&tile_height, sizeof(int), 1, file) != 1) BAIL;
+    int background_index{};
     if (std::fread(&background_index, sizeof(int), 1, file) != 1) BAIL;
+    int tiles_count{};
     if (std::fread(&tiles_count, sizeof(int), 1, file) != 1) BAIL;
+    int interactive_group_count{};
+    if (std::fread(&interactive_group_count, sizeof(int), 1, file) != 1) BAIL;
 
     character_position = intvec2_from_file(file);
 
@@ -123,12 +83,17 @@ struct Editor {
         }
       } else if (special_operation == SpecialOperation::GroupElemSelect) {
         if (IsMouseButtonReleased(0)) {
+          bool has_match{false};
+          IntVec2 match_tile_pos;
           for (auto const& [tile_pos, tile_selection] : tiles) {
             if (CheckCollisionPointRec(mouse_pos, tile_selection.hitbox(tile_pos, pixel_size))) {
-              interactive_groups[active_interactive_group].add_elem(tile_pos);
+              match_tile_pos = tile_pos;
+              interactive_groups[active_interactive_group].add_tile(tile_pos, tile_selection);
               break;
             }
           }
+
+          if (has_match) tiles.erase(match_tile_pos);
           special_operation = SpecialOperation::Nothing;
         }
       }
@@ -179,19 +144,22 @@ struct Editor {
     }
 
     for (auto const& interactive_group : interactive_groups) {
+      for (auto const& [tile_pos, tile_selection] : interactive_groups[active_interactive_group].get_tiles()) {
+        DrawRectangleLinesEx(tile_selection.hitbox(tile_pos, pixel_size), pixel_size, ORANGE);
+      }
+
       for (auto const& behaviour : interactive_group.get_behaviours()) {
-        for (auto const& elem_coord : interactive_group.get_elems()) {
-          TileSelection const& elem_tile_selection = tiles.at(elem_coord);
-          Rectangle const elem_hitbox = elem_tile_selection.hitbox(elem_coord, pixel_size);
+        for (auto const& [tile_pos, tile_selection] : interactive_group.get_tiles()) {
+          Rectangle const elem_hitbox = tile_selection.hitbox(tile_pos, pixel_size);
 
           switch (behaviour.type) {
             case ObjectBehaviourType::HorizontalMovement:
-              DrawLineEx({elem_hitbox.x, elem_hitbox.y}, {elem_hitbox.x + behaviour.movement_range, elem_hitbox.y},
-                         pixel_size, RED);
+              DrawLineEx({elem_hitbox.x, elem_hitbox.y},
+                         {elem_hitbox.x + behaviour.movement_range * pixel_size, elem_hitbox.y}, pixel_size, RED);
               break;
             case ObjectBehaviourType::VerticalMovement:
-              DrawLineEx({elem_hitbox.x, elem_hitbox.y}, {elem_hitbox.x, elem_hitbox.y + behaviour.movement_range},
-                         pixel_size, RED);
+              DrawLineEx({elem_hitbox.x, elem_hitbox.y},
+                         {elem_hitbox.x, elem_hitbox.y + behaviour.movement_range * pixel_size}, pixel_size, RED);
               break;
             default:
               BAIL;
@@ -237,14 +205,23 @@ struct Editor {
       return;
     }
 
-    int values[4] = {tile_width, tile_height, background.get_current_index(), static_cast<int>(tiles.size())};
-    fwrite(values, sizeof(int), 4, file);
+    int values[6] = {MAP_FILE_WRITE_VERSION,
+                     tile_width,
+                     tile_height,
+                     background.get_current_index(),
+                     static_cast<int>(tiles.size()),
+                     static_cast<int>(interactive_groups.size())};
+    fwrite(values, sizeof(int), 6, file);
 
     character_position.write(file);
 
     for (auto const& [k, v] : tiles) {
       k.write(file);
       v.write(file);
+    }
+
+    for (auto const& interactive_group : interactive_groups) {
+      interactive_group.write(file);
     }
 
     std::fclose(file);
@@ -483,11 +460,6 @@ struct Editor {
         return;
       }
 
-      for (auto const& elem_pos : interactive_groups[active_interactive_group].get_elems()) {
-        auto const& tile_selection = tiles[elem_pos];
-        DrawRectangleLinesEx(tile_selection.hitbox(elem_pos, pixel_size), pixel_size, ORANGE);
-      }
-
       if (ImGui::Button("Add elem")) {
         special_operation = SpecialOperation::GroupElemSelect;
       }
@@ -506,11 +478,11 @@ struct Editor {
         switch (behaviour.type) {
           case ObjectBehaviourType::HorizontalMovement:
             ImGui::Text("Behaviour: horizontal movement");
-            ImGui::SliderInt("Right movement", &behaviour.movement_range, 0, GetScreenWidth());
+            ImGui::SliderInt("Right movement", &behaviour.movement_range, 0, tile_width * TILE_SIZE);
             break;
           case ObjectBehaviourType::VerticalMovement:
             ImGui::Text("Behaviour: vertical movement");
-            ImGui::SliderInt("Down movement", &behaviour.movement_range, 0, GetScreenWidth());
+            ImGui::SliderInt("Down movement", &behaviour.movement_range, 0, tile_height * TILE_SIZE);
             break;
           default:
             BAIL;

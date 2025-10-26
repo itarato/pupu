@@ -21,7 +21,7 @@
 
 constexpr int const ReferenceFPS{144};
 // Set after window initialization.
-static int GameFPS{};
+extern int GameFPS;
 static float FPSMultiplier{};
 
 constexpr int const DEFAULT_PIXEL_SIZE{2};
