@@ -145,7 +145,7 @@ struct App {
 
     std::fclose(file);
 
-    map.reload_world(background_index, tile_width, tile_height, std::move(map_tiles));
+    map.reload_world(background_index, tile_width, tile_height, std::move(map_tiles), std::move(interactive_groups));
   }
 
   void draw() const {

@@ -7,6 +7,7 @@
 
 #include "background.h"
 #include "common.h"
+#include "interactive_group.h"
 #include "interactive_object.h"
 #include "raylib.h"
 
@@ -33,7 +34,8 @@ struct Map {
   }
 
   void reload_world(int background_index, int new_tile_width, int new_tile_height,
-                    std::unordered_map<IntVec2, TileSelection>&& tiles) {
+                    std::unordered_map<IntVec2, TileSelection>&& tiles,
+                    std::vector<InteractiveGroup>&& interactive_groups) {
     reset();
 
     tile_width = new_tile_width;
@@ -97,8 +99,8 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      if ((interactive_object->collision_directions() & COLLISION_TYPE_BOTTOM) == 0) continue;
-      check_north_collision(&out, interactive_object->hitbox(), rect);
+      interactive_object->hitbox_check(COLLISION_TYPE_BOTTOM,
+                                       [&](Rectangle hitbox) { check_north_collision(&out, hitbox, rect); });
     }
 
     return out;
@@ -122,8 +124,8 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      if ((interactive_object->collision_directions() & COLLISION_TYPE_TOP) == 0) continue;
-      check_south_collision(&out, interactive_object->hitbox(), rect);
+      interactive_object->hitbox_check(COLLISION_TYPE_TOP,
+                                       [&](Rectangle hitbox) { check_south_collision(&out, hitbox, rect); });
     }
 
     return out;
@@ -147,8 +149,8 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      if ((interactive_object->collision_directions() & COLLISION_TYPE_RIGHT) == 0) continue;
-      check_west_collision(&out, interactive_object->hitbox(), rect);
+      interactive_object->hitbox_check(COLLISION_TYPE_RIGHT,
+                                       [&](Rectangle hitbox) { check_west_collision(&out, hitbox, rect); });
     }
 
     return out;
@@ -172,8 +174,8 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      if ((interactive_object->collision_directions() & COLLISION_TYPE_LEFT) == 0) continue;
-      check_east_collision(&out, interactive_object->hitbox(), rect);
+      interactive_object->hitbox_check(COLLISION_TYPE_LEFT,
+                                       [&](Rectangle hitbox) { check_east_collision(&out, hitbox, rect); });
     }
 
     return out;

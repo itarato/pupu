@@ -11,8 +11,7 @@ struct InteractiveObject {
 
   virtual void draw() const = 0;
   virtual void update(Rectangle const& character_hitbox) = 0;
-  virtual Rectangle const hitbox() const = 0;
-  virtual int collision_directions() const = 0;
+  virtual void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const = 0;
 };
 
 enum class DisappearingPlankState {
@@ -66,16 +65,9 @@ struct DisappearingPlank : InteractiveObject {
     }
   }
 
-  Rectangle const hitbox() const override {
-    if (state == DisappearingPlankState::Solid || state == DisappearingPlankState::WaitForCrumbling) {
-      return move(upscale(tile_source_hitbox(TileSource::Trap5), pixel_size), pos);
-    } else {
-      return OutsideRectangle;
-    }
-  }
-
-  int collision_directions() const override {
-    return COLLISION_TYPE_TOP;
+  void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const override {
+    if ((COLLISION_TYPE_TOP & direction) == 0) return;
+    check_hitbox_fn(hitbox());
   }
 
  private:
@@ -88,4 +80,28 @@ struct DisappearingPlank : InteractiveObject {
   Rectangle const hitbox_upper_surface() const {
     return move(upscale(Trap5Hitbox__UpperSurface, pixel_size), pos);
   }
+
+  Rectangle const hitbox() const {
+    if (state == DisappearingPlankState::Solid || state == DisappearingPlankState::WaitForCrumbling) {
+      return move(upscale(tile_source_hitbox(TileSource::Trap5), pixel_size), pos);
+    } else {
+      return OutsideRectangle;
+    }
+  }
+};
+
+struct DynamicBehaviourObject : InteractiveObject {
+ public:
+  ~DynamicBehaviourObject() = default;
+
+  void draw() const override {
+  }
+
+  void update(Rectangle const& character_hitbox) override {
+  }
+
+  void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const override {
+  }
+
+ private:
 };
