@@ -57,8 +57,8 @@ struct InteractiveGroup {
   InteractiveGroup() {
   }
 
-  InteractiveGroup(std::unordered_map<IntVec2, TileSelection>&& tiles, std::vector<ObjectBehaviour>&& behaviours)
-      : tiles(move(tiles)), behaviours(move(behaviours)) {
+  InteractiveGroup(std::unordered_map<IntVec2, TileSelection> tiles, std::vector<ObjectBehaviour> behaviours)
+      : tiles(tiles), behaviours(behaviours) {
   }
 
   void add_tile(IntVec2 const coord, TileSelection const tile_selection) {
@@ -128,5 +128,5 @@ InteractiveGroup interactive_group_from_file(FILE* file) {
     behaviours.push_back(object_behaviour_from_file(file));
   }
 
-  return InteractiveGroup{move(tiles), move(behaviours)};
+  return InteractiveGroup{tiles, behaviours};
 }

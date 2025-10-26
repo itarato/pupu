@@ -32,7 +32,10 @@ struct Editor {
     reset();
 
     FILE* file = std::fopen("assets/maps/map.mp", "r");
-    if (!file) BAILF("Cannot open map file");
+    if (!file) {
+      TraceLog(LOG_ERROR, "Cannot open map file");
+      return;
+    }
 
     int version{};
     if (std::fread(&version, sizeof(int), 1, file) != 1) {
@@ -56,6 +59,9 @@ struct Editor {
     int interactive_group_count{};
     if (std::fread(&interactive_group_count, sizeof(int), 1, file) != 1) BAIL;
 
+    TraceLog(LOG_INFO, "Loading map. Version=%d W=%d H=%d B=%d Tiles=%d Interactives=%d", version, tile_width,
+             tile_height, background_index, tiles_count, interactive_group_count);
+
     character_position = intvec2_from_file(file);
 
     background.preload(background_index, tile_width, tile_height, pixel_size);
@@ -65,6 +71,11 @@ struct Editor {
       TileSelection tile_selection{tile_selection_from_file(file)};
 
       tiles[tile_pos] = tile_selection;
+    }
+
+    for (int i = 0; i < interactive_group_count; i++) {
+      InteractiveGroup interactive_group = interactive_group_from_file(file);
+      interactive_groups.push_back(interactive_group);
     }
 
     std::fclose(file);
@@ -144,7 +155,7 @@ struct Editor {
     }
 
     for (auto const& interactive_group : interactive_groups) {
-      for (auto const& [tile_pos, tile_selection] : interactive_groups[active_interactive_group].get_tiles()) {
+      for (auto const& [tile_pos, tile_selection] : interactive_group.get_tiles()) {
         DrawRectangleLinesEx(tile_selection.hitbox(tile_pos, pixel_size), pixel_size, ORANGE);
       }
 
@@ -194,6 +205,9 @@ struct Editor {
 
   void reset() {
     tiles.clear();
+    interactive_groups.clear();
+    special_operation = SpecialOperation::Nothing;
+    active_interactive_group = -1;
   }
 
   void export_to_file() {
@@ -435,14 +449,11 @@ struct Editor {
     char group_name_buf[16]{};
 
     if (ImGui::CollapsingHeader("Group Management")) {
-      if (ImGui::Button("+ New group")) {
-        interactive_groups.emplace_back();
-
-        while (interactive_groups.size() > group_list_names.size()) {
-          sprintf(group_name_buf, "Group %lu", group_list_names.size());
-          char* new_group_name = strdup(group_name_buf);
-          group_list_names.push_back(new_group_name);
-        }
+      if (ImGui::Button("+ New group")) interactive_groups.emplace_back();
+      while (interactive_groups.size() > group_list_names.size()) {
+        sprintf(group_name_buf, "Group %lu", group_list_names.size());
+        char* new_group_name = strdup(group_name_buf);
+        group_list_names.push_back(new_group_name);
       }
 
       ImGui::Separator();
