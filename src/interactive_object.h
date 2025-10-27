@@ -90,18 +90,35 @@ struct DisappearingPlank : InteractiveObject {
   }
 };
 
+struct BehaviourHandler {
+ public:
+  virtual void update() = 0;
+  virtual ~BehaviourHandler() = default;
+};
+
+struct HorizontalMoveBehaviourHandler : BehaviourHandler {};
+
 struct DynamicBehaviourObject : InteractiveObject {
  public:
   ~DynamicBehaviourObject() = default;
 
   void draw() const override {
+    for (auto const& [tile_pos, tile_selection] : tiles) {
+      tile_selection.draw(tile_pos.scale(pixel_size).to_vector2(), pixel_size);
+    }
   }
 
   void update(Rectangle const& character_hitbox) override {
+    for (auto& behaviour_handler : behaviour_handlers) {
+      behaviour_handler->update();
+    }
   }
 
   void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const override {
   }
 
  private:
+  int const pixel_size;
+  std::unordered_map<IntVec2, TileSelection> tiles{};
+  std::vector<std::shared_ptr<BehaviourHandler>> behaviour_handlers{};
 };
