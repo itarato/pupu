@@ -100,6 +100,9 @@ struct HorizontalMoveBehaviourHandler : BehaviourHandler {};
 
 struct DynamicBehaviourObject : InteractiveObject {
  public:
+  DynamicBehaviourObject(int const pixel_size) : pixel_size(pixel_size) {
+  }
+
   ~DynamicBehaviourObject() = default;
 
   void draw() const override {

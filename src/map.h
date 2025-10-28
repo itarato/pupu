@@ -89,7 +89,7 @@ struct Map {
     int max_y_coord = 0;
     for (int x = minx; x <= maxx; x++) {
       if (!is_tile_coord_valid(x, y)) continue;
-      max_y_coord = std::max(max_y_coord, hit_map[y * tile_width + x].north);
+      max_y_coord = std::max(max_y_coord, hitmaps[y * tile_width + x].north);
     }
 
     int out = max_y_coord * TILE_SIZE * pixel_size;
@@ -106,7 +106,7 @@ struct Map {
     return out;
   }
 
-  int south_wall_of_range(Rectangle const& rect) const {
+  CollisionResult south_wall_of_range(Rectangle const& rect) const {
     int minx = leftx(rect) / (TILE_SIZE * pixel_size);
     int maxx = rightx(rect) / (TILE_SIZE * pixel_size);
     int y = bottomy(rect) / (TILE_SIZE * pixel_size);
@@ -114,21 +114,21 @@ struct Map {
     int min_y_coord = tile_height;
     for (int x = minx; x <= maxx; x++) {
       if (!is_tile_coord_valid(x, y)) continue;
-      min_y_coord = std::min(min_y_coord, hit_map[y * tile_width + x].south);
+      min_y_coord = std::min(min_y_coord, hitmaps[y * tile_width + x].south);
     }
 
-    int out = min_y_coord * TILE_SIZE * pixel_size - 1;
+    CollisionResult result{min_y_coord * TILE_SIZE * pixel_size - 1};
 
     for (auto const& [pos, selection] : boxes) {
-      check_south_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+      check_south_collision(&result.wall, upscale(selection.hitbox(pos), pixel_size), rect);
     }
 
     for (auto const& interactive_object : interactive_objects) {
       interactive_object->hitbox_check(COLLISION_TYPE_TOP,
-                                       [&](Rectangle hitbox) { check_south_collision(&out, hitbox, rect); });
+                                       [&](Rectangle hitbox) { check_south_collision(&result.wall, hitbox, rect); });
     }
 
-    return out;
+    return result;
   }
 
   int west_wall_of_range(Rectangle const& rect) const {
@@ -139,7 +139,7 @@ struct Map {
     int max_x_coord = 0;
     for (int y = miny; y <= maxy; y++) {
       if (!is_tile_coord_valid(x, y)) continue;
-      max_x_coord = std::max(max_x_coord, hit_map[y * tile_width + x].west);
+      max_x_coord = std::max(max_x_coord, hitmaps[y * tile_width + x].west);
     }
 
     int out = max_x_coord * TILE_SIZE * pixel_size;
@@ -164,7 +164,7 @@ struct Map {
     int min_x_coord = tile_width;
     for (int y = miny; y <= maxy; y++) {
       if (!is_tile_coord_valid(x, y)) continue;
-      min_x_coord = std::min(min_x_coord, hit_map[y * tile_width + x].east);
+      min_x_coord = std::min(min_x_coord, hitmaps[y * tile_width + x].east);
     }
 
     int out = min_x_coord * TILE_SIZE * pixel_size - 1;
@@ -187,29 +187,29 @@ struct Map {
   int tile_height{};
   std::unordered_map<IntVec2, TileSelection> walls{};
   std::unordered_map<IntVec2, TileSelection> boxes{};
-  std::vector<HitMap> hit_map{};
+  std::vector<HitMap> hitmaps{};
   int const pixel_size;
   std::vector<std::shared_ptr<InteractiveObject>> interactive_objects{};
 
   void reset() {
     walls.clear();
-    hit_map.clear();
+    hitmaps.clear();
   }
 
   void recalculate() {
-    hit_map.clear();
-    hit_map.resize(tile_width * tile_height, NULL_HIT_MAP);
+    hitmaps.clear();
+    hitmaps.resize(tile_width * tile_height, NULL_HIT_MAP);
 
     for (int y = 0; y < tile_height; y++) {
       int west_wall = 0;
       int east_wall = tile_width;
 
       for (int x = 0; x < tile_width; x++) {
-        hit_map[y * tile_width + x].west = west_wall;
+        hitmaps[y * tile_width + x].west = west_wall;
         IntVec2 coord{x * TILE_SIZE, y * TILE_SIZE};
         if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_LEFT)) west_wall = x + 1;
 
-        hit_map[y * tile_width + (tile_width - 1 - x)].east = east_wall;
+        hitmaps[y * tile_width + (tile_width - 1 - x)].east = east_wall;
         IntVec2 coord_inv{(tile_width - 1 - x) * TILE_SIZE, y * TILE_SIZE};
         if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_RIGHT))
           east_wall = (tile_width - 1 - x);
@@ -221,11 +221,11 @@ struct Map {
       int south_wall = tile_height;
 
       for (int y = 0; y < tile_height; y++) {
-        hit_map[y * tile_width + x].north = north_wall;
+        hitmaps[y * tile_width + x].north = north_wall;
         IntVec2 coord{x * TILE_SIZE, y * TILE_SIZE};
         if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_BOTTOM)) north_wall = y + 1;
 
-        hit_map[(tile_height - 1 - y) * tile_width + x].south = south_wall;
+        hitmaps[(tile_height - 1 - y) * tile_width + x].south = south_wall;
         IntVec2 coord_inv{x * TILE_SIZE, (tile_height - 1 - y) * TILE_SIZE};
         if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_TOP))
           south_wall = (tile_height - 1 - y);

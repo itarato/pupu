@@ -515,7 +515,8 @@ struct StompingNpc : Npc {
 
     Rectangle _hitbox = hitbox();
     int north_wall = map.north_wall_of_range(_hitbox);
-    int south_wall = map.south_wall_of_range(_hitbox);
+    CollisionResult south_collision_result = map.south_wall_of_range(_hitbox);
+    int south_wall = south_collision_result.wall;
 
     pos.y += speed() * GetFrameTime();
     _hitbox = hitbox();

@@ -303,7 +303,10 @@ struct Character {
 
     hit_map.east = map.east_wall_of_range(_hitbox);
     hit_map.north = map.north_wall_of_range(_hitbox);
-    hit_map.south = map.south_wall_of_range(_hitbox);
+
+    CollisionResult south_collision_result = map.south_wall_of_range(_hitbox);
+    hit_map.south = south_collision_result.wall;
+
     hit_map.west = map.west_wall_of_range(_hitbox);
 
     return hit_map;

@@ -563,3 +563,11 @@ bool can_charge_character_vertical(int south_wall, Rectangle const& self_hitbox,
 
   return false;
 }
+
+struct CollisionResult {
+  int wall{};
+  float wall_horizontal_speed{0};
+
+  CollisionResult(int wall) : wall(wall) {
+  }
+};
