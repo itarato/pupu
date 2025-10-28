@@ -568,6 +568,16 @@ struct CollisionResult {
   int wall{};
   float wall_horizontal_speed{0};
 
+  CollisionResult() {
+  }
+
   CollisionResult(int wall) : wall(wall) {
   }
+};
+
+struct HitAndDragMap {
+  int north{};
+  int east{};
+  int west{};
+  CollisionResult south{};
 };

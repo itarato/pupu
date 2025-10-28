@@ -187,7 +187,7 @@ struct Character {
   }
 
   void update_movement(Map const& map) {
-    HitMap hit_map = calculate_hitmap(map);
+    HitAndDragMap hit_map = calculate_hitmap(map);
     bool is_grab_wall{false};
 
     if (is_live() && IsKeyDown(KEY_LEFT)) {
@@ -262,7 +262,6 @@ struct Character {
       speed.y = PLAYER_FALL_BACK_THRESHOLD;
     }
 
-    // TraceLog(LOG_INFO, "DY: %.2f", speed.y);
     pos.y += speed.y * GetFrameTime();
     _hitbox = hitbox();
 
@@ -272,11 +271,14 @@ struct Character {
       pos.y -= north_wall_dist;
       speed.y = 0.f;
     }
-    float south_wall_dist = static_cast<float>(hit_map.south) - bottomy(_hitbox);
+    float south_wall_dist = static_cast<float>(hit_map.south.wall) - bottomy(_hitbox);
     if (south_wall_dist < 0) {
       pos.y += south_wall_dist;
       speed.y = 0.f;
       multi_jump_count = 0;
+
+      // Touching south wall -> apply south wall drag.
+      pos.x += hit_map.south.wall_horizontal_speed;
     }
 
     // Override sprite when jumping / wall grabbing.
@@ -297,16 +299,13 @@ struct Character {
     return (PLAYER_MAX_REL_SPEED / (30.f / FPSMultiplier));
   }
 
-  HitMap calculate_hitmap(Map const& map) const {
-    HitMap hit_map{};
+  HitAndDragMap calculate_hitmap(Map const& map) const {
+    HitAndDragMap hit_map{};
     Rectangle const _hitbox{hitbox()};
 
     hit_map.east = map.east_wall_of_range(_hitbox);
     hit_map.north = map.north_wall_of_range(_hitbox);
-
-    CollisionResult south_collision_result = map.south_wall_of_range(_hitbox);
-    hit_map.south = south_collision_result.wall;
-
+    hit_map.south = map.south_wall_of_range(_hitbox);
     hit_map.west = map.west_wall_of_range(_hitbox);
 
     return hit_map;
