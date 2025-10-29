@@ -15,7 +15,8 @@ struct InteractiveObject {
 
   virtual void draw() const = 0;
   virtual void update(Rectangle const& character_hitbox) = 0;
-  virtual void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const = 0;
+  //                                                          v Hitbox   v Horizontal movement
+  virtual void hitbox_check(int direction, std::function<void(Rectangle, float)> check_hitbox_fn) const = 0;
 };
 
 enum class DisappearingPlankState {
@@ -69,9 +70,9 @@ struct DisappearingPlank : InteractiveObject {
     }
   }
 
-  void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const override {
+  void hitbox_check(int direction, std::function<void(Rectangle, float)> check_hitbox_fn) const override {
     if ((COLLISION_TYPE_TOP & direction) == 0) return;
-    check_hitbox_fn(hitbox());
+    check_hitbox_fn(hitbox(), 0.f);
   }
 
  private:
@@ -165,14 +166,16 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
 
   void update(Rectangle const& character_hitbox) override {
     for (auto& behaviour_handler : behaviour_handlers) {
+      float pre_x = offset.x;
       behaviour_handler->update(*this);
+      current_frame_xdelta = offset.x - pre_x;
     }
   }
 
-  void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const override {
+  void hitbox_check(int direction, std::function<void(Rectangle, float)> check_hitbox_fn) const override {
     for (auto const& [tile_pos, tile_selection] : tiles) {
       Rectangle hitbox = move(tile_selection.hitbox(tile_pos, pixel_size), offset);
-      check_hitbox_fn(hitbox);
+      check_hitbox_fn(hitbox, current_frame_xdelta);
     }
   }
 
@@ -189,4 +192,5 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
   std::unordered_map<IntVec2, TileSelection> tiles{};
   std::vector<std::shared_ptr<BehaviourHandler>> behaviour_handlers{};
   Vector2 offset{};
+  float current_frame_xdelta{0.f};
 };
