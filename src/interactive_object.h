@@ -7,6 +7,8 @@
 #include "raylib.h"
 #include "sprite.h"
 
+constexpr const float DYNAMIC_OBJECT_MOVE_SPEED{80.f};
+
 struct InteractiveObject {
  public:
   virtual ~InteractiveObject() = default;
@@ -100,34 +102,36 @@ struct BehaviourHandler {
 
 struct HorizontalMoveBehaviourHandler : BehaviourHandler {
  public:
-  HorizontalMoveBehaviourHandler(float const min, float const max, float current) : range(min, max), current(current) {
+  HorizontalMoveBehaviourHandler(float const min, float const max)
+      : back_and_forther(std::pair<float, float>(min, max), 0.f, DYNAMIC_OBJECT_MOVE_SPEED) {
   }
 
   virtual void update(BehaviourAdjustableObject& target) override {
-    target.adjust_pos_x(current);
+    back_and_forther.update();
+    target.adjust_pos_x(back_and_forther.get_current());
   }
 
   ~HorizontalMoveBehaviourHandler() override = default;
 
  private:
-  std::pair<float, float> const range;
-  float current;
+  BackAndForther back_and_forther;
 };
 
 struct VerticalMoveBehaviourHandler : BehaviourHandler {
  public:
-  VerticalMoveBehaviourHandler(float const min, float const max, float current) : range(min, max) {
+  VerticalMoveBehaviourHandler(float const min, float const max)
+      : back_and_forther(std::pair<float, float>(min, max), 0.f, DYNAMIC_OBJECT_MOVE_SPEED) {
   }
 
   virtual void update(BehaviourAdjustableObject& target) override {
-    target.adjust_pos_y(current);
+    back_and_forther.update();
+    target.adjust_pos_y(back_and_forther.get_current());
   }
 
   ~VerticalMoveBehaviourHandler() override = default;
 
  private:
-  std::pair<float, float> const range;
-  float current{0.f};
+  BackAndForther back_and_forther;
 };
 
 struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
@@ -138,10 +142,12 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
     for (auto const& behaviour : behaviours) {
       switch (behaviour.type) {
         case ObjectBehaviourType::HorizontalMovement:
-          behaviour_handlers.push_back(std::make_shared<HorizontalMoveBehaviourHandler>(0, behaviour.movement_range));
+          behaviour_handlers.push_back(
+              std::make_shared<HorizontalMoveBehaviourHandler>(0, behaviour.movement_range * pixel_size));
           break;
         case ObjectBehaviourType::VerticalMovement:
-          behaviour_handlers.push_back(std::make_shared<VerticalMoveBehaviourHandler>(0, behaviour.movement_range));
+          behaviour_handlers.push_back(
+              std::make_shared<VerticalMoveBehaviourHandler>(0, behaviour.movement_range * pixel_size));
           break;
         default:
           BAIL;
@@ -153,7 +159,7 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
 
   void draw() const override {
     for (auto const& [tile_pos, tile_selection] : tiles) {
-      tile_selection.draw(tile_pos.scale(pixel_size).to_vector2(), pixel_size);
+      tile_selection.draw(Vector2Add(tile_pos.scale(pixel_size).to_vector2(), offset), pixel_size);
     }
   }
 
@@ -164,6 +170,10 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
   }
 
   void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const override {
+    for (auto const& [tile_pos, tile_selection] : tiles) {
+      Rectangle hitbox = move(tile_selection.hitbox(tile_pos, pixel_size), offset);
+      check_hitbox_fn(hitbox);
+    }
   }
 
   void adjust_pos_x(float x) override {

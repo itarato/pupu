@@ -14,6 +14,10 @@
 
 constexpr const int fixed_pixel_size{2};
 constexpr const int MAP_FILE_WRITE_VERSION{10};
+constexpr const int COLOR_LIST_SIZE{6};
+constexpr const Color COLOR_LIST[COLOR_LIST_SIZE] = {
+    RED, ORANGE, BLUE, GREEN, MAGENTA, PINK,
+};
 
 static std::vector<const char*> group_list_names{};
 
@@ -100,6 +104,7 @@ struct Editor {
             if (CheckCollisionPointRec(mouse_pos, tile_selection.hitbox(tile_pos, pixel_size))) {
               match_tile_pos = tile_pos;
               interactive_groups[active_interactive_group].add_tile(tile_pos, tile_selection);
+              has_match = true;
               break;
             }
           }
@@ -154,9 +159,12 @@ struct Editor {
       }
     }
 
+    int group_index = 0;
     for (auto const& interactive_group : interactive_groups) {
       for (auto const& [tile_pos, tile_selection] : interactive_group.get_tiles()) {
-        DrawRectangleLinesEx(tile_selection.hitbox(tile_pos, pixel_size), pixel_size, ORANGE);
+        tile_selection.draw(tile_pos.scale(pixel_size).to_vector2(), pixel_size);
+        DrawRectangleLinesEx(tile_selection.hitbox(tile_pos, pixel_size), pixel_size,
+                             COLOR_LIST[group_index & COLOR_LIST_SIZE]);
       }
 
       for (auto const& behaviour : interactive_group.get_behaviours()) {
@@ -177,6 +185,8 @@ struct Editor {
           }
         }
       }
+
+      group_index++;
     }
 
     draw_gui();

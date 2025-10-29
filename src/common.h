@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
+#include <utility>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -587,4 +588,36 @@ struct BehaviourAdjustableObject {
   virtual void adjust_pos_x(float x) = 0;
   virtual void adjust_pos_y(float y) = 0;
   virtual ~BehaviourAdjustableObject() = default;
+};
+
+struct BackAndForther {
+ public:
+  BackAndForther(std::pair<float, float> const range, float current, float(speed))
+      : range(range), current(current), speed(speed) {
+  }
+
+  void update() {
+    current += speed * GetFrameTime();
+
+    if (speed > 0.f) {
+      if (current > range.second) {
+        current = range.second;
+        speed *= -1.f;
+      }
+    } else if (speed < 0.f) {
+      if (current < range.first) {
+        current = range.first;
+        speed *= -1.f;
+      }
+    }
+  }
+
+  float const get_current() const {
+    return current;
+  }
+
+ private:
+  std::pair<float, float> const range;
+  float current;
+  float speed;
 };
