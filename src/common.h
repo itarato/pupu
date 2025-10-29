@@ -581,3 +581,10 @@ struct HitAndDragMap {
   int west{};
   CollisionResult south{};
 };
+
+struct BehaviourAdjustableObject {
+ public:
+  virtual void adjust_pos_x(float x) = 0;
+  virtual void adjust_pos_y(float y) = 0;
+  virtual ~BehaviourAdjustableObject() = default;
+};

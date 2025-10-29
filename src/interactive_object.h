@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "asset_manager.h"
 #include "common.h"
 #include "raylib.h"
@@ -92,15 +94,59 @@ struct DisappearingPlank : InteractiveObject {
 
 struct BehaviourHandler {
  public:
-  virtual void update() = 0;
+  virtual void update(BehaviourAdjustableObject& target) = 0;
   virtual ~BehaviourHandler() = default;
 };
 
-struct HorizontalMoveBehaviourHandler : BehaviourHandler {};
-
-struct DynamicBehaviourObject : InteractiveObject {
+struct HorizontalMoveBehaviourHandler : BehaviourHandler {
  public:
-  DynamicBehaviourObject(int const pixel_size) : pixel_size(pixel_size) {
+  HorizontalMoveBehaviourHandler(float const min, float const max, float current) : range(min, max), current(current) {
+  }
+
+  virtual void update(BehaviourAdjustableObject& target) override {
+    target.adjust_pos_x(current);
+  }
+
+  ~HorizontalMoveBehaviourHandler() override = default;
+
+ private:
+  std::pair<float, float> const range;
+  float current;
+};
+
+struct VerticalMoveBehaviourHandler : BehaviourHandler {
+ public:
+  VerticalMoveBehaviourHandler(float const min, float const max, float current) : range(min, max) {
+  }
+
+  virtual void update(BehaviourAdjustableObject& target) override {
+    target.adjust_pos_y(current);
+  }
+
+  ~VerticalMoveBehaviourHandler() override = default;
+
+ private:
+  std::pair<float, float> const range;
+  float current{0.f};
+};
+
+struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
+ public:
+  DynamicBehaviourObject(int const pixel_size, std::unordered_map<IntVec2, TileSelection> tiles,
+                         std::vector<ObjectBehaviour> behaviours)
+      : pixel_size(pixel_size), tiles(tiles) {
+    for (auto const& behaviour : behaviours) {
+      switch (behaviour.type) {
+        case ObjectBehaviourType::HorizontalMovement:
+          behaviour_handlers.push_back(std::make_shared<HorizontalMoveBehaviourHandler>(0, behaviour.movement_range));
+          break;
+        case ObjectBehaviourType::VerticalMovement:
+          behaviour_handlers.push_back(std::make_shared<VerticalMoveBehaviourHandler>(0, behaviour.movement_range));
+          break;
+        default:
+          BAIL;
+      }
+    }
   }
 
   ~DynamicBehaviourObject() = default;
@@ -113,15 +159,24 @@ struct DynamicBehaviourObject : InteractiveObject {
 
   void update(Rectangle const& character_hitbox) override {
     for (auto& behaviour_handler : behaviour_handlers) {
-      behaviour_handler->update();
+      behaviour_handler->update(*this);
     }
   }
 
   void hitbox_check(int direction, std::function<void(Rectangle)> check_hitbox_fn) const override {
   }
 
+  void adjust_pos_x(float x) override {
+    offset.x = x;
+  }
+
+  void adjust_pos_y(float y) override {
+    offset.y = y;
+  }
+
  private:
   int const pixel_size;
   std::unordered_map<IntVec2, TileSelection> tiles{};
   std::vector<std::shared_ptr<BehaviourHandler>> behaviour_handlers{};
+  Vector2 offset{};
 };

@@ -62,6 +62,11 @@ struct Map {
       }
     }
 
+    for (auto const& interactive_group : interactive_groups) {
+      interactive_objects.push_back(std::make_shared<DynamicBehaviourObject>(pixel_size, interactive_group.get_tiles(),
+                                                                             interactive_group.get_behaviours()));
+    }
+
     recalculate();
   }
 
