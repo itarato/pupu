@@ -53,8 +53,10 @@ constexpr Rectangle const Trap4Hitbox{16.f, 38.f, 16.f, 10.f};
 constexpr Rectangle const Trap5Hitbox{8.f, 20.f, 32.f, 8.f};
 constexpr Rectangle const Trap5Hitbox__UpperSurface{8.f, 18.f, 32.f, 8.f};
 constexpr Rectangle const Trap6Hitbox{16.f, 26.f, 16.f, 22.f};
+constexpr Rectangle const GemHitbox{1.f, 1.f, 14.f, 14.f};
 
 constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
+constexpr Vector2 const GEM_SIZE{16.f, 16.f};
 
 constexpr Rectangle const OutsideRectangle{-100.f, -100.f, 0.f, 0.f};
 
@@ -277,6 +279,14 @@ enum class TileSource {
   Trap4,
   Trap5,
   Trap6,
+  Gem1,
+  Gem2,
+  Gem3,
+  Gem4,
+  Gem5,
+  Gem6,
+  // Four bound checks.
+  EndMarker,
 };
 
 Rectangle const tile_source_hitbox(TileSource tile_source) {
@@ -308,6 +318,13 @@ Rectangle const tile_source_hitbox(TileSource tile_source) {
       return Trap5Hitbox;
     case TileSource::Trap6:
       return Trap6Hitbox;
+    case TileSource::Gem1:
+    case TileSource::Gem2:
+    case TileSource::Gem3:
+    case TileSource::Gem4:
+    case TileSource::Gem5:
+    case TileSource::Gem6:
+      return GemHitbox;
     default:
       BAIL;
   }
@@ -357,6 +374,18 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Trap5__Example];
     } else if (source == TileSource::Trap6) {
       texture = asset_manager.textures[TextureNames::Trap6__Example];
+    } else if (source == TileSource::Gem1) {
+      texture = asset_manager.textures[TextureNames::Gem1__Example];
+    } else if (source == TileSource::Gem2) {
+      texture = asset_manager.textures[TextureNames::Gem2__Example];
+    } else if (source == TileSource::Gem3) {
+      texture = asset_manager.textures[TextureNames::Gem3__Example];
+    } else if (source == TileSource::Gem4) {
+      texture = asset_manager.textures[TextureNames::Gem4__Example];
+    } else if (source == TileSource::Gem5) {
+      texture = asset_manager.textures[TextureNames::Gem5__Example];
+    } else if (source == TileSource::Gem6) {
+      texture = asset_manager.textures[TextureNames::Gem6__Example];
     } else {
       BAIL;
     }
@@ -389,6 +418,12 @@ struct TileSelection {
     switch (source) {
       case TileSource::Gui:
       case TileSource::Tileset:
+      case TileSource::Gem1:
+      case TileSource::Gem2:
+      case TileSource::Gem3:
+      case TileSource::Gem4:
+      case TileSource::Gem5:
+      case TileSource::Gem6:
         return TILESIZE_DEFAULT;
       case TileSource::Box1:
       case TileSource::Box2:
@@ -414,7 +449,13 @@ struct TileSelection {
     switch (source) {
       case TileSource::Gui:
       case TileSource::Tileset:
-        return 16;
+      case TileSource::Gem1:
+      case TileSource::Gem2:
+      case TileSource::Gem3:
+      case TileSource::Gem4:
+      case TileSource::Gem5:
+      case TileSource::Gem6:
+        return TILE_SIZE;
       case TileSource::Box1:
       case TileSource::Box2:
       case TileSource::Box3:
@@ -448,56 +489,11 @@ TileSelection tile_selection_from_file(FILE* file) {
   if (fread(&tile_source_raw, sizeof(int), 1, file) != 1) BAIL;
   IntVec2 pos = intvec2_from_file(file);
 
-  TileSource source{};
-  switch (tile_source_raw) {
-    case 0:
-      source = TileSource::Gui;
-      break;
-    case 1:
-      source = TileSource::Tileset;
-      break;
-    case 2:
-      source = TileSource::Box1;
-      break;
-    case 3:
-      source = TileSource::Box2;
-      break;
-    case 4:
-      source = TileSource::Box3;
-      break;
-    case 5:
-      source = TileSource::Enemy1;
-      break;
-    case 6:
-      source = TileSource::Enemy2;
-      break;
-    case 7:
-      source = TileSource::Enemy3;
-      break;
-    case 8:
-      source = TileSource::Enemy4;
-      break;
-    case 9:
-      source = TileSource::Enemy5;
-      break;
-    case 10:
-      source = TileSource::Trap1;
-      break;
-    case 11:
-      source = TileSource::Trap2;
-      break;
-    case 12:
-      source = TileSource::Trap4;
-      break;
-    case 13:
-      source = TileSource::Trap5;
-      break;
-    case 14:
-      source = TileSource::Trap6;
-      break;
-    default:
-      BAILF("Invalid: %d", tile_source_raw);
-  }
+  if (tile_source_raw < 0 || tile_source_raw >= static_cast<int>(TileSource::EndMarker))
+    BAILF("Invalid: %d", tile_source_raw);
+  ;
+
+  TileSource source = static_cast<TileSource>(tile_source_raw);
 
   return TileSelection{source, pos};
 }

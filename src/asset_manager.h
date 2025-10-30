@@ -68,6 +68,18 @@ enum TextureNames {
   Trap5,
   Trap6__Example,
   Trap6,
+  Gem1,
+  Gem1__Example,
+  Gem2,
+  Gem2__Example,
+  Gem3,
+  Gem3__Example,
+  Gem4,
+  Gem4__Example,
+  Gem5,
+  Gem5__Example,
+  Gem6,
+  Gem6__Example,
 };
 
 struct AssetManager {
@@ -208,6 +220,25 @@ struct AssetManager {
     textures[TextureNames::Trap6__Example] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/6 Traps/6_Example.png"));
     textures[TextureNames::Trap6] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/6 Traps/6.png"));
+
+    textures[TextureNames::Gem1] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/1.png"));
+    textures[TextureNames::Gem1__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/1_Example.png"));
+    textures[TextureNames::Gem2] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/2.png"));
+    textures[TextureNames::Gem2__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/2_Example.png"));
+    textures[TextureNames::Gem3] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/3.png"));
+    textures[TextureNames::Gem3__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/3_Example.png"));
+    textures[TextureNames::Gem4] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/4.png"));
+    textures[TextureNames::Gem4__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/4_Example.png"));
+    textures[TextureNames::Gem5] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/5.png"));
+    textures[TextureNames::Gem5__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/5_Example.png"));
+    textures[TextureNames::Gem6] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/6.png"));
+    textures[TextureNames::Gem6__Example] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/6_Example.png"));
   }
 
  private:

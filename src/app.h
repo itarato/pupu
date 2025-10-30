@@ -5,6 +5,7 @@
 
 #include "asset_manager.h"
 #include "character.h"
+#include "gem.h"
 #include "interactive_group.h"
 #include "map.h"
 #include "npc.h"
@@ -58,10 +59,12 @@ struct App {
   Character character{DEFAULT_PIXEL_SIZE};
   std::vector<std::shared_ptr<Npc>> npcs{};
   std::vector<std::shared_ptr<Trap>> traps{};
+  std::list<Gem> gems{};
 
   void reset() {
     npcs.clear();
     traps.clear();
+    gems.clear();
     pause_update = false;
 
     reload_world_from_file();
@@ -133,6 +136,14 @@ struct App {
         case TileSource::Trap6:
           traps.push_back(std::make_shared<ShockTowerTrap>(tile_pos.scale(pixel_size).to_vector2(), pixel_size));
           break;
+        case TileSource::Gem1:
+        case TileSource::Gem2:
+        case TileSource::Gem3:
+        case TileSource::Gem4:
+        case TileSource::Gem5:
+        case TileSource::Gem6:
+          gems.emplace_back(pixel_size, tile_pos.scale(pixel_size).to_vector2(), tile_selection.source);
+          break;
         default:
           BAILF("Invalid: %d", tile_selection.source);
       }
@@ -153,6 +164,7 @@ struct App {
     for (auto const& npc : npcs) npc->draw();
     for (auto const& trap : traps) trap->draw();
     character.draw();
+    for (auto const& gem : gems) gem.draw();
 
     DrawFPS(0, 0);
   }
@@ -162,6 +174,7 @@ struct App {
       map.update(character.hitbox());
       for (auto& npc : npcs) npc->update(map, character);
       for (auto& trap : traps) trap->update(map, character);
+      for (auto& gem : gems) gem.update();
       character.update(map);
 
       update__character_collisions();
@@ -190,5 +203,12 @@ struct App {
         }
       }
     }
+
+    for (auto& gem : gems) {
+      if (CheckCollisionRecs(gem.hitbox(), character.hitbox())) {
+        gem.consume();
+      }
+    }
+    std::erase_if(gems, [](auto const& gem) { return gem.is_consumed(); });
   }
 };

@@ -118,7 +118,7 @@ struct Editor {
     if (IsMouseButtonDown(1)) {
       // Erase tile.
       if (CheckCollisionPointRec(mouse_pos, game_area())) {
-        std::erase_if(tiles, [&](const auto& p) {
+        std::erase_if(tiles, [&](auto const& p) {
           IntVec2 const& pos = p.first;
           TileSelection const& selection = p.second;
 
@@ -267,6 +267,7 @@ struct Editor {
     draw_gui_pane_enemies();
     draw_gui_pane_traps();
     draw_gui_pane_groups();
+    draw_gui_pane_gems();
 
     ImGui::End();
 
@@ -508,6 +509,62 @@ struct Editor {
           default:
             BAIL;
         }
+      }
+    }
+  }
+
+  void draw_gui_pane_gems() {
+    if (ImGui::CollapsingHeader("Gems")) {
+      if (rlImGuiImageButtonSize(
+              "Gem1", &*asset_manager.textures[TextureNames::Gem1__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Gem1__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Gem1__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Gem1, {0, 0}};
+      }
+
+      ImGui::SameLine();
+
+      if (rlImGuiImageButtonSize(
+              "Gem2", &*asset_manager.textures[TextureNames::Gem2__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Gem2__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Gem2__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Gem2, {0, 0}};
+      }
+
+      ImGui::SameLine();
+
+      if (rlImGuiImageButtonSize(
+              "Gem3", &*asset_manager.textures[TextureNames::Gem3__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Gem3__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Gem3__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Gem3, {0, 0}};
+      }
+
+      ImGui::SameLine();
+
+      if (rlImGuiImageButtonSize(
+              "Gem4", &*asset_manager.textures[TextureNames::Gem4__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Gem4__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Gem4__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Gem4, {0, 0}};
+      }
+
+      ImGui::SameLine();
+
+      if (rlImGuiImageButtonSize(
+              "Gem5", &*asset_manager.textures[TextureNames::Gem5__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Gem5__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Gem5__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Gem5, {0, 0}};
+      }
+
+      ImGui::SameLine();
+
+      if (rlImGuiImageButtonSize(
+              "Gem6", &*asset_manager.textures[TextureNames::Gem6__Example],
+              {static_cast<float>(asset_manager.textures[TextureNames::Gem6__Example]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Gem6__Example]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Gem6, {0, 0}};
       }
     }
   }
