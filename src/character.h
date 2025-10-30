@@ -123,6 +123,8 @@ struct Character {
     }
 
     // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
+    // DrawLineEx({0.f, static_cast<float>(hit_map.south.wall)},
+    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south.wall)}, pixel_size, MAGENTA);
   }
 
   bool is_falling() const {
@@ -182,12 +184,18 @@ struct Character {
   Timeout injury_timeout{};
   Vector2 spawn_location{};
 
+  // Debug.
+  HitAndDragMap hit_map;
+
   bool is_live() const {
     return lifecycle_state == LifecycleState::Live;
   }
 
   void update_movement(Map const& map) {
-    HitAndDragMap hit_map = calculate_hitmap(map);
+    // More of a hack but this helps vertical stabilization when above a vertically moving platform.
+    pos.y += map.south_wall_of_range(hitbox()).wall_vertical_speed;
+
+    hit_map = calculate_hitmap(map);
     bool is_grab_wall{false};
 
     if (is_live() && IsKeyDown(KEY_LEFT)) {
@@ -279,8 +287,6 @@ struct Character {
 
       // Touching south wall -> apply south wall drag.
       pos.x += hit_map.south.wall_horizontal_speed;
-      pos.y += hit_map.south.wall_vertical_speed;
-      debug(hit_map.south.wall_vertical_speed);
     }
 
     // Override sprite when jumping / wall grabbing.

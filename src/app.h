@@ -158,7 +158,7 @@ struct App {
   }
 
   void update() {
-    if (!pause_update) {
+    if (!pause_update || IsKeyPressed(KEY_S)) {
       map.update(character.hitbox());
       for (auto& npc : npcs) npc->update(map, character);
       for (auto& trap : traps) trap->update(map, character);

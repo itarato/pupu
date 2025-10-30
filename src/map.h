@@ -203,6 +203,7 @@ struct Map {
   void reset() {
     walls.clear();
     hitmaps.clear();
+    interactive_objects.clear();
   }
 
   void recalculate() {
