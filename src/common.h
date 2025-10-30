@@ -530,11 +530,15 @@ bool is_vertical_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
   return topy(rect_lhs) <= bottomy(rect_rhs) && bottomy(rect_lhs) >= topy(rect_rhs);
 }
 
-void debug(Vector2 v, const char* msg) {
+void debug(float v, const char* msg = "Debug") {
+  TraceLog(LOG_DEBUG, "%s :: float { %.2f }", msg, v);
+}
+
+void debug(Vector2 v, const char* msg = "Debug") {
   TraceLog(LOG_DEBUG, "%s :: Vector2 { %.2f, %.2f }", msg, v.x, v.y);
 }
 
-void debug(Rectangle r, const char* msg) {
+void debug(Rectangle r, const char* msg = "Debug") {
   TraceLog(LOG_DEBUG, "%s :: Rectangle { %.2f, %.2f, %.2f, %.2f }", msg, r.x, r.y, r.width, r.height);
 }
 
@@ -568,6 +572,7 @@ bool can_charge_character_vertical(int south_wall, Rectangle const& self_hitbox,
 struct CollisionResult {
   int wall{};
   float wall_horizontal_speed{0};
+  float wall_vertical_speed{0};
 
   CollisionResult() {
   }

@@ -279,6 +279,8 @@ struct Character {
 
       // Touching south wall -> apply south wall drag.
       pos.x += hit_map.south.wall_horizontal_speed;
+      pos.y += hit_map.south.wall_vertical_speed;
+      debug(hit_map.south.wall_vertical_speed);
     }
 
     // Override sprite when jumping / wall grabbing.

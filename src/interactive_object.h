@@ -15,8 +15,8 @@ struct InteractiveObject {
 
   virtual void draw() const = 0;
   virtual void update(Rectangle const& character_hitbox) = 0;
-  //                                                          v Hitbox   v Horizontal movement
-  virtual void hitbox_check(int direction, std::function<void(Rectangle, float)> check_hitbox_fn) const = 0;
+  //                                                          v Hitbox   v Hori v Vert movement
+  virtual void hitbox_check(int direction, std::function<void(Rectangle, float, float)> check_hitbox_fn) const = 0;
 };
 
 enum class DisappearingPlankState {
@@ -70,9 +70,9 @@ struct DisappearingPlank : InteractiveObject {
     }
   }
 
-  void hitbox_check(int direction, std::function<void(Rectangle, float)> check_hitbox_fn) const override {
+  void hitbox_check(int direction, std::function<void(Rectangle, float, float)> check_hitbox_fn) const override {
     if ((COLLISION_TYPE_TOP & direction) == 0) return;
-    check_hitbox_fn(hitbox(), 0.f);
+    check_hitbox_fn(hitbox(), 0.f, 0.f);
   }
 
  private:
@@ -167,15 +167,17 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
   void update(Rectangle const& character_hitbox) override {
     for (auto& behaviour_handler : behaviour_handlers) {
       float pre_x = offset.x;
+      float pre_y = offset.y;
       behaviour_handler->update(*this);
       current_frame_xdelta = offset.x - pre_x;
+      current_frame_ydelta = offset.y - pre_y;
     }
   }
 
-  void hitbox_check(int direction, std::function<void(Rectangle, float)> check_hitbox_fn) const override {
+  void hitbox_check(int direction, std::function<void(Rectangle, float, float)> check_hitbox_fn) const override {
     for (auto const& [tile_pos, tile_selection] : tiles) {
       Rectangle hitbox = move(tile_selection.hitbox(tile_pos, pixel_size), offset);
-      check_hitbox_fn(hitbox, current_frame_xdelta);
+      check_hitbox_fn(hitbox, current_frame_xdelta, current_frame_ydelta);
     }
   }
 
@@ -193,4 +195,5 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
   std::vector<std::shared_ptr<BehaviourHandler>> behaviour_handlers{};
   Vector2 offset{};
   float current_frame_xdelta{0.f};
+  float current_frame_ydelta{0.f};
 };

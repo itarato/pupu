@@ -104,8 +104,9 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(
-          COLLISION_TYPE_BOTTOM, [&](Rectangle hitbox, float xdelta) { check_north_collision(&out, hitbox, rect); });
+      interactive_object->hitbox_check(COLLISION_TYPE_BOTTOM, [&](Rectangle hitbox, float xdelta, float ydelta) {
+        check_north_collision(&out, hitbox, rect);
+      });
     }
 
     return out;
@@ -125,12 +126,12 @@ struct Map {
     CollisionResult result{min_y_coord * TILE_SIZE * pixel_size - 1};
 
     for (auto const& [pos, selection] : boxes) {
-      check_south_collision(&result, upscale(selection.hitbox(pos), pixel_size), rect, 0.f);
+      check_south_collision(&result, upscale(selection.hitbox(pos), pixel_size), rect, 0.f, 0.f);
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(COLLISION_TYPE_TOP, [&](Rectangle hitbox, float xdelta) {
-        check_south_collision(&result, hitbox, rect, xdelta);
+      interactive_object->hitbox_check(COLLISION_TYPE_TOP, [&](Rectangle hitbox, float xdelta, float ydelta) {
+        check_south_collision(&result, hitbox, rect, xdelta, ydelta);
       });
     }
 
@@ -155,8 +156,9 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(
-          COLLISION_TYPE_RIGHT, [&](Rectangle hitbox, float xdelta) { check_west_collision(&out, hitbox, rect); });
+      interactive_object->hitbox_check(COLLISION_TYPE_RIGHT, [&](Rectangle hitbox, float xdelta, float ydelta) {
+        check_west_collision(&out, hitbox, rect);
+      });
     }
 
     return out;
@@ -180,8 +182,9 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(
-          COLLISION_TYPE_LEFT, [&](Rectangle hitbox, float xdelta) { check_east_collision(&out, hitbox, rect); });
+      interactive_object->hitbox_check(COLLISION_TYPE_LEFT, [&](Rectangle hitbox, float xdelta, float ydelta) {
+        check_east_collision(&out, hitbox, rect);
+      });
     }
 
     return out;
@@ -253,12 +256,13 @@ struct Map {
   }
 
   void check_south_collision(CollisionResult* out, Rectangle const& map_object_hitbox, Rectangle const& collidee_hitbox,
-                             float xdelta) const {
+                             float xdelta, float ydelta) const {
     if (is_horizontal_overlap(map_object_hitbox, collidee_hitbox)) {
       if (topy(map_object_hitbox) < out->wall &&
           (topy(map_object_hitbox) + WALL_CHECK_THRESHOLD * pixel_size) >= bottomy(collidee_hitbox)) {
         out->wall = map_object_hitbox.y - 1;
         out->wall_horizontal_speed = xdelta;
+        out->wall_vertical_speed = ydelta;
       }
     }
   }
