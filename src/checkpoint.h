@@ -10,6 +10,12 @@ constexpr int const CHECKPOINT_SPRITE_IDLE{0};
 constexpr int const CHECKPOINT_SPRITE_OUT{1};
 constexpr int const CHECKPOINT_SPRITE_INIT{2};
 
+enum class CheckpointState {
+  Closed,
+  Opening,
+  Opened,
+};
+
 struct Checkpoint {
  public:
   Checkpoint(float const pixel_size, Vector2 const pos)
@@ -47,13 +53,16 @@ struct Checkpoint {
   }
 
   void update() {
-    if (sprite_group.update() == 0 && is_opening) {
+    if (sprite_group.update() == 0 && state == CheckpointState::Opening) {
+      state = CheckpointState::Opened;
       sprite_group.set_current_sprite(CHECKPOINT_SPRITE_IDLE);
     }
   }
 
   void touch() {
-    is_opening = true;
+    if (state != CheckpointState::Closed) return;
+
+    state = CheckpointState::Opening;
     sprite_group.set_current_sprite(CHECKPOINT_SPRITE_OUT);
   }
 
@@ -65,6 +74,6 @@ struct Checkpoint {
   float const pixel_size;
   Vector2 const pos;
   SpriteGroup sprite_group{};
-  bool is_opening{false};
+  CheckpointState state{CheckpointState::Closed};
   Rectangle _hitbox;
 };
