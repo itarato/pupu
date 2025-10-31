@@ -212,12 +212,21 @@ struct App {
       }
     }
 
+    bool consumed_gem{false};
     for (auto& gem : gems) {
       if (CheckCollisionRecs(gem.hitbox(), character_hitbox)) {
         gem.consume();
+        consumed_gem = true;
       }
     }
-    std::erase_if(gems, [](auto const& gem) { return gem.is_consumed(); });
+    if (consumed_gem) {
+      std::erase_if(gems, [](auto const& gem) { return gem.is_consumed(); });
+      if (gems.empty()) {
+        for (auto& checkpoint : checkpoints) {
+          checkpoint.victory();
+        }
+      }
+    }
 
     for (auto& checkpoint : checkpoints) {
       if (CheckCollisionRecs(checkpoint.hitbox(), character_hitbox)) {
