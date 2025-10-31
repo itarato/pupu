@@ -85,6 +85,8 @@ enum TextureNames {
   Checkpoint2__Idle,
   Checkpoint2__Out,
   Checkpoint__Init,
+  Pointer__Idle,
+  Pointer__Static,
 };
 
 struct AssetManager {
@@ -255,6 +257,11 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Checkpoint_Flag_Out2.png"));
     textures[TextureNames::Checkpoint__Init] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Checkpoint_No_Flag.png"));
+
+    textures[TextureNames::Pointer__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Pointer_Idle.png"));
+    textures[TextureNames::Pointer__Static] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Pointer_Static.png"));
   }
 
  private:
