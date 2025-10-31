@@ -74,7 +74,7 @@ struct App {
   }
 
   void reload_world_from_file() {
-    FILE* file = std::fopen("assets/maps/map.mp", "r");
+    FILE* file = std::fopen("assets/maps/map0.mp", "r");
     if (!file) {
       TraceLog(LOG_ERROR, "Cannot open map file");
       exit(EXIT_FAILURE);

@@ -35,7 +35,7 @@ struct Editor {
   void load_from_file() {
     reset();
 
-    FILE* file = std::fopen("assets/maps/map.mp", "r");
+    FILE* file = std::fopen(filename, "r");
     if (!file) {
       TraceLog(LOG_ERROR, "Cannot open map file");
       return;
@@ -212,6 +212,7 @@ struct Editor {
   std::vector<InteractiveGroup> interactive_groups{};
   int active_interactive_group{-1};
   SpecialOperation special_operation{SpecialOperation::Nothing};
+  char filename[128]{"assets/maps/map.mp"};
 
   void reset() {
     tiles.clear();
@@ -221,8 +222,6 @@ struct Editor {
   }
 
   void export_to_file() {
-    const char* filename{"assets/maps/map.mp"};
-
     FILE* file = std::fopen(filename, "w");
     if (!file) {
       TraceLog(LOG_ERROR, "Cannot create map file");
@@ -266,9 +265,9 @@ struct Editor {
     draw_gui_pane_boxes();
     draw_gui_pane_enemies();
     draw_gui_pane_traps();
-    draw_gui_pane_groups();
     draw_gui_pane_gems();
     draw_gui_pane_checkpoint();
+    draw_gui_pane_groups();
 
     ImGui::End();
 
@@ -279,7 +278,7 @@ struct Editor {
     bool bgr_need_redraw{false};
     static int new_background_tile_index{0};
 
-    if (ImGui::CollapsingHeader("Core")) {
+    if (ImGui::CollapsingHeader("Core", ImGuiTreeNodeFlags_DefaultOpen)) {
       bgr_need_redraw |= ImGui::SliderInt("Pixel size", &pixel_size, 1, 12);
       bgr_need_redraw |= ImGui::SliderInt("Tile width", &tile_width, 16, 64);
       bgr_need_redraw |= ImGui::SliderInt("Tile height", &tile_height, 16, 64);
@@ -289,8 +288,16 @@ struct Editor {
 
       ImGui::Separator();
 
-      if (ImGui::Button("Reset editor")) reset();
+      ImGui::InputText("filename", filename, IM_ARRAYSIZE(filename));
+
+      if (ImGui::Button("Load")) load_from_file();
+
       ImGui::SameLine();
+
+      if (ImGui::Button("Reset editor")) reset();
+
+      ImGui::SameLine();
+
       if (ImGui::Button("Save")) export_to_file();
     }
   }
