@@ -11,26 +11,26 @@ struct Gem {
       : pixel_size(pixel_size),
         pos(pos),
         sprite(pixel_size),
-        _hitbox({pos.x, pos.y, GEM_SIZE.x * pixel_size, GEM_SIZE.y * pixel_size}) {
+        _hitbox(move(upscale(tile_source_hitbox(tile_source), pixel_size), pos)) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
     switch (tile_source) {
       case TileSource::Gem1:
-        sprite.init_texture(asset_manager.textures[TextureNames::Gem1], GEM_SIZE, 7, sprite_frame_length);
+        sprite.init_texture(asset_manager.textures[TextureNames::Gem1], SMALL_16x16_TILE_SIZE, 7, sprite_frame_length);
         break;
       case TileSource::Gem2:
-        sprite.init_texture(asset_manager.textures[TextureNames::Gem2], GEM_SIZE, 7, sprite_frame_length);
+        sprite.init_texture(asset_manager.textures[TextureNames::Gem2], SMALL_16x16_TILE_SIZE, 7, sprite_frame_length);
         break;
       case TileSource::Gem3:
-        sprite.init_texture(asset_manager.textures[TextureNames::Gem3], GEM_SIZE, 7, sprite_frame_length);
+        sprite.init_texture(asset_manager.textures[TextureNames::Gem3], SMALL_16x16_TILE_SIZE, 7, sprite_frame_length);
         break;
       case TileSource::Gem4:
-        sprite.init_texture(asset_manager.textures[TextureNames::Gem4], GEM_SIZE, 7, sprite_frame_length);
+        sprite.init_texture(asset_manager.textures[TextureNames::Gem4], SMALL_16x16_TILE_SIZE, 7, sprite_frame_length);
         break;
       case TileSource::Gem5:
-        sprite.init_texture(asset_manager.textures[TextureNames::Gem5], GEM_SIZE, 7, sprite_frame_length);
+        sprite.init_texture(asset_manager.textures[TextureNames::Gem5], SMALL_16x16_TILE_SIZE, 7, sprite_frame_length);
         break;
       case TileSource::Gem6:
-        sprite.init_texture(asset_manager.textures[TextureNames::Gem6], GEM_SIZE, 7, sprite_frame_length);
+        sprite.init_texture(asset_manager.textures[TextureNames::Gem6], SMALL_16x16_TILE_SIZE, 7, sprite_frame_length);
         break;
       default:
         BAIL;

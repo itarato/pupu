@@ -80,6 +80,11 @@ enum TextureNames {
   Gem5__Example,
   Gem6,
   Gem6__Example,
+  Checkpoint1__Idle,
+  Checkpoint1__Out,
+  Checkpoint2__Idle,
+  Checkpoint2__Out,
+  Checkpoint__Init,
 };
 
 struct AssetManager {
@@ -239,6 +244,17 @@ struct AssetManager {
     textures[TextureNames::Gem6] = std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/6.png"));
     textures[TextureNames::Gem6__Example] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Gems/6_Example.png"));
+
+    textures[TextureNames::Checkpoint1__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Checkpoint_Flag_Idle1.png"));
+    textures[TextureNames::Checkpoint1__Out] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Checkpoint_Flag_Out1.png"));
+    textures[TextureNames::Checkpoint2__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Checkpoint_Flag_Idle2.png"));
+    textures[TextureNames::Checkpoint2__Out] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Checkpoint_Flag_Out2.png"));
+    textures[TextureNames::Checkpoint__Init] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Checkpoint_No_Flag.png"));
   }
 
  private:

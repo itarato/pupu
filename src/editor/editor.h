@@ -268,6 +268,7 @@ struct Editor {
     draw_gui_pane_traps();
     draw_gui_pane_groups();
     draw_gui_pane_gems();
+    draw_gui_pane_checkpoint();
 
     ImGui::End();
 
@@ -565,6 +566,18 @@ struct Editor {
               {static_cast<float>(asset_manager.textures[TextureNames::Gem6__Example]->width * fixed_pixel_size),
                static_cast<float>(asset_manager.textures[TextureNames::Gem6__Example]->height * fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Gem6, {0, 0}};
+      }
+    }
+  }
+
+  void draw_gui_pane_checkpoint() {
+    if (ImGui::CollapsingHeader("Checkpoints")) {
+      if (rlImGuiImageButtonSize(
+              "Checkpoint", &*asset_manager.textures[TextureNames::Checkpoint__Init],
+              {static_cast<float>(asset_manager.textures[TextureNames::Checkpoint__Init]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Checkpoint__Init]->height *
+                                  fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Checkpoint, {0, 0}};
       }
     }
   }

@@ -5,6 +5,7 @@
 
 #include "asset_manager.h"
 #include "character.h"
+#include "checkpoint.h"
 #include "gem.h"
 #include "interactive_group.h"
 #include "map.h"
@@ -60,11 +61,13 @@ struct App {
   std::vector<std::shared_ptr<Npc>> npcs{};
   std::vector<std::shared_ptr<Trap>> traps{};
   std::list<Gem> gems{};
+  std::vector<Checkpoint> checkpoints{};
 
   void reset() {
     npcs.clear();
     traps.clear();
     gems.clear();
+    checkpoints.clear();
     pause_update = false;
 
     reload_world_from_file();
@@ -144,6 +147,9 @@ struct App {
         case TileSource::Gem6:
           gems.emplace_back(pixel_size, tile_pos.scale(pixel_size).to_vector2(), tile_selection.source);
           break;
+        case TileSource::Checkpoint:
+          checkpoints.emplace_back(pixel_size, tile_pos.scale(pixel_size).to_vector2());
+          break;
         default:
           BAILF("Invalid: %d", tile_selection.source);
       }
@@ -163,6 +169,7 @@ struct App {
     map.draw();
     for (auto const& npc : npcs) npc->draw();
     for (auto const& trap : traps) trap->draw();
+    for (auto const& checkpoint : checkpoints) checkpoint.draw();
     character.draw();
     for (auto const& gem : gems) gem.draw();
 
@@ -175,6 +182,7 @@ struct App {
       for (auto& npc : npcs) npc->update(map, character);
       for (auto& trap : traps) trap->update(map, character);
       for (auto& gem : gems) gem.update();
+      for (auto& checkpoint : checkpoints) checkpoint.update();
       character.update(map);
 
       update__character_collisions();
@@ -186,10 +194,10 @@ struct App {
   }
 
   void update__character_collisions() {
+    Rectangle const character_hitbox{character.hitbox()};
+
     for (auto& npc : npcs) {
       Rectangle npc_hitbox{npc->hitbox()};
-      Rectangle character_hitbox{character.hitbox()};
-
       if (CheckCollisionRecs(npc_hitbox, character_hitbox)) {
         if (character.is_falling()) {
           if (!npc->is_injured()) {
@@ -205,10 +213,16 @@ struct App {
     }
 
     for (auto& gem : gems) {
-      if (CheckCollisionRecs(gem.hitbox(), character.hitbox())) {
+      if (CheckCollisionRecs(gem.hitbox(), character_hitbox)) {
         gem.consume();
       }
     }
     std::erase_if(gems, [](auto const& gem) { return gem.is_consumed(); });
+
+    for (auto& checkpoint : checkpoints) {
+      if (CheckCollisionRecs(checkpoint.hitbox(), character_hitbox)) {
+        checkpoint.touch();
+      }
+    }
   }
 };

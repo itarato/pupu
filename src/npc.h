@@ -64,37 +64,37 @@ struct SimpleWalkNpc : Npc {
     switch (tile_source) {
       case TileSource::Enemy1:
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy1__Fall], SIMPLE_WALK_NPC_SIZE, 3,
+                                        asset_manager.textures[TextureNames::Enemy1__Fall], LARGE_48x48_TILE_SIZE, 3,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy1__Hit], SIMPLE_WALK_NPC_SIZE, 5,
+                                        asset_manager.textures[TextureNames::Enemy1__Hit], LARGE_48x48_TILE_SIZE, 5,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy1__Idle], SIMPLE_WALK_NPC_SIZE, 11,
+                                        asset_manager.textures[TextureNames::Enemy1__Idle], LARGE_48x48_TILE_SIZE, 11,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy1__Jump], SIMPLE_WALK_NPC_SIZE, 3,
+                                        asset_manager.textures[TextureNames::Enemy1__Jump], LARGE_48x48_TILE_SIZE, 3,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy1__Run], SIMPLE_WALK_NPC_SIZE, 12,
+                                        asset_manager.textures[TextureNames::Enemy1__Run], LARGE_48x48_TILE_SIZE, 12,
                                         sprite_frame_length});
 
         break;
       case TileSource::Enemy2:
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy2__Fall], SIMPLE_WALK_NPC_SIZE, 1,
+                                        asset_manager.textures[TextureNames::Enemy2__Fall], LARGE_48x48_TILE_SIZE, 1,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy2__Hit], SIMPLE_WALK_NPC_SIZE, 5,
+                                        asset_manager.textures[TextureNames::Enemy2__Hit], LARGE_48x48_TILE_SIZE, 5,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy2__Idle], SIMPLE_WALK_NPC_SIZE, 11,
+                                        asset_manager.textures[TextureNames::Enemy2__Idle], LARGE_48x48_TILE_SIZE, 11,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy2__Jump], SIMPLE_WALK_NPC_SIZE, 1,
+                                        asset_manager.textures[TextureNames::Enemy2__Jump], LARGE_48x48_TILE_SIZE, 1,
                                         sprite_frame_length});
         sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                        asset_manager.textures[TextureNames::Enemy2__Run], SIMPLE_WALK_NPC_SIZE, 12,
+                                        asset_manager.textures[TextureNames::Enemy2__Run], LARGE_48x48_TILE_SIZE, 12,
                                         sprite_frame_length});
 
         break;

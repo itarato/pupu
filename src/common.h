@@ -54,9 +54,10 @@ constexpr Rectangle const Trap5Hitbox{8.f, 20.f, 32.f, 8.f};
 constexpr Rectangle const Trap5Hitbox__UpperSurface{8.f, 18.f, 32.f, 8.f};
 constexpr Rectangle const Trap6Hitbox{16.f, 26.f, 16.f, 22.f};
 constexpr Rectangle const GemHitbox{1.f, 1.f, 14.f, 14.f};
+constexpr Rectangle const CheckpointHitbox{19.f, 2.f, 10.f, 46.f};
 
-constexpr Vector2 const SIMPLE_WALK_NPC_SIZE{48.f, 48.f};
-constexpr Vector2 const GEM_SIZE{16.f, 16.f};
+constexpr Vector2 const LARGE_48x48_TILE_SIZE{48.f, 48.f};
+constexpr Vector2 const SMALL_16x16_TILE_SIZE{16.f, 16.f};
 
 constexpr Rectangle const OutsideRectangle{-100.f, -100.f, 0.f, 0.f};
 
@@ -285,11 +286,12 @@ enum class TileSource {
   Gem4,
   Gem5,
   Gem6,
+  Checkpoint,
   // Four bound checks.
   EndMarker,
 };
 
-Rectangle const tile_source_hitbox(TileSource tile_source) {
+constexpr Rectangle const tile_source_hitbox(TileSource tile_source) {
   switch (tile_source) {
     case TileSource::Gui:
     case TileSource::Tileset:
@@ -325,6 +327,8 @@ Rectangle const tile_source_hitbox(TileSource tile_source) {
     case TileSource::Gem5:
     case TileSource::Gem6:
       return GemHitbox;
+    case TileSource::Checkpoint:
+      return CheckpointHitbox;
     default:
       BAIL;
   }
@@ -386,6 +390,8 @@ struct TileSelection {
       texture = asset_manager.textures[TextureNames::Gem5__Example];
     } else if (source == TileSource::Gem6) {
       texture = asset_manager.textures[TextureNames::Gem6__Example];
+    } else if (source == TileSource::Checkpoint) {
+      texture = asset_manager.textures[TextureNames::Checkpoint__Init];
     } else {
       BAIL;
     }
@@ -439,6 +445,7 @@ struct TileSelection {
       case TileSource::Trap4:
       case TileSource::Trap5:
       case TileSource::Trap6:
+      case TileSource::Checkpoint:
         return TILESIZE_ENEMY1;
       default:
         BAIL;
@@ -455,6 +462,7 @@ struct TileSelection {
       case TileSource::Gem4:
       case TileSource::Gem5:
       case TileSource::Gem6:
+      case TileSource::Checkpoint:
         return TILE_SIZE;
       case TileSource::Box1:
       case TileSource::Box2:
