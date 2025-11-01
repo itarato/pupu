@@ -238,6 +238,37 @@ struct Timeout {
   double timeout{0.0};
 };
 
+struct Timer {
+ public:
+  Timer() {
+  }
+
+  Timer(double interval) {
+    next_tick = GetTime() + interval;
+    is_timeout = false;
+  }
+
+  bool update() {
+    if (is_timeout) return false;
+
+    if (next_tick <= GetTime()) {
+      is_timeout = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void reset(double new_interval) {
+    next_tick = GetTime() + new_interval;
+    is_timeout = false;
+  }
+
+ private:
+  double next_tick;
+  double is_timeout{true};
+};
+
 struct RepeatTimer {
  public:
   RepeatTimer(double interval) : interval(interval) {
@@ -558,6 +589,10 @@ void debug(Rectangle r, const char* msg = "Debug") {
 
 float randf() {
   return static_cast<float>(rand() % 1001) / 1000.f;
+}
+
+float randd() {
+  return static_cast<double>(rand() % 1001) / 1000.f;
 }
 
 bool can_charge_character_horizontal(int west_wall, int east_wall, Rectangle const& self_hitbox,

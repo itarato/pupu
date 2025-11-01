@@ -6,6 +6,9 @@
 #include "sprite.h"
 #include "sprite_group.h"
 
+constexpr const int POINTER_SPRITE_IDLE{0};
+constexpr const int POINTER_SPRITE_STATIC{1};
+
 struct Pointer {
  public:
   Pointer(float const pixel_size, Vector2 const pos)
@@ -25,10 +28,21 @@ struct Pointer {
         1,
         0,
     });
+
+    sprite_group.set_current_sprite(POINTER_SPRITE_STATIC);
+    reset_timer();
   }
 
   void update() {
-    sprite_group.update();
+    if (sprite_group.update() == 0 && is_idle) {
+      sprite_group.set_current_sprite(POINTER_SPRITE_STATIC);
+      reset_timer();
+    }
+
+    if (timer.update()) {
+      sprite_group.set_current_sprite(POINTER_SPRITE_IDLE);
+      is_idle = true;
+    }
   }
 
   void draw() const {
@@ -43,4 +57,10 @@ struct Pointer {
   Vector2 const pos;
   Rectangle _hitbox;
   SpriteGroup sprite_group{};
+  Timer timer{};
+  bool is_idle{false};
+
+  void reset_timer() {
+    timer.reset(randd() * 4.0 + 4.0);
+  }
 };
