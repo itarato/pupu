@@ -64,6 +64,7 @@ struct App {
   std::list<Gem> gems{};
   std::vector<Checkpoint> checkpoints{};
   std::vector<Pointer> pointers{};
+  size_t map_index{0};
 
   void reset() {
     npcs.clear();
@@ -77,7 +78,7 @@ struct App {
   }
 
   void reload_world_from_file() {
-    FILE* file = std::fopen("assets/maps/map0.mp", "r");
+    FILE* file = std::fopen(MAP_FILENAMES[map_index], "r");
     if (!file) {
       TraceLog(LOG_ERROR, "Cannot open map file");
       exit(EXIT_FAILURE);
@@ -180,7 +181,7 @@ struct App {
     character.draw();
     for (auto const& gem : gems) gem.draw();
 
-    DrawFPS(0, 0);
+    // DrawFPS(0, 0);
   }
 
   void update() {
@@ -241,5 +242,18 @@ struct App {
         checkpoint.touch();
       }
     }
+
+    for (auto const& pointer : pointers) {
+      if (CheckCollisionRecs(pointer.hitbox(), character_hitbox)) {
+        load_next_level();
+      }
+    }
+  }
+
+  void load_next_level() {
+    // Change to the next map.
+    size_t map_count = sizeof(MAP_FILENAMES) / sizeof(MAP_FILENAMES[0]);
+    map_index = (map_index + 1) % map_count;
+    reset();
   }
 };

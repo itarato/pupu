@@ -212,7 +212,7 @@ struct Editor {
   std::vector<InteractiveGroup> interactive_groups{};
   int active_interactive_group{-1};
   SpecialOperation special_operation{SpecialOperation::Nothing};
-  char filename[128]{"assets/maps/map.mp"};
+  char filename[128]{"assets/maps/map_0.mp"};
 
   void reset() {
     tiles.clear();
