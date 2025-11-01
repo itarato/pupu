@@ -30,6 +30,7 @@ struct Editor {
  public:
   Editor() {
     background.preload(0, tile_width, tile_height, pixel_size);
+    update_map_filename();
   }
 
   void load_from_file() {
@@ -212,7 +213,8 @@ struct Editor {
   std::vector<InteractiveGroup> interactive_groups{};
   int active_interactive_group{-1};
   SpecialOperation special_operation{SpecialOperation::Nothing};
-  char filename[128]{"assets/maps/map_0.mp"};
+  char filename[128]{""};
+  int filename_index{0};
 
   void reset() {
     tiles.clear();
@@ -287,6 +289,10 @@ struct Editor {
       if (bgr_need_redraw) background.preload(new_background_tile_index, tile_width, tile_height, pixel_size);
 
       ImGui::Separator();
+
+      if (ImGui::Combo("Maps", &filename_index, MAP_FILENAMES, IM_ARRAYSIZE(MAP_FILENAMES))) {
+        update_map_filename();
+      }
 
       ImGui::InputText("filename", filename, IM_ARRAYSIZE(filename));
 
@@ -601,5 +607,10 @@ struct Editor {
   Rectangle const game_area() const {
     return {0.f, 0.f, static_cast<float>(TILE_SIZE * tile_width * pixel_size),
             static_cast<float>(TILE_SIZE * tile_height * pixel_size)};
+  }
+
+  void update_map_filename() {
+    strncpy(filename, MAP_FILENAMES[filename_index],
+            std::min(127, static_cast<int>(strlen(MAP_FILENAMES[filename_index]))));
   }
 };
