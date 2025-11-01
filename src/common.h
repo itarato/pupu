@@ -264,9 +264,13 @@ struct Timer {
     is_timeout = false;
   }
 
+  bool is_passed() const {
+    return is_timeout;
+  }
+
  private:
   double next_tick;
-  double is_timeout{true};
+  bool is_timeout{true};
 };
 
 struct RepeatTimer {
@@ -575,8 +579,16 @@ bool is_vertical_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {
   return topy(rect_lhs) <= bottomy(rect_rhs) && bottomy(rect_lhs) >= topy(rect_rhs);
 }
 
+void debug(bool v, const char* msg = "Debug") {
+  TraceLog(LOG_DEBUG, "%s :: bool { %s }", msg, v ? "true" : "false");
+}
+
 void debug(float v, const char* msg = "Debug") {
   TraceLog(LOG_DEBUG, "%s :: float { %.2f }", msg, v);
+}
+
+void debug(const char* v, const char* msg = "Debug") {
+  TraceLog(LOG_DEBUG, "%s :: string { %s }", msg, v);
 }
 
 void debug(Vector2 v, const char* msg = "Debug") {

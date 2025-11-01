@@ -376,6 +376,7 @@ struct ShootingNpc : Npc {
   void update(Map const& map, Character& character) override {
     int sprite_group_sequence = sprite_group.update();
     hit_timeout.update();
+    shoot_delay_timer.update();
 
     for (auto& bullet : bullets) {
       bullet.update();
@@ -396,7 +397,8 @@ struct ShootingNpc : Npc {
     Rectangle character_hitbox{character.hitbox()};
 
     if (state == ShootingNpcState::Walk) {
-      if (!character.is_injured() && can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox)) {
+      if (!character.is_injured() && can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox) &&
+          shoot_delay_timer.is_passed()) {
         state = ShootingNpcState::Attack;
         sprite_group.set_current_sprite(ShootingNpcSpriteAttack);
         if (character_hitbox.x <= _hitbox.x) {  // Charge left.
@@ -412,10 +414,11 @@ struct ShootingNpc : Npc {
       if (sprite_group_sequence == 4) {
         bullets.emplace_back(bullet_spawn_point(), pixel_size, is_direction_left ? -400.f : 400.f, west_wall,
                              east_wall);
+        shoot_delay_timer.reset(0.8);
       }
       if (sprite_group_sequence == 0) {
         if (!can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox) ||
-            character.is_injured()) {
+            character.is_injured() || !shoot_delay_timer.is_passed()) {
           state = ShootingNpcState::Walk;
           sprite_group.set_current_sprite(ShootingNpcSpriteWalk);
         }
@@ -470,6 +473,7 @@ struct ShootingNpc : Npc {
   Timeout hit_timeout{};
   ShootingNpcState state{ShootingNpcState::Walk};
   std::list<Bullet> bullets{};
+  Timer shoot_delay_timer{};
 
   Vector2 bullet_spawn_point() const {
     if (is_direction_left) {
