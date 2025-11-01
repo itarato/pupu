@@ -29,7 +29,7 @@ EDITOR_SRC=$(wildcard src/level_editor.cpp lib/imgui/*.cpp lib/rlImGui/*.cpp)
 EDITOR_OBJ=$(addsuffix .o,$(basename $(EDITOR_SRC)))
 
 editor: $(EDITOR_OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) $(CXXFLAGS) -g -O0 -fno-omit-frame-pointer -o $@ $^ $(LIBS)
 
 clean:
 	rm -f ./src/*.o

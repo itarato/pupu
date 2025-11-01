@@ -19,8 +19,6 @@ constexpr const Color COLOR_LIST[COLOR_LIST_SIZE] = {
     RED, ORANGE, BLUE, GREEN, MAGENTA, PINK,
 };
 
-static std::vector<const char*> group_list_names{};
-
 enum class SpecialOperation {
   Nothing,
   GroupElemSelect,
@@ -30,6 +28,7 @@ struct Editor {
  public:
   Editor() {
     background.preload(0, tile_width, tile_height, pixel_size);
+    refresh_map_filenames_without_free_memory();
     update_map_filename();
   }
 
@@ -195,11 +194,19 @@ struct Editor {
 
   void unload() {
     background.unload();
+
     const char** group_list_names_raw = group_list_names.data();
     for (int i = 0; i < static_cast<int>(group_list_names.size()); i++) {
       char* word = const_cast<char*>(group_list_names_raw[i]);
       free(word);
     }
+
+    // const char** all_map_filenames_raw = all_map_filenames.data();
+    // for (int i = 0; i < static_cast<int>(all_map_filenames.size()); i++) {
+    //   char* word = const_cast<char*>(all_map_filenames_raw[i]);
+    //   free(word);
+    // }
+    UnloadDirectoryFiles(map_files);
   }
 
  private:
@@ -215,6 +222,8 @@ struct Editor {
   SpecialOperation special_operation{SpecialOperation::Nothing};
   char filename[128]{""};
   int filename_index{0};
+  std::vector<const char*> group_list_names{};
+  FilePathList map_files;
 
   void reset() {
     tiles.clear();
@@ -290,7 +299,7 @@ struct Editor {
 
       ImGui::Separator();
 
-      if (ImGui::Combo("Maps", &filename_index, MAP_FILENAMES, IM_ARRAYSIZE(MAP_FILENAMES))) {
+      if (ImGui::Combo("Maps", &filename_index, map_files.paths, map_files.count)) {
         update_map_filename();
       }
 
@@ -304,7 +313,10 @@ struct Editor {
 
       ImGui::SameLine();
 
-      if (ImGui::Button("Save")) export_to_file();
+      if (ImGui::Button("Save")) {
+        export_to_file();
+        refresh_map_filenames();
+      }
     }
   }
 
@@ -610,7 +622,16 @@ struct Editor {
   }
 
   void update_map_filename() {
-    strncpy(filename, MAP_FILENAMES[filename_index],
-            std::min(127, static_cast<int>(strlen(MAP_FILENAMES[filename_index]))));
+    strncpy(filename, map_files.paths[filename_index],
+            std::min(127, static_cast<int>(strlen(map_files.paths[filename_index]))));
+  }
+
+  void refresh_map_filenames() {
+    UnloadDirectoryFiles(map_files);
+    refresh_map_filenames_without_free_memory();
+  }
+
+  void refresh_map_filenames_without_free_memory() {
+    map_files = LoadDirectoryFilesEx("assets/maps", "mp", false);
   }
 };

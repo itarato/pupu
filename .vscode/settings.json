@@ -66,6 +66,8 @@
     "__locale": "cpp",
     "execution": "cpp",
     "ios": "cpp",
-    "mutex": "cpp"
+    "mutex": "cpp",
+    "ranges": "cpp",
+    "queue": "cpp"
   }
 }
