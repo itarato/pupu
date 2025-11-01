@@ -83,14 +83,14 @@ struct DisappearingPlank : InteractiveObject {
   RepeatTimer timer{0.f};
 
   Rectangle const hitbox_upper_surface() const {
-    return move(upscale(Trap5Hitbox__UpperSurface, pixel_size), pos);
+    return move(upscale(TRAP5_HITBOX_UPPER_SURFACE, pixel_size), pos);
   }
 
   Rectangle const hitbox() const {
     if (state == DisappearingPlankState::Solid || state == DisappearingPlankState::WaitForCrumbling) {
       return move(upscale(tile_source_hitbox(TileSource::Trap5), pixel_size), pos);
     } else {
-      return OutsideRectangle;
+      return OUTSIDE_RECTANGLE;
     }
   }
 };

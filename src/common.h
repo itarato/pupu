@@ -47,20 +47,20 @@ constexpr Rectangle const ENEMY3_HITBOX{14.f, 19.f, 19.f, 29.f};
 constexpr Rectangle const ENEMY4_HITBOX{12.f, 23.f, 24.f, 25.f};
 constexpr Rectangle const ENEMY5_HITBOX{10.f, 2.f, 26.f, 30.f};
 
-constexpr Rectangle const Trap1Hitbox{8.f, 34.f, 32.f, 10.f};
-constexpr Rectangle const Trap2Hitbox{10.f, 10.f, 28.f, 28.f};
-constexpr Rectangle const Trap4Hitbox{16.f, 38.f, 16.f, 10.f};
-constexpr Rectangle const Trap5Hitbox{8.f, 20.f, 32.f, 8.f};
-constexpr Rectangle const Trap5Hitbox__UpperSurface{8.f, 18.f, 32.f, 8.f};
-constexpr Rectangle const Trap6Hitbox{16.f, 26.f, 16.f, 22.f};
-constexpr Rectangle const GemHitbox{1.f, 1.f, 14.f, 14.f};
-constexpr Rectangle const CheckpointHitbox{19.f, 2.f, 10.f, 46.f};
-constexpr Rectangle const PointerHitbox{19.f, 46.f, 10.f, 2.f};
+constexpr Rectangle const TRAP1_HITBOX{8.f, 34.f, 32.f, 10.f};
+constexpr Rectangle const TRAP2_HITBOX{10.f, 10.f, 28.f, 28.f};
+constexpr Rectangle const TRAP4_HITBOX{16.f, 38.f, 16.f, 10.f};
+constexpr Rectangle const TRAP5_HITBOX{8.f, 20.f, 32.f, 8.f};
+constexpr Rectangle const TRAP5_HITBOX_UPPER_SURFACE{8.f, 18.f, 32.f, 8.f};
+constexpr Rectangle const TRAP6_HITBOX{16.f, 26.f, 16.f, 22.f};
+constexpr Rectangle const GEM_HITBOX{1.f, 1.f, 14.f, 14.f};
+constexpr Rectangle const CHECKPOINT_HITBOX{19.f, 2.f, 10.f, 46.f};
+constexpr Rectangle const POINTER_HITBOX{19.f, 46.f, 10.f, 2.f};
 
 constexpr Vector2 const LARGE_48x48_TILE_SIZE{48.f, 48.f};
 constexpr Vector2 const SMALL_16x16_TILE_SIZE{16.f, 16.f};
 
-constexpr Rectangle const OutsideRectangle{-100.f, -100.f, 0.f, 0.f};
+constexpr Rectangle const OUTSIDE_RECTANGLE{-100.f, -100.f, 0.f, 0.f};
 
 constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format off
@@ -350,26 +350,26 @@ constexpr Rectangle const tile_source_hitbox(TileSource tile_source) {
     case TileSource::Enemy5:
       return ENEMY5_HITBOX;
     case TileSource::Trap1:
-      return Trap1Hitbox;
+      return TRAP1_HITBOX;
     case TileSource::Trap2:
-      return Trap2Hitbox;
+      return TRAP2_HITBOX;
     case TileSource::Trap4:
-      return Trap4Hitbox;
+      return TRAP4_HITBOX;
     case TileSource::Trap5:
-      return Trap5Hitbox;
+      return TRAP5_HITBOX;
     case TileSource::Trap6:
-      return Trap6Hitbox;
+      return TRAP6_HITBOX;
     case TileSource::Gem1:
     case TileSource::Gem2:
     case TileSource::Gem3:
     case TileSource::Gem4:
     case TileSource::Gem5:
     case TileSource::Gem6:
-      return GemHitbox;
+      return GEM_HITBOX;
     case TileSource::Checkpoint:
-      return CheckpointHitbox;
+      return CHECKPOINT_HITBOX;
     case TileSource::Pointer:
-      return PointerHitbox;
+      return POINTER_HITBOX;
     default:
       BAIL;
   }

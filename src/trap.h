@@ -111,7 +111,7 @@ struct SpikeTrap : Trap {
 
   virtual Rectangle hitbox() const override {
     if (is_hidden) {
-      return OutsideRectangle;
+      return OUTSIDE_RECTANGLE;
     } else {
       return move(upscale(tile_source_hitbox(TileSource::Trap4), pixel_size), pos);
     }
