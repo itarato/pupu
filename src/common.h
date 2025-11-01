@@ -22,14 +22,14 @@
 
 constexpr int const ReferenceFPS{144};
 // Set after window initialization.
-extern int GameFPS;
-static float FPSMultiplier{};
+extern int GAME_FPS;
+static float FPS_MULTIPLIER{};
 
 constexpr int const DEFAULT_PIXEL_SIZE{2};
 
 constexpr int const TILE_SIZE{16};
 
-constexpr Vector2 const vector_zero{0.f, 0.f};
+constexpr Vector2 const VECTOR2_ZERO{0.f, 0.f};
 
 constexpr int const COLLISION_TYPE_NOTHING{0b0000};
 constexpr int const COLLISION_TYPE_TOP{0b0001};
@@ -568,7 +568,7 @@ IntVec2 relative_frame_pos(Rectangle const frame, int const tile_size, int const
 }
 
 void fps_independent_multiply(float* v, float mul) {
-  *v *= powf(mul, FPSMultiplier);
+  *v *= powf(mul, FPS_MULTIPLIER);
 }
 
 bool is_horizontal_overlap(Rectangle const& rect_lhs, Rectangle const& rect_rhs) {

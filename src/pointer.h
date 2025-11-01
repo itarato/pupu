@@ -13,7 +13,7 @@ struct Pointer {
  public:
   Pointer(float const pixel_size, Vector2 const pos)
       : pos(pos), _hitbox(move(upscale(tile_source_hitbox(TileSource::Checkpoint), pixel_size), pos)) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
     sprite_group.push_sprite(Sprite{
         pixel_size,
         asset_manager.textures[TextureNames::Pointer__Idle],

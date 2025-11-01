@@ -16,7 +16,7 @@
 #include "sprite_group.h"
 #include "trap.h"
 
-int GameFPS{};
+int GAME_FPS{};
 
 struct App {
  public:
@@ -25,9 +25,9 @@ struct App {
 
     InitWindow(1024, 768, "Pupu");
 
-    GameFPS = GetMonitorRefreshRate(0);
-    FPSMultiplier = static_cast<float>(ReferenceFPS) / static_cast<float>(GameFPS);
-    SetTargetFPS(GameFPS);
+    GAME_FPS = GetMonitorRefreshRate(0);
+    FPS_MULTIPLIER = static_cast<float>(ReferenceFPS) / static_cast<float>(GAME_FPS);
+    SetTargetFPS(GAME_FPS);
 
     asset_manager.preload();
     character.init();

@@ -59,7 +59,7 @@ struct SimpleWalkNpc : Npc {
  public:
   SimpleWalkNpc(IntVec2 const pos, TileSource const tile_source, int const pixel_size)
       : pos(pos.scale(pixel_size).to_vector2()), pixel_size(pixel_size), tile_source(tile_source) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     switch (tile_source) {
       case TileSource::Enemy1:
@@ -207,7 +207,7 @@ enum class ChargingNpcState {
 struct ChargingNpc : Npc {
  public:
   ChargingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
                                     asset_manager.textures[TextureNames::Enemy3__Charge], ChargingNpcSize, 12,
@@ -355,7 +355,7 @@ enum class ShootingNpcState {
 struct ShootingNpc : Npc {
  public:
   ShootingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
                                     asset_manager.textures[TextureNames::Enemy4__Attack], ChargingNpcSize, 7,
@@ -494,7 +494,7 @@ enum class StompingNpcState {
 struct StompingNpc : Npc {
  public:
   StompingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
                                     asset_manager.textures[TextureNames::Enemy5__Attack], ChargingNpcSize, 8,

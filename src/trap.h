@@ -16,7 +16,7 @@ struct Trap {
 struct BouncingTrap : Trap {
  public:
   BouncingTrap(Vector2 pos, int const pixel_size) : pos(pos), pixel_size(pixel_size), sprite(pixel_size) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
     sprite.init_texture(asset_manager.textures[TextureNames::Trap1], LARGE_48x48_TILE_SIZE, 7, sprite_frame_length);
     sprite.stop();
   }
@@ -51,7 +51,7 @@ struct BouncingTrap : Trap {
 struct CircleSawTrap : Trap {
  public:
   CircleSawTrap(Vector2 pos, int const pixel_size) : pos(pos), pixel_size(pixel_size), sprite(pixel_size) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
     sprite.init_texture(asset_manager.textures[TextureNames::Trap2], LARGE_48x48_TILE_SIZE, 7, sprite_frame_length);
   }
 
@@ -83,7 +83,7 @@ struct CircleSawTrap : Trap {
 struct SpikeTrap : Trap {
  public:
   SpikeTrap(Vector2 pos, int const pixel_size) : pos(pos), pixel_size(pixel_size), sprite(pixel_size) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
     sprite.init_texture(asset_manager.textures[TextureNames::Trap4], LARGE_48x48_TILE_SIZE, 7, sprite_frame_length);
   }
 
@@ -130,7 +130,7 @@ struct SpikeTrap : Trap {
 struct ShockTowerTrap : Trap {
  public:
   ShockTowerTrap(Vector2 pos, int const pixel_size) : pos(pos), pixel_size(pixel_size), sprite(pixel_size) {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
     sprite.init_texture(asset_manager.textures[TextureNames::Trap6], LARGE_48x48_TILE_SIZE, 7, sprite_frame_length);
   }
 

@@ -17,7 +17,7 @@ struct Background {
                     static_cast<float>(tile_height * TILE_SIZE * pixel_size)},
                    {pos.x, pos.y, static_cast<float>(tile_width * TILE_SIZE * pixel_size),
                     static_cast<float>(tile_height * TILE_SIZE * pixel_size)},
-                   vector_zero, 0.f, WHITE);
+                   VECTOR2_ZERO, 0.f, WHITE);
   }
 
   void preload(int index, int new_tile_width, int new_tile_height, int pixel_size) {

@@ -59,7 +59,7 @@ struct Character {
   }
 
   void init() {
-    unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
                                     asset_manager.textures[TextureNames::Character1__Run],
@@ -304,7 +304,7 @@ struct Character {
   }
 
   float speed_increments() const {
-    return (PLAYER_MAX_REL_SPEED / (30.f / FPSMultiplier));
+    return (PLAYER_MAX_REL_SPEED / (30.f / FPS_MULTIPLIER));
   }
 
   HitAndDragMap calculate_hitmap(Map const& map) const {

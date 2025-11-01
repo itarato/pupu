@@ -147,7 +147,7 @@ struct Editor {
         {static_cast<float>(character_position.x * pixel_size), static_cast<float>(character_position.y * pixel_size),
          static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width) * pixel_size,
          static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height) * pixel_size},
-        vector_zero, 0.f, WHITE);
+        VECTOR2_ZERO, 0.f, WHITE);
 
     Vector2 mouse_pos = GetMousePosition();
 
