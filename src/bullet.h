@@ -5,6 +5,9 @@
 #include "raylib.h"
 #include "sprite_group.h"
 
+constexpr const int BULLER_SPRITE_SHORT{0};
+constexpr const int BULLER_SPRITE_LONG{1};
+
 struct Bullet {
  public:
   Bullet(Vector2 const pos, int const pixel_size, float const speed, int const west_wall, int const east_wall)
@@ -14,6 +17,14 @@ struct Bullet {
                Vector2{static_cast<float>(asset_manager.textures[TextureNames::BulletShort]->width),
                        static_cast<float>(asset_manager.textures[TextureNames::BulletShort]->height)},
                1, 0});
+
+    sprite_group.push_sprite(
+        Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::BulletLong],
+               Vector2{static_cast<float>(asset_manager.textures[TextureNames::BulletLong]->width),
+                       static_cast<float>(asset_manager.textures[TextureNames::BulletLong]->height)},
+               1, 0});
+
+    sprite_group.set_current_sprite(BULLER_SPRITE_LONG);
   }
 
   void draw() const {
@@ -23,6 +34,8 @@ struct Bullet {
   void update() {
     sprite_group.update();
     pos.x += speed * GetFrameTime();
+
+    if (timer.update()) sprite_group.set_current_sprite(BULLER_SPRITE_SHORT);
   }
 
   bool is_dead() const {
@@ -45,4 +58,5 @@ struct Bullet {
   int const west_wall;
   int const east_wall;
   bool target_hit{false};
+  Timer timer{0.2};
 };
