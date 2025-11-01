@@ -8,10 +8,7 @@
 struct Gem {
  public:
   Gem(int const pixel_size, Vector2 const pos, TileSource const tile_source)
-      : pixel_size(pixel_size),
-        pos(pos),
-        sprite(pixel_size),
-        _hitbox(move(upscale(tile_source_hitbox(tile_source), pixel_size), pos)) {
+      : pos(pos), sprite(pixel_size), _hitbox(move(upscale(tile_source_hitbox(tile_source), pixel_size), pos)) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
     switch (tile_source) {
       case TileSource::Gem1:
@@ -58,7 +55,6 @@ struct Gem {
   }
 
  private:
-  int const pixel_size;
   Vector2 const pos;
   Sprite sprite;
   Rectangle const _hitbox;

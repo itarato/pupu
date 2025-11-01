@@ -9,9 +9,7 @@
 struct Pointer {
  public:
   Pointer(float const pixel_size, Vector2 const pos)
-      : pixel_size(pixel_size),
-        pos(pos),
-        _hitbox(move(upscale(tile_source_hitbox(TileSource::Checkpoint), pixel_size), pos)) {
+      : pos(pos), _hitbox(move(upscale(tile_source_hitbox(TileSource::Checkpoint), pixel_size), pos)) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GameFPS / 24);
     sprite_group.push_sprite(Sprite{
         pixel_size,
@@ -29,8 +27,19 @@ struct Pointer {
     });
   }
 
+  void update() {
+    sprite_group.update();
+  }
+
+  void draw() const {
+    sprite_group.draw(pos);
+  }
+
+  Rectangle const hitbox() const {
+    return _hitbox;
+  }
+
  private:
-  float const pixel_size;
   Vector2 const pos;
   Rectangle _hitbox;
   SpriteGroup sprite_group{};

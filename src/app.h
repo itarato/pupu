@@ -10,6 +10,7 @@
 #include "interactive_group.h"
 #include "map.h"
 #include "npc.h"
+#include "pointer.h"
 #include "raylib.h"
 #include "sprite.h"
 #include "sprite_group.h"
@@ -62,12 +63,14 @@ struct App {
   std::vector<std::shared_ptr<Trap>> traps{};
   std::list<Gem> gems{};
   std::vector<Checkpoint> checkpoints{};
+  std::vector<Pointer> pointers{};
 
   void reset() {
     npcs.clear();
     traps.clear();
     gems.clear();
     checkpoints.clear();
+    pointers.clear();
     pause_update = false;
 
     reload_world_from_file();
@@ -150,6 +153,9 @@ struct App {
         case TileSource::Checkpoint:
           checkpoints.emplace_back(pixel_size, tile_pos.scale(pixel_size).to_vector2());
           break;
+        case TileSource::Pointer:
+          pointers.emplace_back(pixel_size, tile_pos.scale(pixel_size).to_vector2());
+          break;
         default:
           BAILF("Invalid: %d", tile_selection.source);
       }
@@ -170,6 +176,7 @@ struct App {
     for (auto const& npc : npcs) npc->draw();
     for (auto const& trap : traps) trap->draw();
     for (auto const& checkpoint : checkpoints) checkpoint.draw();
+    for (auto const& pointer : pointers) pointer.draw();
     character.draw();
     for (auto const& gem : gems) gem.draw();
 
@@ -183,6 +190,7 @@ struct App {
       for (auto& trap : traps) trap->update(map, character);
       for (auto& gem : gems) gem.update();
       for (auto& checkpoint : checkpoints) checkpoint.update();
+      for (auto& pointer : pointers) pointer.update();
       character.update(map);
 
       update__character_collisions();

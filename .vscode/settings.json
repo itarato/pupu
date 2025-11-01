@@ -56,6 +56,16 @@
     "ratio": "cpp",
     "iomanip": "cpp",
     "istream": "cpp",
-    "sstream": "cpp"
+    "sstream": "cpp",
+    "__bit_reference": "cpp",
+    "__hash_table": "cpp",
+    "__node_handle": "cpp",
+    "__split_buffer": "cpp",
+    "__verbose_abort": "cpp",
+    "locale": "cpp",
+    "__locale": "cpp",
+    "execution": "cpp",
+    "ios": "cpp",
+    "mutex": "cpp"
   }
 }

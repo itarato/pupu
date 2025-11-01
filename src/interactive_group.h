@@ -28,11 +28,11 @@ struct ObjectBehaviour {
 };
 
 ObjectBehaviour make_object_behaviour__vertical_movement(int const movement_range = 0) {
-  return ObjectBehaviour{ObjectBehaviourType::VerticalMovement, movement_range};
+  return ObjectBehaviour{ObjectBehaviourType::VerticalMovement, {movement_range}};
 }
 
 ObjectBehaviour make_object_behaviour__horizontal_movement(int const movement_range = 0) {
-  return ObjectBehaviour{ObjectBehaviourType::HorizontalMovement, movement_range};
+  return ObjectBehaviour{ObjectBehaviourType::HorizontalMovement, {movement_range}};
 }
 
 ObjectBehaviour object_behaviour_from_file(FILE* file) {

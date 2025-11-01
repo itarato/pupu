@@ -8,7 +8,7 @@
 struct Bullet {
  public:
   Bullet(Vector2 const pos, int const pixel_size, float const speed, int const west_wall, int const east_wall)
-      : pos(pos), pixel_size(pixel_size), speed(speed), west_wall(west_wall), east_wall(east_wall) {
+      : pos(pos), speed(speed), west_wall(west_wall), east_wall(east_wall) {
     sprite_group.push_sprite(
         Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::BulletShort],
                Vector2{static_cast<float>(asset_manager.textures[TextureNames::BulletShort]->width),
@@ -40,7 +40,6 @@ struct Bullet {
 
  private:
   Vector2 pos;
-  int const pixel_size;
   float const speed;
   SpriteGroup sprite_group{};
   int const west_wall;

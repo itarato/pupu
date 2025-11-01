@@ -586,6 +586,15 @@ struct Editor {
                                   fixed_pixel_size)})) {
         tile_selection = TileSelection{TileSource::Checkpoint, {0, 0}};
       }
+
+      ImGui::SameLine();
+
+      if (rlImGuiImageButtonSize(
+              "Pointer", &*asset_manager.textures[TextureNames::Pointer__Static],
+              {static_cast<float>(asset_manager.textures[TextureNames::Pointer__Static]->width * fixed_pixel_size),
+               static_cast<float>(asset_manager.textures[TextureNames::Pointer__Static]->height * fixed_pixel_size)})) {
+        tile_selection = TileSelection{TileSource::Pointer, {0, 0}};
+      }
     }
   }
 

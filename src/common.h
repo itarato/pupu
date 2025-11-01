@@ -530,7 +530,7 @@ IntVec2 relative_frame_pos(Rectangle const frame, int const tile_size, int const
                  mod_reduced(mouse_pos.y - frame.y, tile_size * pixel_size) / pixel_size};
 }
 
-constexpr void fps_independent_multiply(float* v, float mul) {
+void fps_independent_multiply(float* v, float mul) {
   *v *= powf(mul, FPSMultiplier);
 }
 
