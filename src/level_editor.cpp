@@ -36,7 +36,7 @@ int main() {
 
     BeginDrawing();
 
-    ClearBackground(RAYWHITE);
+    ClearBackground(DARKGRAY);
 
     editor.draw();
 
