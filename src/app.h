@@ -20,7 +20,7 @@ int GameFPS{};
 
 struct App {
  public:
-  void init() {
+  void init(char* map_filename = nullptr) {
     SetTraceLogLevel(LOG_DEBUG);
 
     InitWindow(1024, 768, "Pupu");
@@ -31,6 +31,8 @@ struct App {
 
     asset_manager.preload();
     character.init();
+
+    force_map_filename = map_filename;
 
     reset();
   }
@@ -65,6 +67,7 @@ struct App {
   std::vector<Checkpoint> checkpoints{};
   std::vector<Pointer> pointers{};
   size_t map_index{0};
+  char* force_map_filename{nullptr};
 
   void reset() {
     npcs.clear();
@@ -78,11 +81,8 @@ struct App {
   }
 
   void reload_world_from_file() {
-    FILE* file = std::fopen(MAP_FILENAMES[map_index], "r");
-    if (!file) {
-      TraceLog(LOG_ERROR, "Cannot open map file");
-      exit(EXIT_FAILURE);
-    }
+    FILE* file = std::fopen(current_map_filename(), "r");
+    if (!file) BAIL;
 
     int version{};
     int background_index{};
@@ -255,5 +255,13 @@ struct App {
     size_t map_count = sizeof(MAP_FILENAMES) / sizeof(MAP_FILENAMES[0]);
     map_index = (map_index + 1) % map_count;
     reset();
+  }
+
+  const char* current_map_filename() {
+    if (force_map_filename == nullptr) {
+      return MAP_FILENAMES[map_index];
+    } else {
+      return force_map_filename;
+    }
   }
 };

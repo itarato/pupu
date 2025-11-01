@@ -3,10 +3,10 @@
 
 #include "app.h"
 
-int main() {
+int main(int argc, char* argv[]) {
   srand(time(nullptr));
 
   App app{};
-  app.init();
+  app.init(argc > 1 ? argv[1] : nullptr);
   app.run();
 }
