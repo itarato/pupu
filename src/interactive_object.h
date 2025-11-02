@@ -71,7 +71,7 @@ struct DisappearingPlank : InteractiveObject {
   }
 
   void hitbox_check(int direction, std::function<void(Rectangle, float, float)> check_hitbox_fn) const override {
-    if ((COLLISION_TYPE_TOP & direction) == 0) return;
+    if ((COLLISION_TYPE_NORTH & direction) == 0) return;
     check_hitbox_fn(hitbox(), 0.f, 0.f);
   }
 

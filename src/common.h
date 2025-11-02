@@ -32,10 +32,10 @@ constexpr int const TILE_SIZE{16};
 constexpr Vector2 const VECTOR2_ZERO{0.f, 0.f};
 
 constexpr int const COLLISION_TYPE_NOTHING{0b0000};
-constexpr int const COLLISION_TYPE_TOP{0b0001};
-constexpr int const COLLISION_TYPE_BOTTOM{0b0010};
-constexpr int const COLLISION_TYPE_LEFT{0b0100};
-constexpr int const COLLISION_TYPE_RIGHT{0b1000};
+constexpr int const COLLISION_TYPE_NORTH{0b0001};
+constexpr int const COLLISION_TYPE_SOUTH{0b0010};
+constexpr int const COLLISION_TYPE_WEST{0b0100};
+constexpr int const COLLISION_TYPE_EAST{0b1000};
 constexpr int const COLLISION_TYPE_ALL{0b1111};
 
 constexpr Rectangle const CHARACTER_HITBOX{8.f, 6.f, 16.f, 26.f};

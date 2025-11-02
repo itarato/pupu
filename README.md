@@ -8,6 +8,7 @@ A 2d platformer game and level editor.
 
 ## Game
 
+- player wall grab jumps only works once on the same wall
 - enemy have gravity
 - enemy stop at a ledge (?)
 - sound

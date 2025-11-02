@@ -44,21 +44,63 @@ constexpr float const ShootingNpcSpeed{200.f};
 
 enum class SimpleWalkNpcState { Idle, Run, Hit };
 
+struct MobileGameObject {
+ public:
+  virtual Rectangle const hitbox() const = 0;
+  ~MobileGameObject() = default;
+
+ protected:
+  Vector2 pos{};
+  Vector2 speed{};
+
+  /**
+   * @return int wall collision mask
+   */
+  int handle_basic_movement(Map const& map) {
+    int collision_mask{0};
+
+    pos.x += speed.x * GetFrameTime();
+
+    Rectangle _hitbox = hitbox();
+    int west_wall = map.west_wall_of_range(_hitbox);
+    int east_wall = map.east_wall_of_range(_hitbox);
+
+    if (speed.x > 0) {  // Walk right.
+      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
+      if (wall_overlap < 0.f) {
+        pos.x += wall_overlap;
+        collision_mask |= COLLISION_TYPE_EAST;
+      }
+    } else if (speed.x < 0) {  // Walk left.
+      float wall_overlap = _hitbox.x - west_wall;
+      if (wall_overlap < 0.f) {
+        pos.x -= wall_overlap;
+        collision_mask |= COLLISION_TYPE_WEST;
+      }
+    }
+
+    return collision_mask;
+  }
+};
+
 struct Npc {
  public:
   virtual void draw() const = 0;
   virtual void update(Map const& map, Character& character) = 0;
-  virtual Rectangle hitbox() const = 0;
+  virtual Rectangle const hitbox() const = 0;
   virtual void injure() = 0;
   virtual bool is_injured() const = 0;
 
   virtual ~Npc() = default;
 };
 
-struct SimpleWalkNpc : Npc {
+struct SimpleWalkNpc : Npc, MobileGameObject {
  public:
-  SimpleWalkNpc(IntVec2 const pos, TileSource const tile_source, int const pixel_size)
-      : pos(pos.scale(pixel_size).to_vector2()), pixel_size(pixel_size), tile_source(tile_source) {
+  SimpleWalkNpc(IntVec2 const coord, TileSource const tile_source, int const pixel_size)
+      : pixel_size(pixel_size), tile_source(tile_source) {
+    speed = {-SimpleWalkNpcSpeed, 0.f};
+    pos = coord.scale(pixel_size).to_vector2();
+
     unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     switch (tile_source) {
@@ -117,28 +159,15 @@ struct SimpleWalkNpc : Npc {
     sprite_group.update();
 
     if (state == SimpleWalkNpcState::Run) {
-      Rectangle _hitbox = hitbox();
-      int west_wall = map.west_wall_of_range(_hitbox);
-      int east_wall = map.east_wall_of_range(_hitbox);
-
-      pos.x += speed.x * GetFrameTime();
-      _hitbox = hitbox();
-
-      // Handle walls.
-      if (speed.x > 0) {  // Walk right.
-        float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
-        if (wall_overlap < 0.f) {
-          pos.x += wall_overlap;
-          sprite_group.horizontal_reset();
-          speed.x = -SimpleWalkNpcSpeed;
-        }
-      } else if (speed.x < 0) {  // Walk left.
-        float wall_overlap = _hitbox.x - west_wall;
-        if (wall_overlap < 0.f) {
-          pos.x -= wall_overlap;
-          sprite_group.horizontal_flip();
-          speed.x = SimpleWalkNpcSpeed;
-        }
+      // Move and handle collisions.
+      const int collision_mask = handle_basic_movement(map);
+      if (collision_mask & COLLISION_TYPE_EAST) {
+        sprite_group.horizontal_reset();
+        speed.x = -SimpleWalkNpcSpeed;
+      }
+      if (collision_mask & COLLISION_TYPE_WEST) {
+        sprite_group.horizontal_flip();
+        speed.x = SimpleWalkNpcSpeed;
       }
 
       if (movement_timer.update()) {
@@ -155,7 +184,7 @@ struct SimpleWalkNpc : Npc {
     }
   }
 
-  Rectangle hitbox() const override {
+  Rectangle const hitbox() const override {
     return move(upscale(tile_source_hitbox(tile_source), pixel_size), pos);
   }
 
@@ -172,8 +201,6 @@ struct SimpleWalkNpc : Npc {
   }
 
  private:
-  Vector2 pos;
-  Vector2 speed{-SimpleWalkNpcSpeed, 0.f};
   int const pixel_size;
   SpriteGroup sprite_group{};
   SimpleWalkNpcState state{SimpleWalkNpcState::Run};
@@ -292,7 +319,7 @@ struct ChargingNpc : Npc {
     }
   }
 
-  Rectangle hitbox() const override {
+  Rectangle const hitbox() const override {
     return move(upscale(tile_source_hitbox(TileSource::Enemy3), pixel_size), pos);
   }
 
@@ -443,7 +470,7 @@ struct ShootingNpc : Npc {
     }
   }
 
-  Rectangle hitbox() const override {
+  Rectangle const hitbox() const override {
     return move(upscale(tile_source_hitbox(TileSource::Enemy4), pixel_size), pos);
   }
 
@@ -551,7 +578,7 @@ struct StompingNpc : Npc {
     }
   }
 
-  Rectangle hitbox() const override {
+  Rectangle const hitbox() const override {
     return move(upscale(tile_source_hitbox(TileSource::Enemy5), pixel_size), pos);
   }
 

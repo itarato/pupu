@@ -104,7 +104,7 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(COLLISION_TYPE_BOTTOM, [&](Rectangle hitbox, float xdelta, float ydelta) {
+      interactive_object->hitbox_check(COLLISION_TYPE_SOUTH, [&](Rectangle hitbox, float xdelta, float ydelta) {
         check_north_collision(&out, hitbox, rect);
       });
     }
@@ -130,7 +130,7 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(COLLISION_TYPE_TOP, [&](Rectangle hitbox, float xdelta, float ydelta) {
+      interactive_object->hitbox_check(COLLISION_TYPE_NORTH, [&](Rectangle hitbox, float xdelta, float ydelta) {
         check_south_collision(&result, hitbox, rect, xdelta, ydelta);
       });
     }
@@ -156,7 +156,7 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(COLLISION_TYPE_RIGHT, [&](Rectangle hitbox, float xdelta, float ydelta) {
+      interactive_object->hitbox_check(COLLISION_TYPE_EAST, [&](Rectangle hitbox, float xdelta, float ydelta) {
         check_west_collision(&out, hitbox, rect);
       });
     }
@@ -182,7 +182,7 @@ struct Map {
     }
 
     for (auto const& interactive_object : interactive_objects) {
-      interactive_object->hitbox_check(COLLISION_TYPE_LEFT, [&](Rectangle hitbox, float xdelta, float ydelta) {
+      interactive_object->hitbox_check(COLLISION_TYPE_WEST, [&](Rectangle hitbox, float xdelta, float ydelta) {
         check_east_collision(&out, hitbox, rect);
       });
     }
@@ -218,11 +218,11 @@ struct Map {
       for (int x = 0; x < tile_width; x++) {
         hitmaps[y * tile_width + x].west = west_wall;
         IntVec2 coord{x * TILE_SIZE, y * TILE_SIZE};
-        if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_LEFT)) west_wall = x + 1;
+        if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_WEST)) west_wall = x + 1;
 
         hitmaps[y * tile_width + (tile_width - 1 - x)].east = east_wall;
         IntVec2 coord_inv{(tile_width - 1 - x) * TILE_SIZE, y * TILE_SIZE};
-        if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_RIGHT))
+        if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_EAST))
           east_wall = (tile_width - 1 - x);
       }
     }
@@ -234,11 +234,11 @@ struct Map {
       for (int y = 0; y < tile_height; y++) {
         hitmaps[y * tile_width + x].north = north_wall;
         IntVec2 coord{x * TILE_SIZE, y * TILE_SIZE};
-        if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_BOTTOM)) north_wall = y + 1;
+        if (walls.contains(coord) && walls[coord].collide_from(COLLISION_TYPE_SOUTH)) north_wall = y + 1;
 
         hitmaps[(tile_height - 1 - y) * tile_width + x].south = south_wall;
         IntVec2 coord_inv{x * TILE_SIZE, (tile_height - 1 - y) * TILE_SIZE};
-        if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_TOP))
+        if (walls.contains(coord_inv) && walls[coord_inv].collide_from(COLLISION_TYPE_NORTH))
           south_wall = (tile_height - 1 - y);
       }
     }
