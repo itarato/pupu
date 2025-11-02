@@ -225,14 +225,14 @@ struct Character {
     if (west_wall_dist < 0) {
       pos.x -= west_wall_dist;
       speed.x = 0.f;
-      is_grab_wall = true;
+      is_grab_wall = hit_map.west > 0;  // Only grab real walls.
       multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
     float east_wall_dist = hit_map.east - rightx(_hitbox);
     if (east_wall_dist < 0) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
-      is_grab_wall = true;
+      is_grab_wall = hit_map.east < GetScreenWidth() - 1;
       multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
 

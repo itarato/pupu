@@ -12,6 +12,7 @@ A 2d platformer game and level editor.
 - enemy have gravity
 - enemy stop at a ledge (?)
 - sound
+- player jump below a moving platform is pushed to the left (hitbox adjustment is likely the cause)
 
 ## Level editor
 
