@@ -22,6 +22,8 @@ constexpr const Color COLOR_LIST[COLOR_LIST_SIZE] = {
 constexpr const int grid_sizes[6]{-1, 8, 16, 24, 32, 48};
 constexpr const char* grid_size_names[6]{"No grid", "8px", "16px", "24px", "32px", "48px"};
 
+constexpr const int TOOLBAR_WIDTH{600};
+
 enum class SpecialOperation {
   Nothing,
   GroupElemSelect,
@@ -91,7 +93,7 @@ struct Editor {
   void update() {
     Vector2 mouse_pos = GetMousePosition();
 
-    if (CheckCollisionPointRec(mouse_pos, game_area())) {
+    if (CheckCollisionPointRec(mouse_pos, game_area()) && mouse_pos.x < GetScreenWidth() - TOOLBAR_WIDTH) {
       if (special_operation == SpecialOperation::Nothing) {
         if (IsMouseButtonDown(0)) {
           // Draw tile.
@@ -120,7 +122,7 @@ struct Editor {
 
     if (IsMouseButtonDown(1)) {
       // Erase tile.
-      if (CheckCollisionPointRec(mouse_pos, game_area())) {
+      if (CheckCollisionPointRec(mouse_pos, game_area()) && mouse_pos.x < GetScreenWidth() - TOOLBAR_WIDTH) {
         std::erase_if(tiles, [&](auto const& p) {
           IntVec2 const& pos = p.first;
           TileSelection const& selection = p.second;
@@ -151,16 +153,6 @@ struct Editor {
          static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width) * pixel_size,
          static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height) * pixel_size},
         VECTOR2_ZERO, 0.f, WHITE);
-
-    Vector2 mouse_pos = GetMousePosition();
-
-    if (CheckCollisionPointRec(mouse_pos, game_area())) {
-      if (special_operation == SpecialOperation::Nothing) {
-        tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
-                             static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
-                            pixel_size);
-      }
-    }
 
     int group_index = 0;
     for (auto const& interactive_group : interactive_groups) {
@@ -194,6 +186,16 @@ struct Editor {
 
     draw_grid();
 
+    Vector2 mouse_pos = GetMousePosition();
+
+    if (CheckCollisionPointRec(mouse_pos, game_area()) && mouse_pos.x < GetScreenWidth() - TOOLBAR_WIDTH) {
+      if (special_operation == SpecialOperation::Nothing) {
+        tile_selection.draw({static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
+                             static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
+                            pixel_size);
+      }
+    }
+
     draw_gui();
   }
 
@@ -206,11 +208,6 @@ struct Editor {
       free(word);
     }
 
-    // const char** all_map_filenames_raw = all_map_filenames.data();
-    // for (int i = 0; i < static_cast<int>(all_map_filenames.size()); i++) {
-    //   char* word = const_cast<char*>(all_map_filenames_raw[i]);
-    //   free(word);
-    // }
     UnloadDirectoryFiles(map_files);
   }
 
@@ -268,7 +265,7 @@ struct Editor {
   }
 
   void draw_gui() {
-    static const int toolbar_width{600};
+    static const int toolbar_width{TOOLBAR_WIDTH};
 
     rlImGuiBegin();
 
@@ -651,14 +648,12 @@ struct Editor {
 
     for (int i = 0; i <= iter_x; i++) {
       DrawLineEx({1.f * i * grid_size * pixel_size, 0.f},
-                 {1.f * i * grid_size * pixel_size, 1.f * tile_height * TILE_SIZE * pixel_size}, 2.f,
-                 ColorAlpha(GRAY, 0.5f));
+                 {1.f * i * grid_size * pixel_size, 1.f * tile_height * TILE_SIZE * pixel_size}, 2.f, GRAY);
     }
 
     for (int i = 0; i <= iter_y; i++) {
       DrawLineEx({0.f, 1.f * i * grid_size * pixel_size},
-                 {1.f * tile_width * TILE_SIZE * pixel_size, 1.f * i * grid_size * pixel_size}, 2.f,
-                 ColorAlpha(GRAY, 0.5f));
+                 {1.f * tile_width * TILE_SIZE * pixel_size, 1.f * i * grid_size * pixel_size}, 2.f, GRAY);
     }
   }
 };
