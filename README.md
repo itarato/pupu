@@ -8,7 +8,6 @@ A 2d platformer game and level editor.
 
 ## Game
 
-- no wall-grab on screen edge (when there is no real wall)
 - enemy have gravity
 - enemy stop at a ledge (?)
 - sound
