@@ -19,6 +19,9 @@ constexpr const Color COLOR_LIST[COLOR_LIST_SIZE] = {
     RED, ORANGE, BLUE, GREEN, MAGENTA, PINK,
 };
 
+constexpr const int grid_sizes[6]{-1, 8, 16, 24, 32, 48};
+constexpr const char* grid_size_names[6]{"No grid", "8px", "16px", "24px", "32px", "48px"};
+
 enum class SpecialOperation {
   Nothing,
   GroupElemSelect,
@@ -189,6 +192,8 @@ struct Editor {
       group_index++;
     }
 
+    draw_grid();
+
     draw_gui();
   }
 
@@ -224,6 +229,7 @@ struct Editor {
   int filename_index{0};
   std::vector<const char*> group_list_names{};
   FilePathList map_files;
+  int grid_size_index{0};
 
   void reset() {
     tiles.clear();
@@ -294,6 +300,7 @@ struct Editor {
       bgr_need_redraw |= ImGui::SliderInt("Tile width", &tile_width, 16, 64);
       bgr_need_redraw |= ImGui::SliderInt("Tile height", &tile_height, 16, 64);
       bgr_need_redraw |= ImGui::SliderInt("Background tile", &new_background_tile_index, 0, 5);
+      ImGui::Combo("Grid", &grid_size_index, grid_size_names, sizeof(grid_size_names) / sizeof(grid_size_names[0]));
 
       if (bgr_need_redraw) background.preload(new_background_tile_index, tile_width, tile_height, pixel_size);
 
@@ -633,5 +640,25 @@ struct Editor {
 
   void refresh_map_filenames_without_free_memory() {
     map_files = LoadDirectoryFilesEx("assets/maps", "mp", false);
+  }
+
+  void draw_grid() {
+    if (grid_size_index == 0) return;
+
+    const int grid_size = grid_sizes[grid_size_index];
+    const int iter_x = (tile_width * TILE_SIZE) / grid_size;
+    const int iter_y = (tile_height * TILE_SIZE) / grid_size;
+
+    for (int i = 0; i <= iter_x; i++) {
+      DrawLineEx({1.f * i * grid_size * pixel_size, 0.f},
+                 {1.f * i * grid_size * pixel_size, 1.f * tile_height * TILE_SIZE * pixel_size}, 2.f,
+                 ColorAlpha(GRAY, 0.5f));
+    }
+
+    for (int i = 0; i <= iter_y; i++) {
+      DrawLineEx({0.f, 1.f * i * grid_size * pixel_size},
+                 {1.f * tile_width * TILE_SIZE * pixel_size, 1.f * i * grid_size * pixel_size}, 2.f,
+                 ColorAlpha(GRAY, 0.5f));
+    }
   }
 };
