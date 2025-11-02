@@ -81,6 +81,15 @@ struct MobileGameObject {
 
     return collision_mask;
   }
+
+  /**
+   * @return bool Whether it is falling.
+   */
+  bool handle_fall(Map const& map) {
+    bool did_fall{false};
+
+    return did_fall;
+  }
 };
 
 struct Npc {
