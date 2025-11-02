@@ -13,6 +13,11 @@
 #include "sprite.h"
 #include "sprite_group.h"
 
+constexpr float const NPC_GRAVITY{0.96f};
+constexpr float const NPC_GRAVITY_INV{1.f / NPC_GRAVITY};
+constexpr float const NPC_FALLBACK_THRESHOLD{100.f};
+constexpr float const NPC_MAX_FALL_SPEED{400.f};
+
 constexpr Vector2 const ChargingNpcSize{48.f, 48.f};
 
 constexpr size_t const SimpleWalkNpcSpriteFall{0};
@@ -59,20 +64,24 @@ struct MobileGameObject {
   int handle_basic_movement(Map const& map) {
     int collision_mask{0};
 
-    pos.x += speed.x * GetFrameTime();
-
     Rectangle _hitbox = hitbox();
     int west_wall = map.west_wall_of_range(_hitbox);
     int east_wall = map.east_wall_of_range(_hitbox);
 
-    if (speed.x > 0) {  // Walk right.
-      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
+    pos.x += speed.x * GetFrameTime();
+    _hitbox = hitbox();
+
+    TraceLog(LOG_INFO, "SX=%.2f WestWall=%d HBLeft=%.2f Dist=%.2f", speed.x, west_wall, leftx(_hitbox),
+             leftx(_hitbox) - west_wall);
+
+    if (speed.x > 0.f) {  // Walk right.
+      float wall_overlap = east_wall - rightx(_hitbox);
       if (wall_overlap < 0.f) {
         pos.x += wall_overlap;
         collision_mask |= COLLISION_TYPE_EAST;
       }
-    } else if (speed.x < 0) {  // Walk left.
-      float wall_overlap = _hitbox.x - west_wall;
+    } else if (speed.x < 0.f) {  // Walk left.
+      float wall_overlap = leftx(_hitbox) - west_wall;
       if (wall_overlap < 0.f) {
         pos.x -= wall_overlap;
         collision_mask |= COLLISION_TYPE_WEST;
@@ -87,6 +96,41 @@ struct MobileGameObject {
    */
   bool handle_fall(Map const& map) {
     bool did_fall{false};
+
+    Rectangle _hitbox = hitbox();
+    // TODO: see if we can allow NPC to use moving platforms.
+    CollisionResult south_wall = map.south_wall_of_range(_hitbox);
+
+    if (speed.y < 0.f) {
+      BAILF("NPS jumps are not supported yet");
+      // // Raising.
+      // fps_independent_multiply(&speed.y, NPC_GRAVITY);
+
+      // if (speed.y > -NPC_FALLBACK_THRESHOLD) {
+      //   speed.y = NPC_FALLBACK_THRESHOLD;  // Start falling.
+      //   // jump_state = JumpState::Fall;
+      // }
+    } else if (speed.y > 0.f) {
+      // Falling.
+      fps_independent_multiply(&speed.y, NPC_GRAVITY_INV);
+
+      if (speed.y > NPC_MAX_FALL_SPEED) speed.y = NPC_MAX_FALL_SPEED;
+
+      // jump_state = JumpState::Fall;
+      did_fall = true;
+    } else {
+      // jump_state = JumpState::Ground;
+      speed.y = NPC_FALLBACK_THRESHOLD;
+    }
+
+    pos.y += speed.y * GetFrameTime();
+    _hitbox = hitbox();
+
+    float south_wall_dist = south_wall.wall - bottomy(_hitbox);
+    if (south_wall_dist < 0.f) {
+      pos.y += south_wall_dist;
+      speed.y = 0.f;
+    }
 
     return did_fall;
   }
@@ -169,21 +213,25 @@ struct SimpleWalkNpc : Npc, MobileGameObject {
 
     if (state == SimpleWalkNpcState::Run) {
       // Move and handle collisions.
-      const int collision_mask = handle_basic_movement(map);
-      if (collision_mask & COLLISION_TYPE_EAST) {
-        sprite_group.horizontal_reset();
-        speed.x = -SimpleWalkNpcSpeed;
-      }
-      if (collision_mask & COLLISION_TYPE_WEST) {
-        sprite_group.horizontal_flip();
-        speed.x = SimpleWalkNpcSpeed;
-      }
+      bool did_fall = handle_fall(map);
 
-      if (movement_timer.update()) {
-        if (randf() >= 0.8) {
-          state = SimpleWalkNpcState::Idle;
-          sprite_group.set_current_sprite(SimpleWalkNpcSpriteIdle);
-          movement_timeout.set_on_timeout([&]() { this->resume_to_run_state(); }, randf() * 3.f);
+      if (!did_fall) {
+        const int collision_mask = handle_basic_movement(map);
+        if (collision_mask & COLLISION_TYPE_EAST) {
+          sprite_group.horizontal_reset();
+          speed.x = -SimpleWalkNpcSpeed;
+        }
+        if (collision_mask & COLLISION_TYPE_WEST) {
+          sprite_group.horizontal_flip();
+          speed.x = SimpleWalkNpcSpeed;
+        }
+
+        if (movement_timer.update()) {
+          if (randf() >= 0.8) {
+            state = SimpleWalkNpcState::Idle;
+            sprite_group.set_current_sprite(SimpleWalkNpcSpriteIdle);
+            movement_timeout.set_on_timeout([&]() { this->resume_to_run_state(); }, randf() * 3.f);
+          }
         }
       }
     } else if (state == SimpleWalkNpcState::Idle) {

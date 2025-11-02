@@ -222,14 +222,14 @@ struct Character {
 
     // Adjust for wall hit.
     float west_wall_dist = leftx(_hitbox) - hit_map.west;
-    if (west_wall_dist < 0) {
+    if (west_wall_dist < 0.f) {
       pos.x -= west_wall_dist;
       speed.x = 0.f;
       is_grab_wall = hit_map.west > 0;  // Only grab real walls.
       multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     }
     float east_wall_dist = hit_map.east - rightx(_hitbox);
-    if (east_wall_dist < 0) {
+    if (east_wall_dist < 0.f) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
       is_grab_wall = hit_map.east < GetScreenWidth() - 1;
@@ -275,12 +275,12 @@ struct Character {
 
     // Adjust for wall hit.
     float north_wall_dist = topy(_hitbox) - hit_map.north;
-    if (north_wall_dist < 0) {
+    if (north_wall_dist < 0.f) {
       pos.y -= north_wall_dist;
       speed.y = 0.f;
     }
     float south_wall_dist = static_cast<float>(hit_map.south.wall) - bottomy(_hitbox);
-    if (south_wall_dist < 0) {
+    if (south_wall_dist < 0.f) {
       pos.y += south_wall_dist;
       speed.y = 0.f;
       multi_jump_count = 0;
