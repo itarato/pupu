@@ -15,7 +15,6 @@ A 2d platformer game and level editor.
 
 ## Level editor
 
-- grid (8/16/24/32/48)
 - multi-tile editing (edge+corner+middle+inverse)
 - deletable group elements
 - deletable group behaviour
