@@ -47,12 +47,18 @@ constexpr float const ChargingNpcWalkSpeed{100.f};
 constexpr float const ChargingNpcChargeSpeed{300.f};
 constexpr float const ShootingNpcSpeed{200.f};
 
+constexpr uint8_t const HANDLE_FALL_MASK_FALLING{0b001};
+constexpr uint8_t const HANDLE_FALL_MASK_JUST_LANDED{0b010};
+
 enum class SimpleWalkNpcState { Idle, Run, Hit };
 
 struct MobileGameObject {
  public:
-  virtual Rectangle const hitbox() const = 0;
+  MobileGameObject() = default;
+  MobileGameObject(Vector2 const pos) : pos(pos) {
+  }
   ~MobileGameObject() = default;
+  virtual Rectangle const hitbox() const = 0;
 
  protected:
   Vector2 pos{};
@@ -70,9 +76,6 @@ struct MobileGameObject {
 
     pos.x += speed.x * GetFrameTime();
     _hitbox = hitbox();
-
-    TraceLog(LOG_INFO, "SX=%.2f WestWall=%d HBLeft=%.2f Dist=%.2f", speed.x, west_wall, leftx(_hitbox),
-             leftx(_hitbox) - west_wall);
 
     if (speed.x > 0.f) {  // Walk right.
       float wall_overlap = east_wall - rightx(_hitbox);
@@ -92,47 +95,39 @@ struct MobileGameObject {
   }
 
   /**
-   * @return bool Whether it is falling.
+   * @return int HANDLE_FALL_MASK_?.
    */
-  bool handle_fall(Map const& map) {
-    bool did_fall{false};
+  uint8_t handle_fall(Map const& map) {
+    uint8_t fall_mask{0};
 
-    Rectangle _hitbox = hitbox();
     // TODO: see if we can allow NPC to use moving platforms.
-    CollisionResult south_wall = map.south_wall_of_range(_hitbox);
+    CollisionResult south_wall = map.south_wall_of_range(hitbox());
 
+    bool was_falling{false};
     if (speed.y < 0.f) {
-      BAILF("NPS jumps are not supported yet");
-      // // Raising.
-      // fps_independent_multiply(&speed.y, NPC_GRAVITY);
-
-      // if (speed.y > -NPC_FALLBACK_THRESHOLD) {
-      //   speed.y = NPC_FALLBACK_THRESHOLD;  // Start falling.
-      //   // jump_state = JumpState::Fall;
-      // }
+      BAILF("NPC jumps are not supported yet");
     } else if (speed.y > 0.f) {
       // Falling.
       fps_independent_multiply(&speed.y, NPC_GRAVITY_INV);
-
       if (speed.y > NPC_MAX_FALL_SPEED) speed.y = NPC_MAX_FALL_SPEED;
-
-      // jump_state = JumpState::Fall;
-      did_fall = true;
+      was_falling = true;
     } else {
-      // jump_state = JumpState::Ground;
       speed.y = NPC_FALLBACK_THRESHOLD;
     }
 
     pos.y += speed.y * GetFrameTime();
-    _hitbox = hitbox();
 
-    float south_wall_dist = south_wall.wall - bottomy(_hitbox);
+    float south_wall_dist = south_wall.wall - bottomy(hitbox());
     if (south_wall_dist < 0.f) {
       pos.y += south_wall_dist;
       speed.y = 0.f;
+
+      if (was_falling) fall_mask |= HANDLE_FALL_MASK_JUST_LANDED;
+    } else {
+      fall_mask |= HANDLE_FALL_MASK_FALLING;
     }
 
-    return did_fall;
+    return fall_mask;
   }
 };
 
@@ -213,9 +208,10 @@ struct SimpleWalkNpc : Npc, MobileGameObject {
 
     if (state == SimpleWalkNpcState::Run) {
       // Move and handle collisions.
-      bool did_fall = handle_fall(map);
 
-      if (!did_fall) {
+      if (handle_fall(map)) {
+        // sprite_group.set_current_sprite(SimpleWalkNpcSpriteFall);
+      } else {
         const int collision_mask = handle_basic_movement(map);
         if (collision_mask & COLLISION_TYPE_EAST) {
           sprite_group.horizontal_reset();
@@ -288,9 +284,9 @@ enum class ChargingNpcState {
   Hit,
 };
 
-struct ChargingNpc : Npc {
+struct ChargingNpc : Npc, MobileGameObject {
  public:
-  ChargingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
+  ChargingNpc(Vector2 const pos, int const pixel_size) : MobileGameObject(pos), pixel_size(pixel_size) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
@@ -319,59 +315,49 @@ struct ChargingNpc : Npc {
     charge_stunned_timeout.update();
     hit_timeout.update();
 
-    Rectangle _hitbox = hitbox();
-    int west_wall = map.west_wall_of_range(_hitbox);
-    int east_wall = map.east_wall_of_range(_hitbox);
+    bool did_fall = handle_fall(map);
+    if (!did_fall) {
+      Rectangle _hitbox = hitbox();
+      int west_wall = map.west_wall_of_range(_hitbox);
+      int east_wall = map.east_wall_of_range(_hitbox);
 
-    pos.x += speed() * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
-    _hitbox = hitbox();
-
-    if (is_walking()) {
-      Rectangle character_hitbox{character.hitbox()};
-      if (can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox)) {
-        state = ChargingNpcState::Charging;
-        sprite_group.set_current_sprite(ChargingNpcSpriteCharge);
-        if (character_hitbox.x <= _hitbox.x) {  // Charge left.
-          sprite_group.horizontal_reset();
-          is_direction_left = true;
-        } else {  // Charge right.
-          sprite_group.horizontal_flip();
-          is_direction_left = false;
+      if (is_walking()) {
+        Rectangle character_hitbox{character.hitbox()};
+        if (can_charge_character_horizontal(west_wall, east_wall, _hitbox, character_hitbox)) {
+          state = ChargingNpcState::Charging;
+          sprite_group.set_current_sprite(ChargingNpcSpriteCharge);
+          if (character_hitbox.x <= _hitbox.x) {  // Charge left.
+            sprite_group.horizontal_reset();
+            is_direction_left = true;
+          } else {  // Charge right.
+            sprite_group.horizontal_flip();
+            is_direction_left = false;
+          }
         }
       }
-    }
 
-    // Handle walls.
-    bool did_hit_wall{false};
-    if (is_direction_left) {  // Walk left.
-      float wall_overlap = _hitbox.x - west_wall;
-      if (wall_overlap < 0.f) {
-        pos.x -= wall_overlap;
+      speed.x = calculate_speed() * (is_direction_left ? -1.f : 1.f);
+      int collision_mask = handle_basic_movement(map);
+      if (collision_mask & COLLISION_TYPE_WEST) {
         sprite_group.horizontal_flip();
         is_direction_left = false;
-        did_hit_wall = true;
-      }
-    } else {  // Walk right.
-      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
-      if (wall_overlap < 0.f) {
-        pos.x += wall_overlap;
+      } else if (collision_mask & COLLISION_TYPE_EAST) {
         sprite_group.horizontal_reset();
         is_direction_left = true;
-        did_hit_wall = true;
       }
-    }
 
-    if (did_hit_wall) {
-      if (is_charging()) {
-        state = ChargingNpcState::Stunned;
-        sprite_group.set_current_sprite(ChargingNpcSpriteStun);
-        charge_stunned_timeout.cancel();
-        charge_stunned_timeout.set_on_timeout(
-            [&]() {
-              state = ChargingNpcState::Walking;
-              sprite_group.set_current_sprite(ChargingNpcSpriteWalk);
-            },
-            2.f);
+      if (collision_mask & (COLLISION_TYPE_EAST | COLLISION_TYPE_WEST)) {
+        if (is_charging()) {
+          state = ChargingNpcState::Stunned;
+          sprite_group.set_current_sprite(ChargingNpcSpriteStun);
+          charge_stunned_timeout.cancel();
+          charge_stunned_timeout.set_on_timeout(
+              [&]() {
+                state = ChargingNpcState::Walking;
+                sprite_group.set_current_sprite(ChargingNpcSpriteWalk);
+              },
+              2.f);
+        }
       }
     }
   }
@@ -398,7 +384,6 @@ struct ChargingNpc : Npc {
   }
 
  private:
-  Vector2 pos;
   int const pixel_size;
   SpriteGroup sprite_group{};
   bool is_direction_left{true};
@@ -414,7 +399,7 @@ struct ChargingNpc : Npc {
     return state == ChargingNpcState::Walking;
   }
 
-  float speed() const {
+  float calculate_speed() const {
     switch (state) {
       case ChargingNpcState::Charging:
         return ChargingNpcChargeSpeed;
