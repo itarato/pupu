@@ -9,11 +9,8 @@ A 2d platformer game and level editor.
 ## Game
 
 - player wall grab jumps only works once on the same wall
-- enemy have gravity
-- enemy stop at a ledge (?)
 - sound
 - player jump below a moving platform is pushed to the left (hitbox adjustment is likely the cause)
-- charging player destroy boxes
 - implement enemy 6
 - player disappear animation when getting to the pointer unit
 

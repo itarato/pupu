@@ -75,7 +75,7 @@ struct Box {
     if (state == BoxState::Idle) {
       state = BoxState::Hurting;
       sprite_group.set_current_sprite(BOX_SPRITE_HIT);
-      hurting_timer.reset(2.0);
+      hurting_timer.reset(1.2);
     }
   }
 

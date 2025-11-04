@@ -458,6 +458,8 @@ struct ShootingNpc : Npc, MobileGameObject {
         character.injure();
         bullet.set_target_hit();
       }
+
+      map.try_demolition(bullet.hitbox());
     }
     std::erase_if(bullets, [](auto const& bullet) { return bullet.is_dead(); });
 
@@ -496,8 +498,10 @@ struct ShootingNpc : Npc, MobileGameObject {
     }
     if (state == ShootingNpcState::Attack) {
       if (sprite_group_sequence == 4) {
-        bullets.emplace_back(bullet_spawn_point(), pixel_size, is_direction_left ? -400.f : 400.f, west_wall,
-                             east_wall);
+        // We allow going into the wall a bit in order to check collision with boxes easily.
+        float hit_buffer = pixel_size * TILE_SIZE * 0.25f;
+        bullets.emplace_back(bullet_spawn_point(), pixel_size, is_direction_left ? -400.f : 400.f,
+                             west_wall - hit_buffer, east_wall + hit_buffer);
         shoot_delay_timer.reset(0.8);
       }
       if (sprite_group_sequence == 0) {
