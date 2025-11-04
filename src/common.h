@@ -210,6 +210,10 @@ constexpr Rectangle move(Rectangle const rect, Vector2 const v) {
   return Rectangle{rect.x + v.x, rect.y + v.y, rect.width, rect.height};
 }
 
+constexpr Rectangle movex(Rectangle const rect, float const offset) {
+  return Rectangle{rect.x + offset, rect.y, rect.width, rect.height};
+}
+
 struct Timeout {
  public:
   Timeout() {

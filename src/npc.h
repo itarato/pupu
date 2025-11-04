@@ -134,7 +134,7 @@ struct MobileGameObject {
 struct Npc {
  public:
   virtual void draw() const = 0;
-  virtual void update(Map const& map, Character& character) = 0;
+  virtual void update(Map& map, Character& character) = 0;
   virtual Rectangle const hitbox() const = 0;
   virtual void injure() = 0;
   virtual bool is_injured() const = 0;
@@ -202,7 +202,7 @@ struct SimpleWalkNpc : Npc, MobileGameObject {
     // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
   }
 
-  void update(Map const& map, Character& character) override {
+  void update(Map& map, Character& character) override {
     movement_timeout.update();
     sprite_group.update();
 
@@ -310,7 +310,7 @@ struct ChargingNpc : Npc, MobileGameObject {
     sprite_group.draw(pos);
   }
 
-  void update(Map const& map, Character& character) override {
+  void update(Map& map, Character& character) override {
     sprite_group.update();
     charge_stunned_timeout.update();
     hit_timeout.update();
@@ -348,6 +348,13 @@ struct ChargingNpc : Npc, MobileGameObject {
 
       if (collision_mask & (COLLISION_TYPE_EAST | COLLISION_TYPE_WEST)) {
         if (is_charging()) {
+          if (collision_mask & COLLISION_TYPE_WEST) {
+            map.try_demolition(movex(hitbox(), -pixel_size));
+          }
+          if (collision_mask & COLLISION_TYPE_EAST) {
+            map.try_demolition(movex(hitbox(), pixel_size));
+          }
+
           state = ChargingNpcState::Stunned;
           sprite_group.set_current_sprite(ChargingNpcSpriteStun);
           charge_stunned_timeout.cancel();
@@ -442,7 +449,7 @@ struct ShootingNpc : Npc, MobileGameObject {
     for (auto const& bullet : bullets) bullet.draw();
   }
 
-  void update(Map const& map, Character& character) override {
+  void update(Map& map, Character& character) override {
     int sprite_group_sequence = sprite_group.update();
     hit_timeout.update();
     shoot_delay_timer.update();
@@ -574,7 +581,7 @@ struct StompingNpc : Npc {
     sprite_group.draw(pos);
   }
 
-  void update(Map const& map, Character& character) override {
+  void update(Map& map, Character& character) override {
     sprite_group.update();
     hit_timeout.update();
 

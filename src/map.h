@@ -190,6 +190,17 @@ struct Map {
     return out;
   }
 
+  bool try_demolition(Rectangle const attacker_hitbox) {
+    for (auto& [tile_pos, tile_selection] : boxes) {
+      if (CheckCollisionRecs(attacker_hitbox, tile_selection.hitbox(tile_pos, pixel_size))) {
+        debug("break");
+        return true;
+      }
+    }
+
+    return false;
+  }
+
  private:
   Background background{};
   int tile_width{};
