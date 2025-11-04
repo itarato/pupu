@@ -27,8 +27,14 @@ enum TextureNames {
   GuiTiles,
   TilesetTiles,
   Box1__Idle,
+  Box1__Hit,
+  Box1__Break,
   Box2__Idle,
+  Box2__Hit,
+  Box2__Break,
   Box3__Idle,
+  Box3__Hit,
+  Box3__Break,
   Enemy1__Example,
   Enemy1__Fall,
   Enemy1__Hit,
@@ -143,10 +149,22 @@ struct AssetManager {
 
     textures[TextureNames::Box1__Idle] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/1_Idle.png"));
+    textures[TextureNames::Box1__Hit] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/1_Hit.png"));
+    textures[TextureNames::Box1__Break] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/1_Break.png"));
     textures[TextureNames::Box2__Idle] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/2_Idle.png"));
+    textures[TextureNames::Box2__Hit] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/2_Hit.png"));
+    textures[TextureNames::Box2__Break] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/2_Break.png"));
     textures[TextureNames::Box3__Idle] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/3_Idle.png"));
+    textures[TextureNames::Box3__Hit] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/3_Hit.png"));
+    textures[TextureNames::Box3__Break] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Boxes/3_Break.png"));
 
     textures[TextureNames::Enemy1__Example] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/4 Enemies/1/Example.png"));

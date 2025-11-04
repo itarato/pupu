@@ -20,7 +20,7 @@
     exit(EXIT_FAILURE);                                                   \
   }
 
-constexpr int const ReferenceFPS{144};
+constexpr int const REFERENCE_FPS{144};
 // Set after window initialization.
 extern int GAME_FPS;
 static float FPS_MULTIPLIER{};

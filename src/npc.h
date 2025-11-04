@@ -18,8 +18,6 @@ constexpr float const NPC_GRAVITY_INV{1.f / NPC_GRAVITY};
 constexpr float const NPC_FALLBACK_THRESHOLD{100.f};
 constexpr float const NPC_MAX_FALL_SPEED{400.f};
 
-constexpr Vector2 const ChargingNpcSize{48.f, 48.f};
-
 constexpr size_t const SimpleWalkNpcSpriteFall{0};
 constexpr size_t const SimpleWalkNpcSpriteHit{1};
 constexpr size_t const SimpleWalkNpcSpriteIdle{2};
@@ -290,16 +288,16 @@ struct ChargingNpc : Npc, MobileGameObject {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Enemy3__Charge], ChargingNpcSize, 12,
+                                    asset_manager.textures[TextureNames::Enemy3__Charge], LARGE_48x48_TILE_SIZE, 12,
                                     sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Hit],
-                                    ChargingNpcSize, 5, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 5, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Idle],
-                                    ChargingNpcSize, 11, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 11, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Stun],
-                                    ChargingNpcSize, 8, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 8, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy3__Walk],
-                                    ChargingNpcSize, 12, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 12, sprite_frame_length});
 
     sprite_group.set_current_sprite(ChargingNpcSpriteWalk);
   }
@@ -434,14 +432,14 @@ struct ShootingNpc : Npc, MobileGameObject {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Enemy4__Attack], ChargingNpcSize, 7,
+                                    asset_manager.textures[TextureNames::Enemy4__Attack], LARGE_48x48_TILE_SIZE, 7,
                                     sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Hit],
-                                    ChargingNpcSize, 5, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 5, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Idle],
-                                    ChargingNpcSize, 11, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 11, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy4__Walk],
-                                    ChargingNpcSize, 12, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 12, sprite_frame_length});
   }
 
   void draw() const override {
@@ -565,14 +563,14 @@ struct StompingNpc : Npc {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Enemy5__Attack], ChargingNpcSize, 8,
+                                    asset_manager.textures[TextureNames::Enemy5__Attack], LARGE_48x48_TILE_SIZE, 8,
                                     sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy5__Fly],
-                                    ChargingNpcSize, 6, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 6, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy5__Hit],
-                                    ChargingNpcSize, 5, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 5, sprite_frame_length});
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Enemy5__Idle],
-                                    ChargingNpcSize, 6, sprite_frame_length});
+                                    LARGE_48x48_TILE_SIZE, 6, sprite_frame_length});
 
     sprite_group.set_current_sprite(StompingNpcSpriteFly);
   }

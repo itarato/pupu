@@ -26,7 +26,7 @@ struct App {
     InitWindow(1024, 768, "Pupu");
 
     GAME_FPS = GetMonitorRefreshRate(0);
-    FPS_MULTIPLIER = static_cast<float>(ReferenceFPS) / static_cast<float>(GAME_FPS);
+    FPS_MULTIPLIER = static_cast<float>(REFERENCE_FPS) / static_cast<float>(GAME_FPS);
     SetTargetFPS(GAME_FPS);
 
     asset_manager.preload();
