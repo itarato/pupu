@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "background.h"
+#include "box.h"
 #include "common.h"
 #include "interactive_group.h"
 #include "interactive_object.h"
@@ -51,7 +52,7 @@ struct Map {
         case TileSource::Box1:
         case TileSource::Box2:
         case TileSource::Box3:
-          boxes[tile_pos] = tile_selection;
+          boxes.emplace_back(pixel_size, tile_pos.scale(pixel_size).to_vector2(), tile_selection.source);
           break;
         case TileSource::Trap5:
           interactive_objects.push_back(
@@ -72,13 +73,14 @@ struct Map {
 
   void update(Rectangle const& character_hitbox) {
     for (auto& interactive_object : interactive_objects) interactive_object->update(character_hitbox);
+    for (auto& box : boxes) box.update();
   }
 
   void draw() const {
     background.draw(Vector2Zero(), pixel_size);
 
     for (auto const& [k, v] : walls) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
-    for (auto const& [k, v] : boxes) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
+    for (auto const& box : boxes) box.draw();
     for (auto const& interactive_object : interactive_objects) interactive_object->draw();
   }
 
@@ -99,8 +101,8 @@ struct Map {
 
     int out = max_y_coord * TILE_SIZE * pixel_size;
 
-    for (auto const& [pos, selection] : boxes) {
-      check_north_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+    for (auto const& box : boxes) {
+      check_north_collision(&out, box.hitbox(), rect);
     }
 
     for (auto const& interactive_object : interactive_objects) {
@@ -125,8 +127,8 @@ struct Map {
 
     CollisionResult result{min_y_coord * TILE_SIZE * pixel_size - 1};
 
-    for (auto const& [pos, selection] : boxes) {
-      check_south_collision(&result, upscale(selection.hitbox(pos), pixel_size), rect, 0.f, 0.f);
+    for (auto const& box : boxes) {
+      check_south_collision(&result, box.hitbox(), rect, 0.f, 0.f);
     }
 
     for (auto const& interactive_object : interactive_objects) {
@@ -151,8 +153,8 @@ struct Map {
 
     int out = max_x_coord * TILE_SIZE * pixel_size;
 
-    for (auto const& [pos, selection] : boxes) {
-      check_west_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+    for (auto const& box : boxes) {
+      check_west_collision(&out, box.hitbox(), rect);
     }
 
     for (auto const& interactive_object : interactive_objects) {
@@ -177,8 +179,8 @@ struct Map {
 
     int out = min_x_coord * TILE_SIZE * pixel_size - 1;
 
-    for (auto const& [pos, selection] : boxes) {
-      check_east_collision(&out, upscale(selection.hitbox(pos), pixel_size), rect);
+    for (auto const& box : boxes) {
+      check_east_collision(&out, box.hitbox(), rect);
     }
 
     for (auto const& interactive_object : interactive_objects) {
@@ -191,9 +193,9 @@ struct Map {
   }
 
   bool try_demolition(Rectangle const attacker_hitbox) {
-    for (auto& [tile_pos, tile_selection] : boxes) {
-      if (CheckCollisionRecs(attacker_hitbox, tile_selection.hitbox(tile_pos, pixel_size))) {
-        debug("break");
+    for (auto& box : boxes) {
+      if (CheckCollisionRecs(attacker_hitbox, box.hitbox())) {
+        box.hit();
         return true;
       }
     }
@@ -206,7 +208,7 @@ struct Map {
   int tile_width{};
   int tile_height{};
   std::unordered_map<IntVec2, TileSelection> walls{};
-  std::unordered_map<IntVec2, TileSelection> boxes{};
+  std::vector<Box> boxes{};
   std::vector<HitMap> hitmaps{};
   int const pixel_size;
   std::vector<std::shared_ptr<InteractiveObject>> interactive_objects{};

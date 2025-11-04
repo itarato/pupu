@@ -58,6 +58,7 @@ constexpr Rectangle const CHECKPOINT_HITBOX{19.f, 2.f, 10.f, 46.f};
 constexpr Rectangle const POINTER_HITBOX{19.f, 46.f, 10.f, 2.f};
 
 constexpr Vector2 const LARGE_48x48_TILE_SIZE{48.f, 48.f};
+constexpr Vector2 const MEDIUM_32x32_TILE_SIZE{32.f, 32.f};
 constexpr Vector2 const SMALL_16x16_TILE_SIZE{16.f, 16.f};
 
 constexpr Rectangle const OUTSIDE_RECTANGLE{-100.f, -100.f, 0.f, 0.f};
