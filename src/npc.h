@@ -208,10 +208,10 @@ struct SimpleWalkNpc : Npc, MobileGameObject {
 
     if (state == SimpleWalkNpcState::Run) {
       // Move and handle collisions.
-
-      if (handle_fall(map)) {
-        // sprite_group.set_current_sprite(SimpleWalkNpcSpriteFall);
-      } else {
+      int fall_mask = handle_fall(map);
+      if (fall_mask & HANDLE_FALL_MASK_FALLING) sprite_group.set_current_sprite(SimpleWalkNpcSpriteFall);
+      if (fall_mask & HANDLE_FALL_MASK_JUST_LANDED) sprite_group.set_current_sprite(SimpleWalkNpcSpriteRun);
+      if (!(fall_mask & HANDLE_FALL_MASK_FALLING)) {
         const int collision_mask = handle_basic_movement(map);
         if (collision_mask & COLLISION_TYPE_EAST) {
           sprite_group.horizontal_reset();
