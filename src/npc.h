@@ -421,9 +421,9 @@ enum class ShootingNpcState {
   Hit,
 };
 
-struct ShootingNpc : Npc {
+struct ShootingNpc : Npc, MobileGameObject {
  public:
-  ShootingNpc(Vector2 const pos, int const pixel_size) : pos(pos), pixel_size(pixel_size) {
+  ShootingNpc(Vector2 const pos, int const pixel_size) : MobileGameObject(pos), pixel_size(pixel_size) {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
     sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
@@ -456,13 +456,23 @@ struct ShootingNpc : Npc {
     }
     std::erase_if(bullets, [](auto const& bullet) { return bullet.is_dead(); });
 
+    speed.x = (state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f) * (is_direction_left ? -1.f : 1.f);
+
+    int fall_mask = handle_fall(map);
+    if (!(fall_mask & HANDLE_FALL_MASK_FALLING)) {
+      int collision_mask = handle_basic_movement(map);
+      if (collision_mask & COLLISION_TYPE_WEST) {
+        sprite_group.horizontal_flip();
+        is_direction_left = false;
+      } else if (collision_mask & COLLISION_TYPE_EAST) {
+        sprite_group.horizontal_reset();
+        is_direction_left = true;
+      }
+    }
+
     Rectangle _hitbox = hitbox();
     int west_wall = map.west_wall_of_range(_hitbox);
     int east_wall = map.east_wall_of_range(_hitbox);
-
-    float speed = state == ShootingNpcState::Walk ? ShootingNpcSpeed : 0.f;
-    pos.x += speed * GetFrameTime() * (is_direction_left ? -1.f : 1.f);
-    _hitbox = hitbox();
     Rectangle character_hitbox{character.hitbox()};
 
     if (state == ShootingNpcState::Walk) {
@@ -493,23 +503,6 @@ struct ShootingNpc : Npc {
         }
       }
     }
-
-    // Handle walls.
-    if (is_direction_left) {  // Walk left.
-      float wall_overlap = _hitbox.x - west_wall;
-      if (wall_overlap < 0.f) {
-        pos.x -= wall_overlap;
-        sprite_group.horizontal_flip();
-        is_direction_left = false;
-      }
-    } else {  // Walk right.
-      float wall_overlap = east_wall - (_hitbox.x + _hitbox.width - 1.f);
-      if (wall_overlap < 0.f) {
-        pos.x += wall_overlap;
-        sprite_group.horizontal_reset();
-        is_direction_left = true;
-      }
-    }
   }
 
   Rectangle const hitbox() const override {
@@ -535,7 +528,6 @@ struct ShootingNpc : Npc {
   ~ShootingNpc() = default;
 
  private:
-  Vector2 pos;
   int const pixel_size;
   SpriteGroup sprite_group{};
   bool is_direction_left{true};
