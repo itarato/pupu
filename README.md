@@ -8,9 +8,8 @@ A 2d platformer game and level editor.
 
 ## Game
 
-- player wall grab jumps only works once on the same wall
 - sound
-- player jump below a moving platform is pushed to the left (hitbox adjustment is likely the cause)
+- [bug] player jump below a moving platform is pushed to the left (hitbox adjustment is likely the cause)
 - implement enemy 6
 - player disappear animation when getting to the pointer unit
 
@@ -19,3 +18,4 @@ A 2d platformer game and level editor.
 - multi-tile editing (edge+corner+middle+inverse)
 - deletable group elements
 - deletable group behaviour
+- [bug] level name combo change does not set ending null char

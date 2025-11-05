@@ -588,6 +588,10 @@ void debug(bool v, const char* msg = "Debug") {
   TraceLog(LOG_DEBUG, "%s :: bool { %s }", msg, v ? "true" : "false");
 }
 
+void debug(int v, const char* msg = "Debug") {
+  TraceLog(LOG_DEBUG, "%s :: int { %d }", msg, v);
+}
+
 void debug(float v, const char* msg = "Debug") {
   TraceLog(LOG_DEBUG, "%s :: float { %.2f }", msg, v);
 }
@@ -691,4 +695,33 @@ struct BackAndForther {
   std::pair<float, float> const range;
   float current;
   float speed;
+};
+
+struct WallGrabJumpCounter {
+ public:
+  void at_west() {
+    side = 1;
+    if (counter > 0) counter = 0;
+  }
+
+  void at_east() {
+    side = 2;
+    if (counter < 0) counter = 0;
+  }
+
+  void count_jump() {
+    if (side == 1) {
+      counter--;
+    } else if (side == 2) {
+      counter++;
+    }
+  }
+
+  bool can_jump() const {
+    return !counter;
+  }
+
+ private:
+  uint8_t side{0};  // 0=no -1=west +1=east
+  int counter;
 };

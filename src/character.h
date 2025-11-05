@@ -220,23 +220,27 @@ struct Character {
     pos.x += speed.x * GetFrameTime();
     Rectangle _hitbox{hitbox()};
 
+    static WallGrabJumpCounter wall_grab_counter{};
+
     // Adjust for wall hit.
     float west_wall_dist = leftx(_hitbox) - hit_map.west;
     if (west_wall_dist < 0.f) {
       pos.x -= west_wall_dist;
       speed.x = 0.f;
       is_grab_wall = hit_map.west > 0;  // Only grab real walls.
-      multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
+      wall_grab_counter.at_west();
     }
     float east_wall_dist = hit_map.east - rightx(_hitbox);
     if (east_wall_dist < 0.f) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
-      is_grab_wall = hit_map.east < GetScreenWidth() - 1;
-      multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
+      is_grab_wall = hit_map.east < GetScreenWidth() - 1;  // Only grab real walls.
+      wall_grab_counter.at_east();
     }
 
-    if (is_live() && IsKeyPressed(KEY_SPACE) && multi_jump_count < PLAYER_MULTI_JUMP_MAX) {
+    if (is_live() && IsKeyPressed(KEY_SPACE) &&
+        (multi_jump_count < PLAYER_MULTI_JUMP_MAX || wall_grab_counter.can_jump())) {
+      wall_grab_counter.count_jump();
       speed.y = PLAYER_JUMP_SPEED;
       multi_jump_count++;
       if (multi_jump_count == 1) {
