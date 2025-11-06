@@ -21,6 +21,7 @@
 
 int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+  SetTraceLogLevel(LOG_DEBUG);
 
   InitWindow(1800, 1200, "Pupu Level Editor");
   SetTargetFPS(30);

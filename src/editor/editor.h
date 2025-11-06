@@ -95,11 +95,21 @@ struct Editor {
 
     if (CheckCollisionPointRec(mouse_pos, game_area()) && mouse_pos.x < GetScreenWidth() - TOOLBAR_WIDTH) {
       if (special_operation == SpecialOperation::Nothing) {
-        if (IsMouseButtonDown(0)) {
-          // Draw tile.
-          IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size) / pixel_size,
-                            mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size) / pixel_size};
-          tiles[int_coord] = tile_selection;
+        if (cluster_mode) {
+          debug("cluster mode");
+          if (IsMouseButtonPressed(0)) {
+            debug("pressed");
+          }
+          if (IsMouseButtonReleased(0)) {
+            debug("released");
+          }
+        } else {
+          if (IsMouseButtonDown(0)) {
+            // Draw tile.
+            IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size) / pixel_size,
+                              mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size) / pixel_size};
+            tiles[int_coord] = tile_selection;
+          }
         }
       } else if (special_operation == SpecialOperation::GroupElemSelect) {
         if (IsMouseButtonReleased(0)) {
@@ -227,6 +237,7 @@ struct Editor {
   std::vector<const char*> group_list_names{};
   FilePathList map_files;
   int grid_size_index{0};
+  bool cluster_mode{false};
 
   void reset() {
     tiles.clear();
@@ -326,6 +337,8 @@ struct Editor {
 
   void draw_gui_pane_walls() {
     if (ImGui::CollapsingHeader("Walls")) {
+      ImGui::Checkbox("Cluster mode", &cluster_mode);
+
       rlImGuiImageSize(&*asset_manager.textures[TextureNames::GuiTiles],
                        asset_manager.textures[TextureNames::GuiTiles]->width * fixed_pixel_size,
                        asset_manager.textures[TextureNames::GuiTiles]->height * fixed_pixel_size);
