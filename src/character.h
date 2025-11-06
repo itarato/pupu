@@ -42,6 +42,7 @@ enum class LifecycleState {
   Disappear,
   Live,
   Injured,
+  WaitingForNextLevel,
 };
 
 struct Character {
@@ -56,6 +57,7 @@ struct Character {
     jump_state = JumpState::Ground;
     lifecycle_state = LifecycleState::Appear;
     multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
+    level_complete = false;
   }
 
   void init() {
@@ -102,11 +104,19 @@ struct Character {
     if (lifecycle_state == LifecycleState::Appear) {
       if (appear_sprite.update() == 0) lifecycle_state = LifecycleState::Live;
     } else if (lifecycle_state == LifecycleState::Disappear) {
-      if (disappear_sprite.update() == 0) reset(spawn_location);
+      if (disappear_sprite.update() == 0) {
+        if (level_complete) {
+          lifecycle_state = LifecycleState::WaitingForNextLevel;
+        } else {
+          reset(spawn_location);
+        }
+      }
     } else if (lifecycle_state == LifecycleState::Live || lifecycle_state == LifecycleState::Injured) {
       update_movement(map);
       if (map.check_collision_with_fully_solid_walls(shrink(hitbox(), 1.f))) injure(true);
       sprite_group.update();
+    } else if (lifecycle_state == LifecycleState::WaitingForNextLevel) {
+      // Noop.
     } else {
       BAIL;
     }
@@ -172,6 +182,17 @@ struct Character {
     jump_state = JumpState::Jump;
   }
 
+  void set_level_complete() {
+    if (level_complete) return;
+
+    level_complete = true;
+    lifecycle_state = LifecycleState::Disappear;
+  }
+
+  bool const ready_for_next_level() const {
+    return lifecycle_state == LifecycleState::WaitingForNextLevel;
+  }
+
  private:
   const int pixel_size{DEFAULT_PIXEL_SIZE};
   SpriteGroup sprite_group{};
@@ -184,6 +205,7 @@ struct Character {
   LifecycleState lifecycle_state{LifecycleState::Appear};
   Timeout injury_timeout{};
   Vector2 spawn_location{};
+  bool level_complete{false};
 
   // Debug.
   HitAndDragMap hit_map;

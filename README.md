@@ -10,7 +10,6 @@ A 2d platformer game and level editor.
 
 - sound
 - implement enemy 6
-- player disappear animation when getting to the pointer unit
 - allow crush-check for dyn-behaviour objects too (currently missing a hitbox [multiple] for map all-solid-wall check)
 
 ## Level editor

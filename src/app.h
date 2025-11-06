@@ -185,6 +185,11 @@ struct App {
   }
 
   void update() {
+    if (character.ready_for_next_level()) {
+      load_next_level();
+      return;
+    }
+
     if (!pause_update || IsKeyPressed(KEY_S)) {
       map.update(character.hitbox());
       for (auto& npc : npcs) npc->update(map, character);
@@ -245,7 +250,7 @@ struct App {
 
     for (auto const& pointer : pointers) {
       if (CheckCollisionRecs(pointer.hitbox(), character_hitbox)) {
-        load_next_level();
+        character.set_level_complete();
       }
     }
   }
