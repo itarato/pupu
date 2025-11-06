@@ -123,7 +123,7 @@ struct Character {
       sprite_group.draw(pos);
     }
 
-    DrawRectangleLinesEx(hitbox(), pixel_size, RED);
+    // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
     // DrawLineEx({0.f, static_cast<float>(hit_map.south.wall)},
     //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south.wall)}, pixel_size, MAGENTA);
   }
