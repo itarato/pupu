@@ -219,6 +219,10 @@ constexpr Rectangle movey(Rectangle const rect, float const offset) {
   return Rectangle{rect.x, rect.y + offset, rect.width, rect.height};
 }
 
+constexpr Rectangle shrink(Rectangle const rect, float const dist) {
+  return Rectangle{rect.x + dist, rect.y + dist, rect.width - (dist * 2.f), rect.height - (dist * 2.f)};
+}
+
 struct Timeout {
  public:
   Timeout() {
