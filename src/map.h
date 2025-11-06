@@ -265,7 +265,7 @@ struct Map {
     if (is_horizontal_overlap(map_object_hitbox, collidee_hitbox)) {
       if (bottomy(map_object_hitbox) > *out &&
           (bottomy(map_object_hitbox) - WALL_CHECK_THRESHOLD * pixel_size) <= topy(collidee_hitbox)) {
-        *out = bottomy(map_object_hitbox);
+        *out = bottomy(map_object_hitbox) + 1;
       }
     }
   }

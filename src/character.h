@@ -192,11 +192,15 @@ struct Character {
   }
 
   void update_movement(Map const& map) {
-    // More of a hack but this helps vertical stabilization when above a vertically moving platform.
+    // More of a hack but this helps vertical stabilization when above is a vertically moving platform.
     pos.y += map.south_wall_of_range(hitbox()).wall_vertical_speed;
 
-    hit_map = calculate_hitmap(map);
-    bool is_grab_wall{false};
+    Rectangle _hitbox{hitbox()};
+
+    // Adjusting for vertical above platforms. This helps the character not to be pushed
+    // left when a platform is getting closer from above.
+    float north_wall_pre_adjust = topy(_hitbox) - map.north_wall_of_range(_hitbox);
+    if (north_wall_pre_adjust < 0.f) pos.y -= north_wall_pre_adjust;
 
     if (is_live() && IsKeyDown(KEY_LEFT)) {
       sprite_group.horizontal_flip();
@@ -217,10 +221,13 @@ struct Character {
       if (fabs(speed.x) < PLAYER_ZERO_SPEED_THRESHOLD) speed.x = 0.f;
     }
 
-    pos.x += speed.x * GetFrameTime();
-    Rectangle _hitbox{hitbox()};
+    hit_map = calculate_hitmap(map);
 
+    pos.x += speed.x * GetFrameTime();
+
+    _hitbox = hitbox();
     static WallGrabJumpCounter wall_grab_counter{};
+    bool is_grab_wall{false};
 
     // Adjust for wall hit.
     float west_wall_dist = leftx(_hitbox) - hit_map.west;

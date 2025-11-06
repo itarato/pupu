@@ -215,6 +215,10 @@ constexpr Rectangle movex(Rectangle const rect, float const offset) {
   return Rectangle{rect.x + offset, rect.y, rect.width, rect.height};
 }
 
+constexpr Rectangle movey(Rectangle const rect, float const offset) {
+  return Rectangle{rect.x, rect.y + offset, rect.width, rect.height};
+}
+
 struct Timeout {
  public:
   Timeout() {

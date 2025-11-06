@@ -9,9 +9,9 @@ A 2d platformer game and level editor.
 ## Game
 
 - sound
-- [bug] player jump below a moving platform is pushed to the left (hitbox adjustment is likely the cause)
 - implement enemy 6
 - player disappear animation when getting to the pointer unit
+- player die when squashed
 
 ## Level editor
 
