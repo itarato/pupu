@@ -192,9 +192,6 @@ struct Character {
   }
 
   void update_movement(Map const& map) {
-    bool had_north_adjustment{false};
-    bool had_south_adjustment{false};
-
     // More of a hack but this helps vertical stabilization when above is a vertically moving platform.
     pos.y += map.south_wall_of_range(hitbox()).wall_vertical_speed;
 
@@ -205,7 +202,6 @@ struct Character {
     float north_wall_pre_adjust = topy(_hitbox) - map.north_wall_of_range(_hitbox);
     if (north_wall_pre_adjust < 0.f) {
       pos.y -= north_wall_pre_adjust;
-      had_north_adjustment = true;
     }
 
     if (is_live() && IsKeyDown(KEY_LEFT)) {
@@ -294,20 +290,16 @@ struct Character {
     if (north_wall_dist < 0.f) {
       pos.y -= north_wall_dist;
       speed.y = 0.f;
-      had_north_adjustment = true;
     }
     float south_wall_dist = static_cast<float>(hit_map.south.wall) - bottomy(hitbox());
     if (south_wall_dist < 0.f) {
       pos.y += south_wall_dist;
       speed.y = 0.f;
       multi_jump_count = 0;
-      had_south_adjustment = true;
 
       // Touching south wall -> apply south wall drag.
       pos.x += hit_map.south.wall_horizontal_speed;
     }
-
-    if (had_north_adjustment && had_south_adjustment) injure(true);
 
     // Override sprite when jumping / wall grabbing.
     if (is_grab_wall) {
