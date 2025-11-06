@@ -105,6 +105,7 @@ struct Character {
       if (disappear_sprite.update() == 0) reset(spawn_location);
     } else if (lifecycle_state == LifecycleState::Live || lifecycle_state == LifecycleState::Injured) {
       update_movement(map);
+      if (map.check_collision_with_fully_solid_walls(hitbox())) injure(true);
       sprite_group.update();
     } else {
       BAIL;

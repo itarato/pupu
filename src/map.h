@@ -203,6 +203,22 @@ struct Map {
     return false;
   }
 
+  bool check_collision_with_fully_solid_walls(Rectangle const& collider) const {
+    if (leftx(collider) < 0.f || rightx(collider) > GetScreenWidth() || topy(collider) < 0.f ||
+        bottomy(collider) > GetScreenHeight())
+      return true;
+
+    for (auto const& [tile_pos, tile_selection] : walls) {
+      if (CheckCollisionRecs(collider, tile_selection.hitbox(tile_pos, pixel_size))) return true;
+    }
+
+    for (auto const& box : boxes) {
+      if (CheckCollisionRecs(collider, box.hitbox())) return true;
+    }
+
+    return false;
+  }
+
  private:
   Background background{};
   int tile_width{};

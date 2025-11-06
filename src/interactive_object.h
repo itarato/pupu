@@ -17,6 +17,7 @@ struct InteractiveObject {
   virtual void update(Rectangle const& character_hitbox) = 0;
   //                                                          v Hitbox   v Hori v Vert movement
   virtual void hitbox_check(int direction, std::function<void(Rectangle, float, float)> check_hitbox_fn) const = 0;
+  virtual Rectangle const hitbox() const = 0;
 };
 
 enum class DisappearingPlankState {
@@ -75,6 +76,14 @@ struct DisappearingPlank : InteractiveObject {
     check_hitbox_fn(hitbox(), 0.f, 0.f);
   }
 
+  Rectangle const hitbox() const override {
+    if (state == DisappearingPlankState::Solid || state == DisappearingPlankState::WaitForCrumbling) {
+      return move(upscale(tile_source_hitbox(TileSource::Trap5), pixel_size), pos);
+    } else {
+      return OUTSIDE_RECTANGLE;
+    }
+  }
+
  private:
   int const pixel_size;
   Vector2 const pos;
@@ -84,14 +93,6 @@ struct DisappearingPlank : InteractiveObject {
 
   Rectangle const hitbox_upper_surface() const {
     return move(upscale(TRAP5_HITBOX_UPPER_SURFACE, pixel_size), pos);
-  }
-
-  Rectangle const hitbox() const {
-    if (state == DisappearingPlankState::Solid || state == DisappearingPlankState::WaitForCrumbling) {
-      return move(upscale(tile_source_hitbox(TileSource::Trap5), pixel_size), pos);
-    } else {
-      return OUTSIDE_RECTANGLE;
-    }
   }
 };
 
@@ -176,8 +177,8 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
 
   void hitbox_check(int direction, std::function<void(Rectangle, float, float)> check_hitbox_fn) const override {
     for (auto const& [tile_pos, tile_selection] : tiles) {
-      Rectangle hitbox = move(tile_selection.hitbox(tile_pos, pixel_size), offset);
-      check_hitbox_fn(hitbox, current_frame_xdelta, current_frame_ydelta);
+      check_hitbox_fn(move(tile_selection.hitbox(tile_pos, pixel_size), offset), current_frame_xdelta,
+                      current_frame_ydelta);
     }
   }
 
@@ -187,6 +188,11 @@ struct DynamicBehaviourObject : InteractiveObject, BehaviourAdjustableObject {
 
   void adjust_pos_y(float y) override {
     offset.y = y;
+  }
+
+  Rectangle const hitbox() const override {
+    BAILF("Do not call hitbox for these objects as they have multiple")
+    return OUTSIDE_RECTANGLE;
   }
 
  private:
