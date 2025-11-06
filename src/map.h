@@ -311,7 +311,7 @@ struct Map {
     if (is_vertical_overlap(map_object_hitbox, collidee_hitbox)) {
       if (rightx(map_object_hitbox) > *out &&
           (rightx(map_object_hitbox) - WALL_CHECK_THRESHOLD * pixel_size) <= leftx(collidee_hitbox)) {
-        *out = rightx(map_object_hitbox);
+        *out = rightx(map_object_hitbox) + 1;
       }
     }
   }

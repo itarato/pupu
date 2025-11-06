@@ -61,6 +61,7 @@ struct Box {
 
   void draw() const {
     sprite_group.draw(pos);
+    DrawRectangleLinesEx(hitbox(), 2.f, RED);
   }
 
   Rectangle const hitbox() const {
