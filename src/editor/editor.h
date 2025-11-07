@@ -141,6 +141,14 @@ struct Editor {
           const Rectangle hitbox = selection.hitbox(pos, pixel_size);
           return CheckCollisionPointRec(mouse_pos, hitbox);
         });
+
+        // Erase tile from an interactive group.
+        for (auto& interactive_group : interactive_groups) {
+          std::erase_if(interactive_group.get_tiles_mut(), [&](auto const& kv) {
+            Rectangle const tile_hitbox = kv.second.hitbox(kv.first, pixel_size);
+            return CheckCollisionPointRec(mouse_pos, tile_hitbox);
+          });
+        }
       }
     }
 

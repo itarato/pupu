@@ -69,6 +69,10 @@ struct InteractiveGroup {
     return tiles;
   }
 
+  std::unordered_map<IntVec2, TileSelection>& get_tiles_mut() {
+    return tiles;
+  }
+
   std::vector<ObjectBehaviour>& get_behaviours_mut() {
     return behaviours;
   }

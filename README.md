@@ -18,4 +18,3 @@ A 2d platformer game and level editor.
 - clusters:
   - rect delete
   - [?] freehand cluster drawing
-- deletable group elements
