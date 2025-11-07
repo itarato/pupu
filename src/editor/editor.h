@@ -101,7 +101,7 @@ struct Editor {
           }
           if (IsMouseButtonReleased(0)) {
             yield_cluster([this](TileSelection const tile_selection, IntVec2 const tile_pos) {
-              tiles[tile_pos] = tile_selection;
+              tiles[tile_pos.scale(TILE_SIZE)] = tile_selection;
             });
           }
         } else {
