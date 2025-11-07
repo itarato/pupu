@@ -14,7 +14,10 @@ A 2d platformer game and level editor.
 
 ## Level editor
 
-- multi-tile editing (edge+corner+middle+inverse)
+- ctrl-z
+- clusters:
+  - rect delete
+  - [?] freehand cluster drawing
 - deletable group elements
 - deletable group behaviour
 - [bug] level name combo change does not set ending null char
