@@ -153,6 +153,10 @@ constexpr std::pair<Vector2, Vector2> vec2_minmax_x(Vector2 const lhs, Vector2 c
   return {{std::min(lhs.x, rhs.x), lhs.y}, {std::max(lhs.x, rhs.x), rhs.y}};
 }
 
+constexpr std::pair<Vector2, Vector2> vec2_minmax_y(Vector2 const lhs, Vector2 const rhs) {
+  return {{lhs.x, std::min(lhs.y, rhs.y)}, {rhs.x, std::max(lhs.y, rhs.y)}};
+}
+
 constexpr IntVec2 const intvec2_0_0{0, 0};
 constexpr IntVec2 const intvec2_4_4{4, 4};
 

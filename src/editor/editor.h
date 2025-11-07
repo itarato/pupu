@@ -347,6 +347,13 @@ struct Editor {
       if (tile_selection.tile_coord.is_between({12, 10}, {14, 10})) {
         yield_cluster_3x1(tile_selection.source, {12, 10}, callback);
       }
+
+      if (tile_selection.tile_coord.is_between({15, 0}, {15, 2})) {
+        yield_cluster_1x3(tile_selection.source, {15, 0}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({15, 4}, {15, 6})) {
+        yield_cluster_1x3(tile_selection.source, {15, 4}, callback);
+      }
     }
   }
 
@@ -402,6 +409,21 @@ struct Editor {
 
     callback({tile_source, {cluster_pos.x + 0, cluster_pos.y + 0}}, {start_coord.x, end_coord.y});
     callback({tile_source, {cluster_pos.x + 2, cluster_pos.y + 0}}, {end_coord.x, end_coord.y});
+  }
+
+  void yield_cluster_1x3(TileSource const tile_source, IntVec2 const cluster_pos,
+                         std::function<void(TileSelection const, IntVec2 const)> callback) {
+    auto const endpoints = vec2_minmax_y(cluster_start, GetMousePosition());
+    IntVec2 start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
+    IntVec2 end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
+
+    TileSelection ts_top{tile_source, {cluster_pos.x, cluster_pos.y + 1}};
+    for (int y = start_coord.y + 1; y <= end_coord.y - 1; y++) {
+      callback(ts_top, {end_coord.x, y});
+    }
+
+    callback({tile_source, {cluster_pos.x + 0, cluster_pos.y + 0}}, {end_coord.x, start_coord.y});
+    callback({tile_source, {cluster_pos.x + 0, cluster_pos.y + 2}}, {end_coord.x, end_coord.y});
   }
 
   void draw_gui() {
