@@ -135,10 +135,22 @@ struct IntVec2 {
     x = static_cast<float>(v.x);
     y = static_cast<float>(v.y);
   }
+
+  bool is_between(IntVec2 const upperleft, IntVec2 const bottomright) const {
+    return x >= upperleft.x && x <= bottomright.x && y >= upperleft.y && y <= bottomright.y;
+  }
 };
 
-IntVec2 vector2_to_intvec2(Vector2 const v) {
+constexpr IntVec2 vector2_to_intvec2(Vector2 const v) {
   return IntVec2{static_cast<int>(v.x), static_cast<int>(v.y)};
+}
+
+constexpr std::pair<Vector2, Vector2> vec2_minmax(Vector2 const lhs, Vector2 const rhs) {
+  return {{std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y)}, {std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y)}};
+}
+
+constexpr std::pair<Vector2, Vector2> vec2_minmax_x(Vector2 const lhs, Vector2 const rhs) {
+  return {{std::min(lhs.x, rhs.x), lhs.y}, {std::max(lhs.x, rhs.x), rhs.y}};
 }
 
 constexpr IntVec2 const intvec2_0_0{0, 0};
@@ -459,6 +471,10 @@ struct TileSelection {
          static_cast<float>(_tile_size.x), static_cast<float>(_tile_size.y)},
         {pos.x, pos.y, static_cast<float>(_tile_size.x * pixel_size), static_cast<float>(_tile_size.y * pixel_size)},
         Vector2Zero(), 0.f, WHITE);
+  }
+
+  void draw(IntVec2 const coord, int const pixel_size) const {
+    draw(Vector2{1.f * coord.x * TILE_SIZE * pixel_size, 1.f * coord.y * TILE_SIZE * pixel_size}, pixel_size);
   }
 
   void write(FILE* file) const {
