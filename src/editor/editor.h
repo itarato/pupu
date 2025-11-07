@@ -167,10 +167,10 @@ struct Editor {
 
     int group_index = 0;
     for (auto const& interactive_group : interactive_groups) {
+      Color group_color{COLOR_LIST[group_index % COLOR_LIST_SIZE]};
       for (auto const& [tile_pos, tile_selection] : interactive_group.get_tiles()) {
         tile_selection.draw(tile_pos.scale(pixel_size).to_vector2(), pixel_size);
-        DrawRectangleLinesEx(tile_selection.hitbox(tile_pos, pixel_size), pixel_size,
-                             COLOR_LIST[group_index & COLOR_LIST_SIZE]);
+        DrawRectangleLinesEx(tile_selection.hitbox(tile_pos, pixel_size), pixel_size, group_color);
       }
 
       for (auto const& behaviour : interactive_group.get_behaviours()) {
@@ -180,11 +180,13 @@ struct Editor {
           switch (behaviour.type) {
             case ObjectBehaviourType::HorizontalMovement:
               DrawLineEx({elem_hitbox.x, elem_hitbox.y},
-                         {elem_hitbox.x + behaviour.movement_range * pixel_size, elem_hitbox.y}, pixel_size, RED);
+                         {elem_hitbox.x + behaviour.movement_range * pixel_size, elem_hitbox.y}, pixel_size,
+                         group_color);
               break;
             case ObjectBehaviourType::VerticalMovement:
               DrawLineEx({elem_hitbox.x, elem_hitbox.y},
-                         {elem_hitbox.x, elem_hitbox.y + behaviour.movement_range * pixel_size}, pixel_size, RED);
+                         {elem_hitbox.x, elem_hitbox.y + behaviour.movement_range * pixel_size}, pixel_size,
+                         group_color);
               break;
             default:
               BAIL;
