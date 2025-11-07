@@ -735,10 +735,16 @@ struct Editor {
       }
 
       const char** items = group_list_names.data();
-      ImGui::Combo("Groups", &active_interactive_group, items, group_list_names.size());
+      ImGui::Combo("Groups", &active_interactive_group, items, interactive_groups.size());
 
       if (active_interactive_group < 0 || active_interactive_group >= static_cast<int>(interactive_groups.size())) {
         ImGui::Text("No group selected");
+        return;
+      }
+
+      if (ImGui::Button("Delete group")) {
+        interactive_groups.erase(interactive_groups.begin() + active_interactive_group);
+        active_interactive_group--;
         return;
       }
 
@@ -752,10 +758,14 @@ struct Editor {
       static int selected_behaviour{0};
       ImGui::Combo("Behaviour", &selected_behaviour, behaviour_names, IM_ARRAYSIZE(behaviour_names));
       if (ImGui::Button("Add behaviour")) {
+        // TODO: Do not add existing type.
         interactive_groups[active_interactive_group].add_behaviour(
             static_cast<ObjectBehaviourType>(selected_behaviour));
       }
 
+      int i = 0;
+      char delete_button_buf[32]{};
+      int behaviour_index_to_delete{-1};
       for (auto& behaviour : interactive_groups[active_interactive_group].get_behaviours_mut()) {
         switch (behaviour.type) {
           case ObjectBehaviourType::HorizontalMovement:
@@ -769,6 +779,16 @@ struct Editor {
           default:
             BAIL;
         }
+
+        sprintf(delete_button_buf, "Delete #%d", i);
+        if (ImGui::Button(delete_button_buf)) behaviour_index_to_delete = i;
+
+        i++;
+      }
+
+      if (behaviour_index_to_delete >= 0) {
+        interactive_groups[active_interactive_group].get_behaviours_mut().erase(
+            interactive_groups[active_interactive_group].get_behaviours_mut().begin() + behaviour_index_to_delete);
       }
     }
   }
