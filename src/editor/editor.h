@@ -857,7 +857,7 @@ struct Editor {
 
   void update_map_filename() {
     strncpy(filename, map_files.paths[filename_index],
-            std::min(127, static_cast<int>(strlen(map_files.paths[filename_index]))));
+            std::min(127, static_cast<int>(strlen(map_files.paths[filename_index])) + 1));
   }
 
   void refresh_map_filenames() {

@@ -20,4 +20,3 @@ A 2d platformer game and level editor.
   - [?] freehand cluster drawing
 - deletable group elements
 - deletable group behaviour
-- [bug] level name combo change does not set ending null char
