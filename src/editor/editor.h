@@ -312,6 +312,19 @@ struct Editor {
       if (tile_selection.tile_coord.is_between({12, 6}, {14, 6})) {
         yield_cluster_3x1(tile_selection.source, {12, 6}, callback);
       }
+
+      if (tile_selection.tile_coord.is_between({3, 0}, {4, 1})) {
+        yield_cluster_2x2(tile_selection.source, {3, 0}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({9, 0}, {10, 1})) {
+        yield_cluster_2x2(tile_selection.source, {9, 0}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({3, 4}, {4, 5})) {
+        yield_cluster_2x2(tile_selection.source, {3, 4}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({9, 4}, {10, 5})) {
+        yield_cluster_2x2(tile_selection.source, {9, 4}, callback);
+      }
     } else if (tile_selection.source == TileSource::Tileset) {
       if (tile_selection.tile_coord.is_between({0, 0}, {2, 2})) {
         yield_cluster_3x3(tile_selection.source, {0, 0}, callback);
@@ -354,38 +367,57 @@ struct Editor {
       if (tile_selection.tile_coord.is_between({15, 4}, {15, 6})) {
         yield_cluster_1x3(tile_selection.source, {15, 4}, callback);
       }
+
+      if (tile_selection.tile_coord.is_between({3, 0}, {4, 1})) {
+        yield_cluster_2x2(tile_selection.source, {3, 0}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({9, 0}, {10, 1})) {
+        yield_cluster_2x2(tile_selection.source, {9, 0}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({3, 4}, {4, 5})) {
+        yield_cluster_2x2(tile_selection.source, {3, 4}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({9, 4}, {10, 5})) {
+        yield_cluster_2x2(tile_selection.source, {9, 4}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({3, 8}, {4, 9})) {
+        yield_cluster_2x2(tile_selection.source, {3, 8}, callback);
+      }
+      if (tile_selection.tile_coord.is_between({9, 8}, {10, 9})) {
+        yield_cluster_2x2(tile_selection.source, {9, 8}, callback);
+      }
     }
   }
 
   void yield_cluster_3x3(TileSource const tile_source, IntVec2 const cluster_pos,
                          std::function<void(TileSelection const, IntVec2 const)> callback) {
     auto const endpoints = vec2_minmax(cluster_start, GetMousePosition());
-    IntVec2 start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
-    IntVec2 end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
+    IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
+    IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
 
-    TileSelection ts_middle{tile_source, {cluster_pos.x + 1, cluster_pos.y + 1}};
+    TileSelection const ts_middle{tile_source, {cluster_pos.x + 1, cluster_pos.y + 1}};
     for (int y = start_coord.y + 1; y <= end_coord.y - 1; y++) {
       for (int x = start_coord.x + 1; x <= end_coord.x - 1; x++) {
         callback(ts_middle, {x, y});
       }
     }
 
-    TileSelection ts_top{tile_source, {cluster_pos.x + 1, cluster_pos.y + 0}};
+    TileSelection const ts_top{tile_source, {cluster_pos.x + 1, cluster_pos.y + 0}};
     for (int x = start_coord.x + 1; x <= end_coord.x - 1; x++) {
       callback(ts_top, {x, start_coord.y});
     }
 
-    TileSelection ts_bottom{tile_source, {cluster_pos.x + 1, cluster_pos.y + 2}};
+    TileSelection const ts_bottom{tile_source, {cluster_pos.x + 1, cluster_pos.y + 2}};
     for (int x = start_coord.x + 1; x <= end_coord.x - 1; x++) {
       callback(ts_bottom, {x, end_coord.y});
     }
 
-    TileSelection ts_left{tile_source, {cluster_pos.x + 0, cluster_pos.y + 1}};
+    TileSelection const ts_left{tile_source, {cluster_pos.x + 0, cluster_pos.y + 1}};
     for (int y = start_coord.y + 1; y <= end_coord.y - 1; y++) {
       callback(ts_left, {start_coord.x, y});
     }
 
-    TileSelection ts_right{tile_source, {cluster_pos.x + 2, cluster_pos.y + 1}};
+    TileSelection const ts_right{tile_source, {cluster_pos.x + 2, cluster_pos.y + 1}};
     for (int y = start_coord.y + 1; y <= end_coord.y - 1; y++) {
       callback(ts_right, {end_coord.x, y});
     }
@@ -399,10 +431,10 @@ struct Editor {
   void yield_cluster_3x1(TileSource const tile_source, IntVec2 const cluster_pos,
                          std::function<void(TileSelection const, IntVec2 const)> callback) {
     auto const endpoints = vec2_minmax_x(cluster_start, GetMousePosition());
-    IntVec2 start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
-    IntVec2 end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
+    IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
+    IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
 
-    TileSelection ts_top{tile_source, {cluster_pos.x + 1, cluster_pos.y + 0}};
+    TileSelection const ts_top{tile_source, {cluster_pos.x + 1, cluster_pos.y + 0}};
     for (int x = start_coord.x + 1; x <= end_coord.x - 1; x++) {
       callback(ts_top, {x, end_coord.y});
     }
@@ -414,16 +446,48 @@ struct Editor {
   void yield_cluster_1x3(TileSource const tile_source, IntVec2 const cluster_pos,
                          std::function<void(TileSelection const, IntVec2 const)> callback) {
     auto const endpoints = vec2_minmax_y(cluster_start, GetMousePosition());
-    IntVec2 start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
-    IntVec2 end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
+    IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
+    IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
 
-    TileSelection ts_top{tile_source, {cluster_pos.x, cluster_pos.y + 1}};
+    TileSelection const ts_top{tile_source, {cluster_pos.x, cluster_pos.y + 1}};
     for (int y = start_coord.y + 1; y <= end_coord.y - 1; y++) {
       callback(ts_top, {end_coord.x, y});
     }
 
     callback({tile_source, {cluster_pos.x + 0, cluster_pos.y + 0}}, {end_coord.x, start_coord.y});
     callback({tile_source, {cluster_pos.x + 0, cluster_pos.y + 2}}, {end_coord.x, end_coord.y});
+  }
+
+  void yield_cluster_2x2(TileSource const tile_source, IntVec2 const cluster_pos,
+                         std::function<void(TileSelection const, IntVec2 const)> callback) {
+    auto const endpoints = vec2_minmax(cluster_start, GetMousePosition());
+    IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
+    IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
+
+    TileSelection const ts_top{tile_source, {cluster_pos.x - 2, cluster_pos.y + 2}};
+    for (int x = start_coord.x + 1; x <= end_coord.x - 1; x++) {
+      callback(ts_top, {x, start_coord.y});
+    }
+
+    TileSelection const ts_bottom{tile_source, {cluster_pos.x - 2, cluster_pos.y}};
+    for (int x = start_coord.x + 1; x <= end_coord.x - 1; x++) {
+      callback(ts_bottom, {x, end_coord.y});
+    }
+
+    TileSelection const ts_left{tile_source, {cluster_pos.x - 1, cluster_pos.y + 1}};
+    for (int y = start_coord.y + 1; y <= end_coord.y - 1; y++) {
+      callback(ts_left, {start_coord.x, y});
+    }
+
+    TileSelection const ts_right{tile_source, {cluster_pos.x - 3, cluster_pos.y + 1}};
+    for (int y = start_coord.y + 1; y <= end_coord.y - 1; y++) {
+      callback(ts_right, {end_coord.x, y});
+    }
+
+    callback({tile_source, {cluster_pos.x + 0, cluster_pos.y + 0}}, {start_coord.x, start_coord.y});
+    callback({tile_source, {cluster_pos.x + 1, cluster_pos.y + 0}}, {end_coord.x, start_coord.y});
+    callback({tile_source, {cluster_pos.x + 0, cluster_pos.y + 1}}, {start_coord.x, end_coord.y});
+    callback({tile_source, {cluster_pos.x + 1, cluster_pos.y + 1}}, {end_coord.x, end_coord.y});
   }
 
   void draw_gui() {
