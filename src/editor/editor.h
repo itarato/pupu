@@ -100,14 +100,16 @@ struct Editor {
             cluster_start = mouse_pos;
           }
           if (IsMouseButtonReleased(0)) {
-            // Unimplemented.
+            yield_cluster([this](TileSelection const tile_selection, IntVec2 const tile_pos) {
+              tiles[tile_pos] = tile_selection;
+            });
           }
         } else {
           if (IsMouseButtonDown(0)) {
             // Draw tile.
-            IntVec2 int_coord{mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size) / pixel_size,
-                              mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size) / pixel_size};
-            tiles[int_coord] = tile_selection;
+            IntVec2 tile_pos{mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size) / pixel_size,
+                             mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size) / pixel_size};
+            tiles[tile_pos] = tile_selection;
           }
         }
       } else if (special_operation == SpecialOperation::GroupElemSelect) {
