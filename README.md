@@ -17,7 +17,7 @@ A 2d platformer game and level editor.
 - ctrl-z
 - clusters:
   - [?] freehand cluster drawing
-  - upside down spike
+- upside down spike
 
 ---
 
