@@ -113,6 +113,7 @@ struct Character {
       }
     } else if (lifecycle_state == LifecycleState::Live || lifecycle_state == LifecycleState::Injured) {
       update_movement(map);
+      update_drop_down(map);
       if (map.check_collision_with_fully_solid_walls(shrink(hitbox(), 1.f))) injure(true);
       sprite_group.update();
     } else if (lifecycle_state == LifecycleState::WaitingForNextLevel) {
@@ -335,6 +336,18 @@ struct Character {
       sprite_group.set_current_sprite(PLAYER_SPRITE_DOUBLE_JUMP);
     } else if (lifecycle_state == LifecycleState::Injured) {
       sprite_group.set_current_sprite(PLAYER_SPRITE_HIT);
+    }
+  }
+
+  void update_drop_down(Map const& map) {
+    if (IsKeyPressed(KEY_DOWN)) {
+      if (jump_state == JumpState::Ground) {
+        Rectangle const _hitbox{hitbox()};
+        Rectangle const drop_down_hitbox = movey(_hitbox, _hitbox.height);
+        if (!map.check_collision_with_fully_solid_walls(drop_down_hitbox)) {
+          pos.y += pixel_size * 4;
+        }
+      }
     }
   }
 
