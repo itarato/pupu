@@ -239,6 +239,15 @@ constexpr Rectangle shrink(Rectangle const rect, float const dist) {
   return Rectangle{rect.x + dist, rect.y + dist, rect.width - (dist * 2.f), rect.height - (dist * 2.f)};
 }
 
+constexpr Rectangle const rec_from_edges(Vector2 const lhs, Vector2 const rhs) {
+  return {
+      std::min(lhs.x, rhs.x),
+      std::min(lhs.y, rhs.y),
+      fabs(lhs.x - rhs.x),
+      fabs(lhs.y - rhs.y),
+  };
+}
+
 struct Timeout {
  public:
   Timeout() {
@@ -416,7 +425,7 @@ struct TileSelection {
   TileSource source{};
   IntVec2 tile_coord{};
 
-  void draw(Vector2 const pos, int const pixel_size) const {
+  void draw(Vector2 const pos, int const pixel_size, Color const color = WHITE) const {
     std::shared_ptr<Texture2D> texture;
     if (source == TileSource::Gui) {
       texture = asset_manager.textures[TextureNames::GuiTiles];
@@ -474,7 +483,7 @@ struct TileSelection {
         {static_cast<float>(tile_coord.x * TILE_SIZE), static_cast<float>(tile_coord.y * TILE_SIZE),
          static_cast<float>(_tile_size.x), static_cast<float>(_tile_size.y)},
         {pos.x, pos.y, static_cast<float>(_tile_size.x * pixel_size), static_cast<float>(_tile_size.y * pixel_size)},
-        Vector2Zero(), 0.f, WHITE);
+        Vector2Zero(), 0.f, color);
   }
 
   void draw(IntVec2 const coord, int const pixel_size) const {
@@ -491,6 +500,16 @@ struct TileSelection {
       return true;
     } else if (source == TileSource::Tileset) {
       return (tileset_tile_collision_map[tile_coord.y * 16 + tile_coord.x] & direction) > 0;
+    } else {
+      BAIL;
+    }
+  }
+
+  bool is_solid() const {
+    if (source == TileSource::Gui) {
+      return true;
+    } else if (source == TileSource::Tileset) {
+      return tileset_tile_collision_map[tile_coord.y * 16 + tile_coord.x] == COLLISION_TYPE_ALL;
     } else {
       BAIL;
     }

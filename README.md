@@ -10,6 +10,7 @@ A 2d platformer game and level editor.
 
 - sound
 - implement enemy 6
+- player to be able to jump down from an only-up-collider platform
 
 ## Level editor
 

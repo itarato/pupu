@@ -93,11 +93,11 @@ struct Editor {
   void update() {
     Vector2 mouse_pos = GetMousePosition();
 
-    if (CheckCollisionPointRec(mouse_pos, game_area()) && mouse_pos.x < GetScreenWidth() - TOOLBAR_WIDTH) {
+    if (on_game_area()) {
       if (special_operation == SpecialOperation::Nothing) {
         if (cluster_mode) {
           if (IsMouseButtonPressed(0)) {
-            cluster_start = mouse_pos;
+            cluster_draw_start = mouse_pos;
           }
           if (IsMouseButtonReleased(0)) {
             yield_cluster([this](TileSelection const tile_selection, IntVec2 const tile_pos) {
@@ -131,27 +131,25 @@ struct Editor {
       }
     }
 
-    if (IsMouseButtonDown(1)) {
-      // Erase tile.
-      if (CheckCollisionPointRec(mouse_pos, game_area()) && mouse_pos.x < GetScreenWidth() - TOOLBAR_WIDTH) {
-        std::erase_if(tiles, [&](auto const& p) {
-          IntVec2 const& pos = p.first;
-          TileSelection const& selection = p.second;
-
-          const Rectangle hitbox = selection.hitbox(pos, pixel_size);
-          return CheckCollisionPointRec(mouse_pos, hitbox);
-        });
-
-        // Erase tile from an interactive group.
-        for (auto& interactive_group : interactive_groups) {
-          std::erase_if(interactive_group.get_tiles_mut(), [&](auto const& kv) {
-            Rectangle const tile_hitbox = kv.second.hitbox(kv.first, pixel_size);
-            return CheckCollisionPointRec(mouse_pos, tile_hitbox);
-          });
+    // Erase tile.
+    if (cluster_mode) {
+      if (IsMouseButtonPressed(1)) {
+        if (on_game_area()) cluster_erase_start = mouse_pos;
+      }
+      if (IsMouseButtonReleased(1)) {
+        if (on_game_area()) {
+          erase_tiles(rec_from_edges(cluster_erase_start, mouse_pos));
+        }
+      }
+    } else {
+      if (IsMouseButtonDown(1)) {
+        if (on_game_area()) {
+          erase_tiles(Rectangle{mouse_pos.x, mouse_pos.y, 1.f, 1.f});
         }
       }
     }
 
+    // Update character position.
     if (IsMouseButtonDown(2)) {
       character_position.x = mouse_pos.x / pixel_size;
       character_position.y = mouse_pos.y / pixel_size;
@@ -209,14 +207,23 @@ struct Editor {
 
     Vector2 mouse_pos = GetMousePosition();
 
-    if (CheckCollisionPointRec(mouse_pos, game_area()) && mouse_pos.x < GetScreenWidth() - TOOLBAR_WIDTH) {
+    if (on_game_area()) {
       if (special_operation == SpecialOperation::Nothing) {
-        if (cluster_mode && IsMouseButtonDown(0)) {
-          draw_cluster();
+        if (cluster_mode) {
+          if (IsMouseButtonDown(0)) {
+            draw_cluster();
+          } else if (IsMouseButtonDown(1)) {
+            DrawRectangleRec(rec_from_edges(cluster_erase_start, mouse_pos), Fade(WHITE, 0.5));
+            DrawRectangleLinesEx(rec_from_edges(cluster_erase_start, mouse_pos), pixel_size, WHITE);
+          } else {
+            DrawRectangleV(Vector2{static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
+                                   static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
+                           {1.f * TILE_SIZE * pixel_size, 1.f * TILE_SIZE * pixel_size}, Fade(WHITE, 0.5f));
+          }
         } else {
           tile_selection.draw(Vector2{static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
                                       static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
-                              pixel_size);
+                              pixel_size, Fade(WHITE, 0.5));
         }
       }
     }
@@ -253,7 +260,8 @@ struct Editor {
   FilePathList map_files;
   int grid_size_index{0};
   bool cluster_mode{false};
-  Vector2 cluster_start{};
+  Vector2 cluster_draw_start{};
+  Vector2 cluster_erase_start{};
 
   void reset() {
     tiles.clear();
@@ -403,7 +411,7 @@ struct Editor {
 
   void yield_cluster_3x3(TileSource const tile_source, IntVec2 const cluster_pos,
                          std::function<void(TileSelection const, IntVec2 const)> callback) {
-    auto const endpoints = vec2_minmax(cluster_start, GetMousePosition());
+    auto const endpoints = vec2_minmax(cluster_draw_start, GetMousePosition());
     IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
     IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
 
@@ -442,7 +450,7 @@ struct Editor {
 
   void yield_cluster_3x1(TileSource const tile_source, IntVec2 const cluster_pos,
                          std::function<void(TileSelection const, IntVec2 const)> callback) {
-    auto const endpoints = vec2_minmax_x(cluster_start, GetMousePosition());
+    auto const endpoints = vec2_minmax_x(cluster_draw_start, GetMousePosition());
     IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
     IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
 
@@ -457,7 +465,7 @@ struct Editor {
 
   void yield_cluster_1x3(TileSource const tile_source, IntVec2 const cluster_pos,
                          std::function<void(TileSelection const, IntVec2 const)> callback) {
-    auto const endpoints = vec2_minmax_y(cluster_start, GetMousePosition());
+    auto const endpoints = vec2_minmax_y(cluster_draw_start, GetMousePosition());
     IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
     IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
 
@@ -472,7 +480,7 @@ struct Editor {
 
   void yield_cluster_2x2(TileSource const tile_source, IntVec2 const cluster_pos,
                          std::function<void(TileSelection const, IntVec2 const)> callback) {
-    auto const endpoints = vec2_minmax(cluster_start, GetMousePosition());
+    auto const endpoints = vec2_minmax(cluster_draw_start, GetMousePosition());
     IntVec2 const start_coord{tile_coord_from_absolute(endpoints.first, pixel_size)};
     IntVec2 const end_coord{tile_coord_from_absolute(endpoints.second, pixel_size)};
 
@@ -915,5 +923,28 @@ struct Editor {
       DrawLineEx({0.f, 1.f * i * grid_size * pixel_size},
                  {1.f * tile_width * TILE_SIZE * pixel_size, 1.f * i * grid_size * pixel_size}, 2.f, GRAY);
     }
+  }
+
+  void erase_tiles(Rectangle const& area) {
+    std::erase_if(tiles, [&](auto const& p) {
+      IntVec2 const& pos = p.first;
+      TileSelection const& selection = p.second;
+
+      const Rectangle hitbox = selection.hitbox(pos, pixel_size);
+      return CheckCollisionRecs(area, hitbox);
+    });
+
+    // Erase tile from an interactive group.
+    for (auto& interactive_group : interactive_groups) {
+      std::erase_if(interactive_group.get_tiles_mut(), [&](auto const& kv) {
+        Rectangle const tile_hitbox = kv.second.hitbox(kv.first, pixel_size);
+        return CheckCollisionRecs(area, tile_hitbox);
+      });
+    }
+  }
+
+  bool on_game_area() const {
+    return CheckCollisionPointRec(GetMousePosition(), game_area()) &&
+           GetMousePosition().x < GetScreenWidth() - TOOLBAR_WIDTH;
   }
 };

@@ -203,12 +203,15 @@ struct Map {
     return false;
   }
 
+  // This is a brute check whether any solid wall collides with a subject. An object is solid when
+  // it's a collider from all 4 directions.
   bool check_collision_with_fully_solid_walls(Rectangle const& collider) const {
     if (leftx(collider) < 0.f || rightx(collider) > GetScreenWidth() || topy(collider) < 0.f ||
         bottomy(collider) > GetScreenHeight())
       return true;
 
     for (auto const& [tile_pos, tile_selection] : walls) {
+      if (!tile_selection.is_solid()) continue;
       if (CheckCollisionRecs(collider, tile_selection.hitbox(tile_pos, pixel_size))) return true;
     }
 
