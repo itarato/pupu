@@ -134,16 +134,16 @@ struct Editor {
     // Erase tile.
     if (cluster_mode) {
       if (IsMouseButtonPressed(1)) {
-        if (on_game_area()) cluster_erase_start = mouse_pos;
+        if (on_extended_game_area()) cluster_erase_start = mouse_pos;
       }
       if (IsMouseButtonReleased(1)) {
-        if (on_game_area()) {
+        if (on_extended_game_area()) {
           erase_tiles(rec_from_edges(cluster_erase_start, mouse_pos));
         }
       }
     } else {
       if (IsMouseButtonDown(1)) {
-        if (on_game_area()) {
+        if (on_extended_game_area()) {
           erase_tiles(Rectangle{mouse_pos.x, mouse_pos.y, 1.f, 1.f});
         }
       }
@@ -207,23 +207,28 @@ struct Editor {
 
     Vector2 mouse_pos = GetMousePosition();
 
-    if (on_game_area()) {
+    if (on_extended_game_area()) {
       if (special_operation == SpecialOperation::Nothing) {
         if (cluster_mode) {
           if (IsMouseButtonDown(0)) {
-            draw_cluster();
+            if (on_game_area()) draw_cluster();
           } else if (IsMouseButtonDown(1)) {
             DrawRectangleRec(rec_from_edges(cluster_erase_start, mouse_pos), Fade(WHITE, 0.5));
             DrawRectangleLinesEx(rec_from_edges(cluster_erase_start, mouse_pos), pixel_size, WHITE);
           } else {
-            DrawRectangleV(Vector2{static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
-                                   static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
-                           {1.f * TILE_SIZE * pixel_size, 1.f * TILE_SIZE * pixel_size}, Fade(WHITE, 0.5f));
+            if (on_game_area()) {
+              DrawRectangleV(Vector2{static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
+                                     static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
+                             {1.f * TILE_SIZE * pixel_size, 1.f * TILE_SIZE * pixel_size}, Fade(WHITE, 0.5f));
+            }
           }
         } else {
-          tile_selection.draw(Vector2{static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
-                                      static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
-                              pixel_size, Fade(WHITE, 0.5));
+          if (on_game_area()) {
+            tile_selection.draw(
+                Vector2{static_cast<float>(mod_reduced(mouse_pos.x, tile_selection.snap() * pixel_size)),
+                        static_cast<float>(mod_reduced(mouse_pos.y, tile_selection.snap() * pixel_size))},
+                pixel_size, Fade(WHITE, 0.5));
+          }
         }
       }
     }
@@ -946,5 +951,10 @@ struct Editor {
   bool on_game_area() const {
     return CheckCollisionPointRec(GetMousePosition(), game_area()) &&
            GetMousePosition().x < GetScreenWidth() - TOOLBAR_WIDTH;
+  }
+
+  // This is mainly for object removal. Not for new items.
+  bool on_extended_game_area() const {
+    return GetMousePosition().x < GetScreenWidth() - TOOLBAR_WIDTH;
   }
 };
