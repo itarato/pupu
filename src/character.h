@@ -63,35 +63,7 @@ struct Character {
   void init() {
     unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
 
-    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Character1__Run],
-                                    {32.f, 32.f},
-                                    12,
-                                    sprite_frame_length});
-    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Character1__Idle],
-                                    {32.f, 32.f},
-                                    11,
-                                    sprite_frame_length});
-    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Character1__Hit],
-                                    {32.f, 32.f},
-                                    7,
-                                    sprite_frame_length});
-    sprite_group.push_sprite(Sprite{
-        static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Character1__Jump], {32.f, 32.f}, 1, 0});
-    sprite_group.push_sprite(Sprite{
-        static_cast<float>(pixel_size), asset_manager.textures[TextureNames::Character1__Fall], {32.f, 32.f}, 1, 0});
-    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Character1__Double_Jump],
-                                    {32.f, 32.f},
-                                    6,
-                                    sprite_frame_length});
-    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
-                                    asset_manager.textures[TextureNames::Character1__Wall_Jump],
-                                    {32.f, 32.f},
-                                    5,
-                                    sprite_frame_length});
+    set_sprite_group_collection(0);
 
     appear_sprite.init_texture(asset_manager.textures[TextureNames::Character__Appear], {96.f, 96.f}, 7,
                                sprite_frame_length);
@@ -114,6 +86,7 @@ struct Character {
     } else if (lifecycle_state == LifecycleState::Live || lifecycle_state == LifecycleState::Injured) {
       update_movement(map);
       update_drop_down(map);
+      update_sprite();
       if (map.check_collision_with_fully_solid_walls(shrink(hitbox(), 1.f))) injure(true);
       sprite_group.update();
     } else if (lifecycle_state == LifecycleState::WaitingForNextLevel) {
@@ -369,5 +342,57 @@ struct Character {
 
   void end_injury() {
     lifecycle_state = LifecycleState::Live;
+  }
+
+  void update_sprite() {
+    if (IsKeyPressed(KEY_ONE)) set_sprite_group_collection(0);
+    if (IsKeyPressed(KEY_TWO)) set_sprite_group_collection(1);
+    if (IsKeyPressed(KEY_THREE)) set_sprite_group_collection(2);
+  }
+
+  void set_sprite_group_collection(int const index) {
+    unsigned int sprite_frame_length = static_cast<unsigned int>(GAME_FPS / 24);
+
+    sprite_group.clear();
+    size_t old_sprite_index = sprite_group.get_current_sprite_index();
+    int index_offset = index * 7;
+
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Run + index_offset],
+                                    {32.f, 32.f},
+                                    12,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Idle + index_offset],
+                                    {32.f, 32.f},
+                                    11,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Hit + index_offset],
+                                    {32.f, 32.f},
+                                    7,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Jump + index_offset],
+                                    {32.f, 32.f},
+                                    1,
+                                    0});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Fall + index_offset],
+                                    {32.f, 32.f},
+                                    1,
+                                    0});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Double_Jump + index_offset],
+                                    {32.f, 32.f},
+                                    6,
+                                    sprite_frame_length});
+    sprite_group.push_sprite(Sprite{static_cast<float>(pixel_size),
+                                    asset_manager.textures[TextureNames::Character1__Wall_Jump + index_offset],
+                                    {32.f, 32.f},
+                                    5,
+                                    sprite_frame_length});
+
+    sprite_group.set_current_sprite(old_sprite_index);
   }
 };

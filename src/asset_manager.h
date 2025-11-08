@@ -8,6 +8,7 @@
 constexpr int BACKGROUND_COUNT{6};
 
 enum TextureNames {
+  Character__Example,
   Character1__Run,
   Character1__Idle,
   Character1__Hit,
@@ -15,7 +16,20 @@ enum TextureNames {
   Character1__Fall,
   Character1__Double_Jump,
   Character1__Wall_Jump,
-  Character1__Example,
+  Character2__Run,
+  Character2__Idle,
+  Character2__Hit,
+  Character2__Jump,
+  Character2__Fall,
+  Character2__Double_Jump,
+  Character2__Wall_Jump,
+  Character3__Run,
+  Character3__Idle,
+  Character3__Hit,
+  Character3__Jump,
+  Character3__Fall,
+  Character3__Double_Jump,
+  Character3__Wall_Jump,
   Character__Appear,
   Character__Disappear,
   Background__0,
@@ -127,8 +141,38 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/1/Double_Jump.png"));
     textures[TextureNames::Character1__Wall_Jump] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/1/Wall_Jump.png"));
-    textures[TextureNames::Character1__Example] =
+    textures[TextureNames::Character__Example] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/1/Example.png"));
+
+    textures[TextureNames::Character2__Run] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/2/Run.png"));
+    textures[TextureNames::Character2__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/2/Idle.png"));
+    textures[TextureNames::Character2__Hit] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/2/Hit.png"));
+    textures[TextureNames::Character2__Jump] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/2/Jump.png"));
+    textures[TextureNames::Character2__Fall] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/2/Fall.png"));
+    textures[TextureNames::Character2__Double_Jump] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/2/Double_Jump.png"));
+    textures[TextureNames::Character2__Wall_Jump] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/2/Wall_Jump.png"));
+
+    textures[TextureNames::Character3__Run] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/3/Run.png"));
+    textures[TextureNames::Character3__Idle] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/3/Idle.png"));
+    textures[TextureNames::Character3__Hit] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/3/Hit.png"));
+    textures[TextureNames::Character3__Jump] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/3/Jump.png"));
+    textures[TextureNames::Character3__Fall] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/3/Fall.png"));
+    textures[TextureNames::Character3__Double_Jump] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/3/Double_Jump.png"));
+    textures[TextureNames::Character3__Wall_Jump] =
+        std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/3/Wall_Jump.png"));
 
     textures[TextureNames::Character__Appear] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/1 Main Characters/Appearing.png"));

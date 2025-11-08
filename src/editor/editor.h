@@ -163,12 +163,12 @@ struct Editor {
     // Tiles.
     for (auto const& [k, v] : tiles) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
     DrawTexturePro(
-        *asset_manager.textures[TextureNames::Character1__Example],
-        {0.f, 0.f, static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width),
-         static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height)},
+        *asset_manager.textures[TextureNames::Character__Example],
+        {0.f, 0.f, static_cast<float>(asset_manager.textures[TextureNames::Character__Example]->width),
+         static_cast<float>(asset_manager.textures[TextureNames::Character__Example]->height)},
         {static_cast<float>(character_position.x * pixel_size), static_cast<float>(character_position.y * pixel_size),
-         static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->width) * pixel_size,
-         static_cast<float>(asset_manager.textures[TextureNames::Character1__Example]->height) * pixel_size},
+         static_cast<float>(asset_manager.textures[TextureNames::Character__Example]->width) * pixel_size,
+         static_cast<float>(asset_manager.textures[TextureNames::Character__Example]->height) * pixel_size},
         VECTOR2_ZERO, 0.f, WHITE);
 
     int group_index = 0;

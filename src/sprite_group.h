@@ -12,11 +12,13 @@ struct SpriteGroup {
     set_current_sprite(0);
   }
 
+  void clear() {
+    current_sprite_index = 0;
+    sprites.clear();
+  }
+
   void set_current_sprite(size_t new_current_sprite_index) {
-    if (new_current_sprite_index >= sprites.size()) {
-      TraceLog(LOG_ERROR, "Invalid sprite index");
-      return;
-    }
+    if (new_current_sprite_index >= sprites.size()) BAIL;
     current_sprite_index = new_current_sprite_index;
   }
 
@@ -46,6 +48,10 @@ struct SpriteGroup {
 
   Sprite const& current_sprite() const {
     return sprites[current_sprite_index];
+  }
+
+  size_t const get_current_sprite_index() const {
+    return current_sprite_index;
   }
 
  private:
