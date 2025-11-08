@@ -216,6 +216,10 @@ struct Map {
       if (CheckCollisionRecs(collider, box.hitbox())) return true;
     }
 
+    for (auto const& interactive_object : interactive_objects) {
+      if (interactive_object->check_collision_rec(collider)) return true;
+    }
+
     return false;
   }
 
