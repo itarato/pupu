@@ -95,15 +95,21 @@ enum TextureNames {
   Pointer__Static,
 };
 
+enum MusicName {
+  Soundtrack,
+};
+
 struct AssetManager {
  public:
   std::unordered_map<int, std::shared_ptr<Texture2D>> textures{};
+  std::unordered_map<int, std::shared_ptr<Music>> musics{};
 
   // Must be the last thing called.
   void unload_assets() {
     TraceLog(LOG_INFO, "Unload all textures");
 
     for (auto [k, v] : textures) UnloadTexture(*v);
+    for (auto [k, v] : musics) UnloadMusicStream(*v);
   }
 
   void preload() {
@@ -280,6 +286,9 @@ struct AssetManager {
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Pointer_Idle.png"));
     textures[TextureNames::Pointer__Static] =
         std::make_shared<Texture2D>(LoadTexture("assets/craftpixnet/3 Objects/Checkpoints/Pointer_Static.png"));
+
+    musics[MusicName::Soundtrack] = std::make_shared<Music>(LoadMusicStream("assets/music/soundtrack.mp3"));
+    SetMusicVolume(*musics[MusicName::Soundtrack], 0.8f);
   }
 
  private:

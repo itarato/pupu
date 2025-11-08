@@ -24,6 +24,7 @@ struct App {
     SetTraceLogLevel(LOG_DEBUG);
 
     InitWindow(1024, 768, "Pupu");
+    InitAudioDevice();
 
     GAME_FPS = GetMonitorRefreshRate(0);
     FPS_MULTIPLIER = static_cast<float>(REFERENCE_FPS) / static_cast<float>(GAME_FPS);
@@ -38,6 +39,8 @@ struct App {
   }
 
   void run() {
+    PlayMusicStream(*asset_manager.musics[MusicName::Soundtrack]);
+
     while (!WindowShouldClose()) {
       update();
 
@@ -53,6 +56,7 @@ struct App {
     map.unload();
     asset_manager.unload_assets();
 
+    CloseAudioDevice();
     CloseWindow();
   }
 
@@ -185,6 +189,8 @@ struct App {
   }
 
   void update() {
+    UpdateMusicStream(*asset_manager.musics[MusicName::Soundtrack]);
+
     if (character.ready_for_next_level()) {
       load_next_level();
       return;

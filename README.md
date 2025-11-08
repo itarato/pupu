@@ -10,9 +10,19 @@ A 2d platformer game and level editor.
 
 - sound
 - implement enemy 6
+- [idea] when die - skull sprite grid effect
+- 1/2/3 to change characters
 
 ## Level editor
 
 - ctrl-z
 - clusters:
   - [?] freehand cluster drawing
+  - upside down spike
+
+---
+
+### Credit
+
+Graphics: https://craftpix.net/freebies/free-simple-platformer-game-kit-pixel-art/
+Music: https://pixabay.com/music/upbeat-the-final-boss-battle-158700/
