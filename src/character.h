@@ -10,23 +10,24 @@
 
 constexpr int PLAYER_TEXTURE_SIZE{32};
 
-constexpr float PLAYER_MAX_REL_SPEED = 500.f;
-constexpr float PLAYER_MOVEMENT_FRICTION = 0.9f;
-constexpr float PLAYER_ZERO_SPEED_THRESHOLD = 0.1f;
-constexpr float PLAYER_JUMP_SPEED = -750.f;
-constexpr float PLAYER_GRAVITY = 0.96f;
-constexpr float PLAYER_GRAVITY_INV = 1.f / PLAYER_GRAVITY;
-constexpr float PLAYER_FALL_BACK_THRESHOLD = 100.f;
-constexpr float PLAYER_MAX_FALL_SPEED = PLAYER_MAX_REL_SPEED;
-constexpr float PLAYER_MULTI_JUMP_MAX = 2;
+constexpr float const PLAYER_MAX_REL_SPEED = 500.f;
+constexpr float const PLAYER_MOVEMENT_FRICTION = 0.9f;
+constexpr float const PLAYER_ZERO_SPEED_THRESHOLD = 0.1f;
+constexpr float const PLAYER_JUMP_SPEED = -750.f;
+constexpr float const PLAYER_GRAVITY = 0.96f;
+constexpr float const PLAYER_GRAVITY_INV = 1.f / PLAYER_GRAVITY;
+constexpr float const PLAYER_FALL_BACK_THRESHOLD = 100.f;
+constexpr float const PLAYER_MAX_FALL_SPEED = PLAYER_MAX_REL_SPEED;
+constexpr float const PLAYER_MULTI_JUMP_MAX = 2;
+constexpr int const PLAYER_MAX_HEALTH{3};
 
-constexpr int PLAYER_SPRITE_RUN{0};
-constexpr int PLAYER_SPRITE_IDLE{1};
-constexpr int PLAYER_SPRITE_HIT{2};
-constexpr int PLAYER_SPRITE_JUMP{3};
-constexpr int PLAYER_SPRITE_FALL{4};
-constexpr int PLAYER_SPRITE_DOUBLE_JUMP{5};
-constexpr int PLAYER_SPRITE_WALL_JUMP{6};
+constexpr int const PLAYER_SPRITE_RUN{0};
+constexpr int const PLAYER_SPRITE_IDLE{1};
+constexpr int const PLAYER_SPRITE_HIT{2};
+constexpr int const PLAYER_SPRITE_JUMP{3};
+constexpr int const PLAYER_SPRITE_FALL{4};
+constexpr int const PLAYER_SPRITE_DOUBLE_JUMP{5};
+constexpr int const PLAYER_SPRITE_WALL_JUMP{6};
 
 constexpr Vector2 const AppearDisappearSpriteOffset{-32.f, -32.f};
 
@@ -58,6 +59,7 @@ struct Character {
     lifecycle_state = LifecycleState::Appear;
     multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     level_complete = false;
+    health = PLAYER_MAX_HEALTH;
   }
 
   void init() {
@@ -120,14 +122,17 @@ struct Character {
     return move(upscale(CHARACTER_HITBOX, pixel_size), pos);
   }
 
-  void injure(bool const should_restart = false) {
-    if (should_restart) {
+  void injure(bool const is_fatal = false) {
+    if (is_injured()) return;
+
+    health = std::max(0, health - (is_fatal ? 3 : 1));
+
+    if (health <= 0) {
       lifecycle_state = LifecycleState::Disappear;
       injury_timeout.cancel();
+      health = 0;
       return;
     }
-
-    if (is_injured()) return;
 
     injury_timeout.cancel();
     lifecycle_state = LifecycleState::Injured;
@@ -180,6 +185,7 @@ struct Character {
   Timeout injury_timeout{};
   Vector2 spawn_location{};
   bool level_complete{false};
+  int health{PLAYER_MAX_HEALTH};
 
   // Debug.
   HitAndDragMap hit_map;

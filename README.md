@@ -11,6 +11,7 @@ A 2d platformer game and level editor.
 - sound
 - implement enemy 6
 - [idea] when die - skull sprite grid effect
+- player die after 3 injury
 
 ## Level editor
 
