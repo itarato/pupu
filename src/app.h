@@ -237,6 +237,7 @@ struct App {
       if (CheckCollisionRecs(gem.hitbox(), character_hitbox)) {
         gem.consume();
         consumed_gem = true;
+        PlaySound(*asset_manager.sounds[SoundName::CoinSound]);
       }
     }
     if (consumed_gem) {

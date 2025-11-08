@@ -25,3 +25,4 @@ A 2d platformer game and level editor.
 
 Graphics: https://craftpix.net/freebies/free-simple-platformer-game-kit-pixel-art/
 Music: https://pixabay.com/music/upbeat-the-final-boss-battle-158700/
+Sound: https://uppbeat.io/sfx/category/gaming/8-bit

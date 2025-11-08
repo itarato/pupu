@@ -249,6 +249,9 @@ struct Character {
       wall_grab_counter.count_jump();
       speed.y = PLAYER_JUMP_SPEED;
       multi_jump_count++;
+
+      PlaySound(*asset_manager.sounds[SoundName::JumpSound]);
+
       if (multi_jump_count == 1) {
         jump_state = JumpState::Jump;
       } else {

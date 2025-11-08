@@ -113,10 +113,16 @@ enum MusicName {
   Soundtrack,
 };
 
+enum SoundName {
+  JumpSound,
+  CoinSound,
+};
+
 struct AssetManager {
  public:
   std::unordered_map<int, std::shared_ptr<Texture2D>> textures{};
   std::unordered_map<int, std::shared_ptr<Music>> musics{};
+  std::unordered_map<int, std::shared_ptr<Sound>> sounds{};
 
   // Must be the last thing called.
   void unload_assets() {
@@ -124,6 +130,7 @@ struct AssetManager {
 
     for (auto [k, v] : textures) UnloadTexture(*v);
     for (auto [k, v] : musics) UnloadMusicStream(*v);
+    for (auto [k, v] : sounds) UnloadSound(*v);
   }
 
   void preload() {
@@ -333,6 +340,11 @@ struct AssetManager {
 
     musics[MusicName::Soundtrack] = std::make_shared<Music>(LoadMusicStream("assets/music/soundtrack.mp3"));
     SetMusicVolume(*musics[MusicName::Soundtrack], 0.8f);
+
+    sounds[SoundName::JumpSound] = std::make_shared<Sound>(LoadSound("assets/music/jump.mp3"));
+    SetSoundVolume(*sounds[SoundName::JumpSound], 1.0f);
+    sounds[SoundName::CoinSound] = std::make_shared<Sound>(LoadSound("assets/music/coin.mp3"));
+    SetSoundVolume(*sounds[SoundName::CoinSound], 1.0f);
   }
 
  private:
