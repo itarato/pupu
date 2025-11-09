@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "asset_manager.h"
+#include "background.h"
 #include "character.h"
 #include "checkpoint.h"
 #include "gem.h"
@@ -41,19 +42,25 @@ struct App {
   void run() {
     PlayMusicStream(*asset_manager.musics[MusicName::Soundtrack]);
 
+    Camera2D camera{};
+    camera.zoom = 1.f;
+
     while (!WindowShouldClose()) {
       update();
+      camera.target = Vector2Subtract(character.get_pos(), {GetScreenWidth() / 2.f, GetScreenHeight() / 2.f});
 
       BeginDrawing();
+      BeginMode2D(camera);
 
-      ClearBackground(RAYWHITE);
+      ClearBackground(BLACK);
 
       draw();
 
+      EndMode2D();
       EndDrawing();
     }
 
-    map.unload();
+    background.unload();
     asset_manager.unload_assets();
 
     CloseAudioDevice();
@@ -72,6 +79,7 @@ struct App {
   std::vector<Pointer> pointers{};
   size_t map_index{0};
   char* force_map_filename{nullptr};
+  Background background{};
 
   void reset() {
     npcs.clear();
@@ -173,12 +181,15 @@ struct App {
 
     std::fclose(file);
 
-    map.reload_world(background_index, tile_width, tile_height, std::move(map_tiles), std::move(interactive_groups));
+    background.preload(background_index, tile_width, tile_height, pixel_size);
+
+    map.reload_world(tile_width, tile_height, std::move(map_tiles), std::move(interactive_groups));
   }
 
   void draw() const {
-    map.draw();
+    background.draw(Vector2Zero(), pixel_size);
     for (auto const& trap : traps) trap->draw();
+    map.draw();
     for (auto const& npc : npcs) npc->draw();
     for (auto const& checkpoint : checkpoints) checkpoint.draw();
     for (auto const& pointer : pointers) pointer.draw();

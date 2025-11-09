@@ -665,7 +665,7 @@ float randf() {
   return static_cast<float>(rand() % 1001) / 1000.f;
 }
 
-float randd() {
+double randd() {
   return static_cast<double>(rand() % 1001) / 1000.f;
 }
 

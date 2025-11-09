@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "background.h"
 #include "box.h"
 #include "common.h"
 #include "interactive_group.h"
@@ -34,14 +33,12 @@ struct Map {
   Map(int const pixel_size) : pixel_size(pixel_size) {
   }
 
-  void reload_world(int background_index, int new_tile_width, int new_tile_height,
-                    std::unordered_map<IntVec2, TileSelection>&& tiles,
+  void reload_world(int new_tile_width, int new_tile_height, std::unordered_map<IntVec2, TileSelection>&& tiles,
                     std::vector<InteractiveGroup>&& interactive_groups) {
     reset();
 
     tile_width = new_tile_width;
     tile_height = new_tile_height;
-    background.preload(background_index, new_tile_width, new_tile_height, pixel_size);
 
     for (auto&& [tile_pos, tile_selection] : tiles) {
       switch (tile_selection.source) {
@@ -77,15 +74,9 @@ struct Map {
   }
 
   void draw() const {
-    background.draw(Vector2Zero(), pixel_size);
-
     for (auto const& [k, v] : walls) v.draw(k.scale(pixel_size).to_vector2(), pixel_size);
     for (auto const& box : boxes) box.draw();
     for (auto const& interactive_object : interactive_objects) interactive_object->draw();
-  }
-
-  void unload() {
-    background.unload();
   }
 
   int north_wall_of_range(Rectangle const& rect) const {
@@ -227,7 +218,6 @@ struct Map {
   }
 
  private:
-  Background background{};
   int tile_width{};
   int tile_height{};
   std::unordered_map<IntVec2, TileSelection> walls{};

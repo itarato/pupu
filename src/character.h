@@ -60,6 +60,8 @@ struct Character {
     multi_jump_count = PLAYER_MULTI_JUMP_MAX - 1;
     level_complete = false;
     health = PLAYER_MAX_HEALTH;
+
+    set_sprite_group_collection(rand() % 3);
   }
 
   void init() {
@@ -170,6 +172,10 @@ struct Character {
 
   bool const ready_for_next_level() const {
     return lifecycle_state == LifecycleState::WaitingForNextLevel;
+  }
+
+  Vector2 const get_pos() const {
+    return pos;
   }
 
  private:
