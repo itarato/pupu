@@ -3,3 +3,4 @@ src/*.o
 imgui.ini
 /editor
 !/editor/
+notes.md
