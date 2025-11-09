@@ -950,11 +950,11 @@ struct Editor {
 
   bool on_game_area() const {
     return CheckCollisionPointRec(GetMousePosition(), game_area()) &&
-           GetMousePosition().x < GetScreenWidth() - TOOLBAR_WIDTH;
+           GetMousePosition().x < get_world_width() - TOOLBAR_WIDTH;
   }
 
   // This is mainly for object removal. Not for new items.
   bool on_extended_game_area() const {
-    return GetMousePosition().x < GetScreenWidth() - TOOLBAR_WIDTH;
+    return GetMousePosition().x < get_world_width() - TOOLBAR_WIDTH;
   }
 };

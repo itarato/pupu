@@ -24,6 +24,7 @@ constexpr int const REFERENCE_FPS{144};
 // Set after window initialization.
 extern int GAME_FPS;
 static float FPS_MULTIPLIER{};
+static float WORLD_ZOOM{1.f};
 
 constexpr int const DEFAULT_PIXEL_SIZE{2};
 
@@ -778,3 +779,11 @@ struct WallGrabJumpCounter {
   uint8_t side{0};  // 0=no -1=west +1=east
   int counter;
 };
+
+float get_world_width() {
+  return GetScreenWidth() / WORLD_ZOOM;
+}
+
+float get_world_height() {
+  return GetScreenHeight() / WORLD_ZOOM;
+}

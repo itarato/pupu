@@ -29,6 +29,7 @@ struct View {
 
     if (has_changed) {
       camera.zoom = zoom_levels[zoom_level_index];
+      WORLD_ZOOM = camera.zoom;
       SetWindowSize(map_tile_width * TILE_SIZE * DEFAULT_PIXEL_SIZE * camera.zoom,
                     map_tile_height * TILE_SIZE * DEFAULT_PIXEL_SIZE * camera.zoom);
     }

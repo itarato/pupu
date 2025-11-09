@@ -113,7 +113,7 @@ struct Character {
 
     // DrawRectangleLinesEx(hitbox(), pixel_size, RED);
     // DrawLineEx({0.f, static_cast<float>(hit_map.south.wall)},
-    //            {static_cast<float>(GetScreenWidth()), static_cast<float>(hit_map.south.wall)}, pixel_size, MAGENTA);
+    //            {static_cast<float>(get_world_width()), static_cast<float>(hit_map.south.wall)}, pixel_size, MAGENTA);
   }
 
   bool is_falling() const {
@@ -252,7 +252,7 @@ struct Character {
     if (east_wall_dist < 0.f) {
       pos.x += east_wall_dist;
       speed.x = 0.f;
-      is_grab_wall = hit_map.east < GetScreenWidth() - 1;  // Only grab real walls.
+      is_grab_wall = hit_map.east < get_world_width() - 1;  // Only grab real walls.
       wall_grab_counter.at_east();
     }
 
