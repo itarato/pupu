@@ -2,6 +2,8 @@
 
 A 2d platformer game and level editor.
 
+![Demo](./misc/demo.gif)
+
 ![Level editor screenshot](./misc/screenshot_editor.png)
 
 # Todo
