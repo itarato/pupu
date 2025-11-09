@@ -16,6 +16,7 @@
 #include "sprite.h"
 #include "sprite_group.h"
 #include "trap.h"
+#include "view.h"
 
 int GAME_FPS{};
 
@@ -42,15 +43,11 @@ struct App {
   void run() {
     PlayMusicStream(*asset_manager.musics[MusicName::Soundtrack]);
 
-    Camera2D camera{};
-    camera.zoom = 1.f;
-
     while (!WindowShouldClose()) {
       update();
-      camera.target = Vector2Subtract(character.get_pos(), {GetScreenWidth() / 2.f, GetScreenHeight() / 2.f});
 
       BeginDrawing();
-      BeginMode2D(camera);
+      BeginMode2D(view.get_camera());
 
       ClearBackground(BLACK);
 
@@ -80,6 +77,7 @@ struct App {
   size_t map_index{0};
   char* force_map_filename{nullptr};
   Background background{};
+  View view{};
 
   void reset() {
     npcs.clear();
@@ -114,7 +112,8 @@ struct App {
 
     character.reset(intvec2_from_file(file).scale(pixel_size).to_vector2());
 
-    SetWindowSize(tile_width * TILE_SIZE * pixel_size, tile_height * TILE_SIZE * pixel_size);
+    SetWindowSize(tile_width * TILE_SIZE * pixel_size * view.get_camera().zoom,
+                  tile_height * TILE_SIZE * pixel_size * view.get_camera().zoom);
 
     std::unordered_map<IntVec2, TileSelection> map_tiles{};
     for (int i = 0; i < tiles_count; i++) {
@@ -200,6 +199,7 @@ struct App {
   }
 
   void update() {
+    view.update(map.get_tile_width(), map.get_tile_height());
     UpdateMusicStream(*asset_manager.musics[MusicName::Soundtrack]);
 
     if (character.ready_for_next_level()) {

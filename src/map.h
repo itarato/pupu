@@ -217,6 +217,14 @@ struct Map {
     return false;
   }
 
+  int const get_tile_width() const {
+    return tile_width;
+  }
+
+  int const get_tile_height() const {
+    return tile_height;
+  }
+
  private:
   int tile_width{};
   int tile_height{};
