@@ -38,9 +38,9 @@ struct Sprite {
     frame_stepper.set_threshold(frame_length);
   }
 
-  void draw(Vector2 const& pos) const {
+  void draw(Vector2 const& pos, Color const color = WHITE) const {
     DrawTexturePro(*texture, {size.x * current_frame, 0.f, size.x * horizontal_reverse, size.y},
-                   {pos.x - origin.x, pos.y - origin.y, size.x * pixel_size, size.y * pixel_size}, origin, 0.f, WHITE);
+                   {pos.x - origin.x, pos.y - origin.y, size.x * pixel_size, size.y * pixel_size}, origin, 0.f, color);
   }
 
   /**

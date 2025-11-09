@@ -23,8 +23,6 @@ struct App {
   void init(char* map_filename = nullptr) {
     SetTraceLogLevel(LOG_DEBUG);
 
-    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-
     InitWindow(1024, 768, "Pupu");
     InitAudioDevice();
 
@@ -180,8 +178,8 @@ struct App {
 
   void draw() const {
     map.draw();
-    for (auto const& npc : npcs) npc->draw();
     for (auto const& trap : traps) trap->draw();
+    for (auto const& npc : npcs) npc->draw();
     for (auto const& checkpoint : checkpoints) checkpoint.draw();
     for (auto const& pointer : pointers) pointer.draw();
     character.draw();

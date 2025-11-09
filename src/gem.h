@@ -5,6 +5,12 @@
 #include "raylib.h"
 #include "sprite.h"
 
+enum class GemState {
+  Active,
+  Disappearing,
+  Collected,
+};
+
 struct Gem {
  public:
   Gem(int const pixel_size, Vector2 const pos, TileSource const tile_source)
@@ -36,27 +42,41 @@ struct Gem {
 
   void update() {
     sprite.update();
+
+    if (state == GemState::Disappearing) {
+      if (alpha <= 0.f) {
+        state = GemState::Collected;
+      } else {
+        alpha -= GetFrameTime() * 1.5f;
+        pos.y -= world_rate() * 75.f;
+      }
+    }
   }
 
   void draw() const {
-    sprite.draw(pos);
+    sprite.draw(pos, Fade(WHITE, alpha));
   }
 
   Rectangle const hitbox() const {
-    return _hitbox;
+    if (state == GemState::Active) {
+      return _hitbox;
+    } else {
+      return OUTSIDE_RECTANGLE;
+    }
   }
 
   void consume() {
-    _is_consumed = true;
+    state = GemState::Disappearing;
   }
 
   bool const is_consumed() const {
-    return _is_consumed;
+    return state == GemState::Collected;
   }
 
  private:
-  Vector2 const pos;
+  Vector2 pos;
   Sprite sprite;
   Rectangle const _hitbox;
-  bool _is_consumed{false};
+  GemState state{GemState::Active};
+  float alpha{1.f};
 };
