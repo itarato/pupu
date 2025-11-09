@@ -79,7 +79,9 @@ constexpr int tileset_tile_collision_map[16 * 11]{
     // clang-format on
 };
 
-const char* const MAP_FILENAMES[]{"assets/maps/map_0.mp", "assets/maps/map_1.mp", "assets/maps/map_2.mp"};
+const char* const MAP_FILENAMES[]{"assets/maps/leni_1.mp", "assets/maps/leni_2.mp", "assets/maps/leni_3.mp",
+                                  "assets/maps/leni_4.mp", "assets/maps/leni_5.mp", "assets/maps/leni_6.mp",
+                                  "assets/maps/map_0.mp",  "assets/maps/map_1.mp",  "assets/maps/map_2.mp"};
 
 void log_va_list(const char* level, const char* fileName, int lineNo, const char* s, va_list args) {
   printf("[%s][\x1b[93m%s\x1b[39m:\x1b[96m%d\x1b[0m] \x1b[94m", level, fileName, lineNo);
