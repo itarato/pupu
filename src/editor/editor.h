@@ -545,8 +545,8 @@ struct Editor {
 
     if (ImGui::CollapsingHeader("Core", ImGuiTreeNodeFlags_DefaultOpen)) {
       bgr_need_redraw |= ImGui::SliderInt("Pixel size", &pixel_size, 1, 12);
-      bgr_need_redraw |= ImGui::SliderInt("Tile width", &tile_width, 16, 64);
-      bgr_need_redraw |= ImGui::SliderInt("Tile height", &tile_height, 16, 64);
+      bgr_need_redraw |= ImGui::SliderInt("Tile width", &tile_width, 8, 128);
+      bgr_need_redraw |= ImGui::SliderInt("Tile height", &tile_height, 8, 64);
       bgr_need_redraw |= ImGui::SliderInt("Background tile", &new_background_tile_index, 0, 5);
       ImGui::Combo("Grid", &grid_size_index, grid_size_names, sizeof(grid_size_names) / sizeof(grid_size_names[0]));
 

@@ -77,7 +77,8 @@ struct DisappearingPlank : InteractiveObject {
   }
 
   virtual bool check_collision_rec(Rectangle const& rec) const override {
-    return CheckCollisionRecs(rec, hitbox());
+    // There is no collision for squash check.
+    return false;
   }
 
  private:
