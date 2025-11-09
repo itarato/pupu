@@ -243,20 +243,25 @@ struct App {
       }
     }
 
-    bool consumed_gem{false};
+    bool gem_collected{false};
     for (auto& gem : gems) {
       if (CheckCollisionRecs(gem.hitbox(), character_hitbox)) {
         gem.consume();
-        consumed_gem = true;
         PlaySound(*asset_manager.sounds[SoundName::CoinSound]);
+        gem_collected = true;
       }
     }
-    if (consumed_gem) {
-      std::erase_if(gems, [](auto const& gem) { return gem.is_consumed(); });
-      if (gems.empty()) {
-        for (auto& checkpoint : checkpoints) {
-          checkpoint.victory();
+    std::erase_if(gems, [](auto const& gem) { return gem.can_be_removed(); });
+    if (gem_collected) {
+      bool all_gems_collected{true};
+      for (auto const& gem : gems) {
+        if (!gem.is_collected()) {
+          all_gems_collected = false;
+          break;
         }
+      }
+      if (all_gems_collected) {
+        for (auto& checkpoint : checkpoints) checkpoint.victory();
       }
     }
 

@@ -69,8 +69,12 @@ struct Gem {
     state = GemState::Disappearing;
   }
 
-  bool const is_consumed() const {
+  bool const can_be_removed() const {
     return state == GemState::Collected;
+  }
+
+  bool const is_collected() const {
+    return state != GemState::Active;
   }
 
  private:
