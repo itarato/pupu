@@ -23,6 +23,8 @@ struct App {
   void init(char* map_filename = nullptr) {
     SetTraceLogLevel(LOG_DEBUG);
 
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+
     InitWindow(1024, 768, "Pupu");
     InitAudioDevice();
 
