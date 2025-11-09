@@ -8,7 +8,6 @@ A 2d platformer game and level editor.
 
 ## Game
 
-- sound
 - implement enemy 6
 - [idea] when die - skull sprite grid effect
 
@@ -18,7 +17,6 @@ A 2d platformer game and level editor.
 - clusters:
   - [?] freehand cluster drawing
 - upside down spike
-- tile (at adding) in the center
 
 ---
 
