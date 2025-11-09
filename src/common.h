@@ -94,6 +94,10 @@ void log(const char* level, const char* fileName, int lineNo, const char* s, ...
   va_end(args);
 }
 
+float world_rate() {
+  return GetFrameTime() * (static_cast<float>(DEFAULT_PIXEL_SIZE) / 2.f);
+}
+
 float leftx(Rectangle const& rect) {
   return rect.x;
 }
@@ -719,7 +723,7 @@ struct BackAndForther {
   }
 
   void update() {
-    current += speed * GetFrameTime();
+    current += speed * world_rate();
 
     if (speed > 0.f) {
       if (current > range.second) {

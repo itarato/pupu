@@ -228,7 +228,7 @@ struct Character {
 
     hit_map = calculate_hitmap(map);
 
-    pos.x += speed.x * GetFrameTime();
+    pos.x += speed.x * world_rate();
 
     _hitbox = hitbox();
     static WallGrabJumpCounter wall_grab_counter{};
@@ -289,7 +289,7 @@ struct Character {
       speed.y = PLAYER_FALL_BACK_THRESHOLD;
     }
 
-    pos.y += speed.y * GetFrameTime();
+    pos.y += speed.y * world_rate();
 
     // Adjust for wall hit.
     float north_wall_dist = topy(hitbox()) - hit_map.north;

@@ -33,7 +33,7 @@ struct Bullet {
 
   void update() {
     sprite_group.update();
-    pos.x += speed * GetFrameTime();
+    pos.x += speed * world_rate();
 
     if (timer.update()) sprite_group.set_current_sprite(BULLER_SPRITE_SHORT);
   }

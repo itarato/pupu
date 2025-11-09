@@ -72,7 +72,7 @@ struct MobileGameObject {
     int west_wall = map.west_wall_of_range(_hitbox);
     int east_wall = map.east_wall_of_range(_hitbox);
 
-    pos.x += speed.x * GetFrameTime();
+    pos.x += speed.x * world_rate();
     _hitbox = hitbox();
 
     if (speed.x > 0.f) {  // Walk right.
@@ -113,7 +113,7 @@ struct MobileGameObject {
       speed.y = NPC_FALLBACK_THRESHOLD;
     }
 
-    pos.y += speed.y * GetFrameTime();
+    pos.y += speed.y * world_rate();
 
     float south_wall_dist = south_wall.wall - bottomy(hitbox());
     if (south_wall_dist < 0.f) {
@@ -592,7 +592,7 @@ struct StompingNpc : Npc {
     CollisionResult south_collision_result = map.south_wall_of_range(_hitbox);
     int south_wall = south_collision_result.wall;
 
-    pos.y += speed() * GetFrameTime();
+    pos.y += speed() * world_rate();
     _hitbox = hitbox();
     Rectangle character_hitbox{character.hitbox()};
 
